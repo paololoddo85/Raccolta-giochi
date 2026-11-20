@@ -1,0 +1,3 @@
+# screenshot delle prove automatiche (si rigenerano a ogni esecuzione)
+prove/screenshot/
+node_modules/
