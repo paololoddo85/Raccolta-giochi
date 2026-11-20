@@ -127,3 +127,5 @@
 .rg-aggiorna button:focus-visible { outline: 3px solid var(--rg-su-accento); outline-offset: -4px; }
 @keyframes rg-scende { from { transform: translateY(-100%); } to { transform: none; } }
 @media (prefers-reduced-motion: reduce) { .rg-aggiorna { animation: none; } }
+.rg-aggiorna-attesa { display: flex; align-items: center; cursor: default; }
+.rg-aggiorna[data-stato="in-arrivo"] { background: var(--rg-tenue); color: var(--rg-testo); }

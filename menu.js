@@ -89,6 +89,28 @@
         if (v) { el.textContent = `Versione ${v} · funziona anche senza connessione`; el.hidden = false; }
     });
 
+    // "Controlla aggiornamenti": risponde sempre, anche quando non c'è niente di nuovo
+    const RISPOSTE = {
+        trovata: ["C'è una versione nuova: guarda in alto.", 'info'],
+        offline: ['Serve la connessione per controllare gli aggiornamenti.', 'errore'],
+        attendi: ["L'app si sta ancora preparando: riprova tra qualche secondo.", 'avviso'],
+        'non-disponibile': ['Questo browser non permette gli aggiornamenti automatici: ricarica la pagina.', 'avviso']
+    };
+    const cerca = document.getElementById('cerca-aggiornamenti');
+    cerca.addEventListener('click', async () => {
+        cerca.disabled = true;
+        cerca.textContent = 'Controllo in corso…';
+        const esito = await RG.cercaAggiornamenti();
+        if (esito === 'aggiornata') {
+            const versione = await RG.versioneApp();
+            RG.toast(`Hai già l'ultima versione${versione ? ` (versione ${versione})` : ''}.`, 'successo');
+        } else {
+            RG.toast(...(RISPOSTE[esito] || RISPOSTE['non-disponibile']));
+        }
+        cerca.disabled = false;
+        cerca.textContent = 'Controlla aggiornamenti';
+    });
+
     disegnaNomi();
     segnaPartite();
     // Tornando indietro dal gioco la pagina può arrivare dalla cache del browser: si aggiorna
