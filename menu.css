@@ -181,3 +181,15 @@
 @media (prefers-reduced-motion: reduce) {
     .scatola, .interruttore-segno, .interruttore-segno::after { transition: none; }
 }
+
+/* Nota sotto i fatti del gioco (es. online / offline) */
+.scatola-nota { max-width: 36ch; font-size: 13px; line-height: 1.4; font-weight: 500; opacity: .85; }
+
+/* "Azzera la partita in corso", sotto la scatola del gioco */
+.azzera {
+    display: block; margin: 16px 0 0 auto; padding: 6px 2px;
+    border: 0; background: none; color: var(--fumo);
+    font-size: 14px; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; cursor: pointer;
+}
+.azzera:hover { color: var(--ko); }
+.azzera[hidden] { display: none; }
