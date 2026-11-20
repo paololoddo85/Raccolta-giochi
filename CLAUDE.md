@@ -24,7 +24,7 @@ Sito statico con giochi da festa da usare sul telefono (un telefono solo che pas
   il sito vive in una sottocartella e deve funzionare anche in locale.
 - **Niente CDN a runtime**: stili, font e librerie stanno nel sito, così funziona offline.
   Le uniche richieste esterne ammesse sono i contenuti online dei giochi
-  (catalogo e locandine di CineStar, catalogo e audio di Hitstar).
+  (catalogo e locandine di CineStar, catalogo e audio di Giradischi).
 - **Mai `confirm()`, `alert()` o `prompt()`** del browser: usa `RG.conferma()` e `RG.toast()`.
 - **Mobile-first**, schermi da 360px in su; nessuno scorrimento orizzontale della pagina.
 - Carte e contenuti dei giochi stanno in **file dati separati** (`dati/*.js`), non nel codice.
@@ -38,9 +38,10 @@ index.html  menu.css  menu.js      menù della raccolta ("Chi gioca stasera", sc
 manifest.webmanifest               app installabile: nome, icone, start_url e scope "./", scorciatoie ai giochi
 sw.js                              service worker: VERSIONE + elenco FILE salvati offline (deve stare in radice)
 icone/                             icone dell'app (192, 512, maskable, apple-touch, favicon)
-HINT_FAKE.html                     vecchi indirizzi → rinvio automatico a giochi/<nome>/
+HINT_FAKE.html                     vecchi indirizzi → rinvio automatico alla pagina nuova
 cinestar_il_gioco_dei_film.html    (non cancellarli: sono nei preferiti e nelle app installate)
 hitstar_il_gioco_della_musica.html
+giochi/hint-fake/  giochi/hitstar/ vecchie cartelle: contengono solo il rinvio a cinquina/ e giradischi/
 shared/
   stile/font.css                   @font-face dei font inclusi (font/*.woff2, licenza OFL)
   stile/tailwind.css               Tailwind già compilato (vedi sotto)
@@ -55,13 +56,14 @@ shared/
   js/dialoghi.js                   RG.conferma, RG.toast
   js/partita.js                    salvataggio/ripresa, istantanee per "Annulla ultimo turno"
   js/importa.js                    import di pacchetti JSON, copia negli appunti
-  vendor/confetti.js               canvas-confetti (coriandoli di Hitstar), licenza ISC
+  vendor/confetti.js               canvas-confetti (coriandoli di Giradischi), licenza ISC
 giochi/<nome>/
   index.html  gioco.js  stile.css  dati/…
-giochi/hint-fake/dati/carte.js     le 304 carte di HINT FAKE
+giochi/cinquina/dati/carte.js      le 304 carte di Cinquina (prima "HINT FAKE")
 giochi/cinestar/dati/film.js       88 film inclusi, titoli alternativi, ricerche del catalogo online
-giochi/hitstar/dati/ricerche.js    ricerche iTunes e parole che scartano raccolte/remaster/live
-giochi/hitstar/icone.js            icone Font Awesome incluse (SVG), licenza CC BY 4.0
+giochi/giradischi/dati/ricerche.js ricerche iTunes e parole che scartano raccolte/remaster/live (prima "Hitstar")
+giochi/giradischi/icone.js         icone Font Awesome incluse (SVG), licenza CC BY 4.0
+prove/                             prove automatiche (Playwright): `node prove/esegui.js` — non fanno parte del sito
 ```
 
 Ordine di caricamento degli script comuni: `base.js` sempre per primo, poi `migrazioni.js`, poi gli altri.
@@ -72,9 +74,9 @@ Ogni gioco ha la sua identità; le parti comuni si adattano ridefinendo le varia
 | Gioco | Colore | Note |
 |---|---|---|
 | Menù Combriccola | prugna `#24142E`, latte `#FFF4E6` | font Bricolage Grotesque |
-| HINT FAKE | verde acqua `#4D9496`, nero `#1E2024` | font Inter, Tailwind |
+| Cinquina | verde acqua `#4D9496`, nero `#1E2024` | font Inter, Tailwind |
 | CineStar | oro `#E8B04B` su notte `#0A1020` | font Big Shoulders Display + Instrument Sans, CSS proprio |
-| Hitstar | rosa `#EC4899` e ciano `#22D3EE` su viola notte | font Inter + Space Grotesk, Tailwind, icone.js |
+| Giradischi | rosa `#EC4899` e ciano `#22D3EE` su viola notte | font Inter + Space Grotesk, Tailwind, icone.js |
 
 ## Memoria sul dispositivo (localStorage)
 
@@ -95,13 +97,17 @@ per questo tutte le chiavi hanno il prefisso `rg-`. Usa sempre `RG.archivio`, ma
 | `rg-hitstar-partita` | partita in corso, compresi brano del turno, carte già verificate e "annulla" |
 | `rg-<gioco>-migrazione` | segno che la migrazione è già stata fatta |
 
+**Nomi interni**: i giochi si chiamavano "HINT FAKE" e "Hitstar". Le chiavi di memoria (`rg-hintfake-…`, `rg-hitstar-…`)
+e i valori `data-gioco="hintfake"` / `"hitstar"` del menù **restano con il nome vecchio**: non si vedono e cambiarli
+costringerebbe a migrare di nuovo partite e carte. Non rinominarli.
+
 Le vecchie chiavi (`hintfake-…`, `cinestar_…`, `hitstar_…`) vengono **copiate** una volta sola e **non cancellate** (copia di sicurezza).
 Le regole stanno in `shared/js/migrazioni.js`. Chi cambia il formato di un salvataggio alza la `versione`
 in `RG.partita.crea(...)` e gestisce i salvataggi vecchi.
 
-## Formato delle carte di HINT FAKE
+## Formato delle carte di Cinquina
 
-File: `giochi/hint-fake/dati/carte.js` → `window.HINTFAKE_CARTE = { base, soloAdultiBase, extra }`.
+File: `giochi/cinquina/dati/carte.js` → `window.CINQUINA_CARTE = { base, soloAdultiBase, extra }`.
 
 - `base`: oggetti `{ id, abilita, tema, proibita, oggetti: [5] }` con id numerico. Pubblico "adulti" se l'id
   è in `soloAdultiBase`, altrimenti "tutti".
@@ -130,11 +136,11 @@ In tutti i giochi: se la pagina viene **ricaricata** (anche dal telefono dopo av
 partita in corso, si torna **subito in partita** (`RG.partita.ricaricata()`). Aprendo il gioco dal menù si vede
 invece la schermata iniziale con il riquadro "Partita in corso" (Riprendi / Scarta).
 
-- **HINT FAKE**: salva a ogni turno registrato e carta cambiata; "Annulla turno" riapre il passo 4 del turno precedente.
+- **Cinquina**: salva a ogni turno registrato e carta cambiata; "Annulla turno" riapre il passo 4 del turno precedente.
 - **CineStar**: salva a ogni turno, indizio e piazzamento. Dopo un ricaricamento il film del turno resta lo stesso
   (con gli indizi già pagati). "Annulla" torna a prima del piazzamento: dal risultato, nella premiazione o all'inizio
   del turno dopo, finché non si compra un indizio.
-- **Hitstar**: salva a ogni carta, scelta, sfida, gettone e conferma. "Annulla" torna a prima della conferma
+- **Giradischi**: salva a ogni carta, scelta, sfida, gettone e conferma. "Annulla" torna a prima della conferma
   (anche il gettone bonus Pro incassato dopo si perde): dalla carta girata, nella vittoria o all'inizio del turno dopo,
   finché non si usano gettoni o sfide. L'audio non si salva mai: per riascoltare serve la connessione.
   Se la connessione cade, la partita non finisce: compare "Riprova".
@@ -170,37 +176,52 @@ invece la schermata iniziale con il riquadro "Partita in corso" (Riprendi / Scar
 ## Tailwind
 
 `shared/stile/tailwind.css` è Tailwind v4 **già compilato** e fa parte del repository: non serve nessun passaggio
-per pubblicare. Contiene solo le classi usate in `giochi/hint-fake/` e `giochi/hitstar/` (CineStar e il menù hanno
+per pubblicare. Contiene solo le classi usate in `giochi/cinquina/` e `giochi/giradischi/` (CineStar e il menù hanno
 CSS proprio). Se aggiungi classi Tailwind nuove in quei giochi, rigeneralo da un ambiente con Node e committalo:
 
 ```
 npx @tailwindcss/cli -i shared/stile/tailwind-sorgente.css -o shared/stile/tailwind.css --minify
 ```
 
-Hitstar era scritto per Tailwind v3: le piccole differenze sono compensate in `giochi/hitstar/stile.css`
-(bordi grigi di default, cursore sui pulsanti). Dopo la rigenerazione confronta gli screenshot di HINT FAKE e Hitstar.
+Giradischi era scritto per Tailwind v3: le piccole differenze sono compensate in `giochi/giradischi/stile.css`
+(bordi grigi di default, cursore sui pulsanti). Dopo la rigenerazione confronta gli screenshot di Cinquina e Giradischi.
 
-## Icone di Hitstar
+## Icone di Giradischi
 
-Nel codice di Hitstar le icone si scrivono come prima, `<i class="fa-solid fa-play"></i>`: `giochi/hitstar/icone.js`
+Nel codice di Giradischi le icone si scrivono come prima, `<i class="fa-solid fa-play"></i>`: `giochi/giradischi/icone.js`
 le disegna come SVG incluse, anche quando cambiano dopo. Per un'icona nuova aggiungi a `ICONE` il `viewBox` e il
 percorso presi dal file SVG di Font Awesome Free (stesso nome, senza `fa-`).
 
 ## Come provare (prima di ogni pull request)
 
-- Servi la **cartella che contiene il repository** chiamata `Raccolta-giochi` (es. un link simbolico) con un server
-  statico, e apri `http://localhost:<porta>/Raccolta-giochi/`: così si simula la sottocartella di GitHub Pages.
-- Playwright (già presente nell'ambiente cloud): schermo 360×780, blocca le richieste esterne per simulare l'offline,
-  nessun errore in console, nessuno scorrimento orizzontale.
-- Per ogni gioco: partita completa, annulla turno, ripresa dopo il ricaricamento, import (dove c'è).
-- Controlla lo scorrimento orizzontale in **ogni schermata** di ogni gioco (non solo nella prima), a 320 e 360px.
-- CineStar e Hitstar usano servizi online (iTunes, MusicBrainz, Wikidata, Wikipedia): nell'ambiente cloud non sono
-  raggiungibili, quindi si provano con risposte finte servite da Playwright (`context.route`), più una prova offline.
-- PWA: elenco `FILE` completo, installabilità (`Page.getInstallabilityErrors` via CDP), tutte le pagine offline con
-  `context.setOffline(true)`, e l'avviso di aggiornamento cambiando `VERSIONE` in una **copia** del sito.
-- Controlla gli screenshot prima di chiudere la fase.
+Le prove automatiche stanno in `prove/` e si lanciano dalla radice del repository, in un ambiente con Node, Playwright
+e Chromium (l'ambiente cloud di Claude Code li ha già):
+
+```
+node prove/esegui.js                 # tutte (circa 180 controlli, qualche minuto)
+node prove/esegui.js cinquina pwa    # solo alcune
+```
+
+`esegui.js` avvia un piccolo server che serve il repository sotto `/Raccolta-giochi/` (come GitHub Pages), lancia le prove
+con uno schermo da 360×780, blocca le richieste verso internet e salva gli screenshot in `prove/screenshot/` (ignorata da git).
+
+| Prova | Cosa controlla |
+|---|---|
+| `menu` | nomi condivisi, "Partita in corso", interruttore suoni |
+| `cinquina` | vecchi indirizzi, migrazione, partita completa, annulla, ripresa, timer, import, muto |
+| `cinestar offline` / `online` | partita completa, indizi, ripresa, annulla (3 casi); online con risposte finte |
+| `giradischi`, `giradischi-offline` | ascolto, sfida, gettoni, bonus Pro, annulla, ripresa, rete persa, avvio senza internet |
+| `larghezze` | nessuno scorrimento orizzontale in ogni schermata, a 320 e 360px (anche con pellicola lunga) |
+| `pwa` | elenco `FILE` completo, installabilità, tutte le pagine offline, avviso di nuova versione (su una copia del sito) |
+
+- iTunes, MusicBrainz, Wikidata e Wikipedia non sono raggiungibili dall'ambiente cloud: le prove usano le risposte finte
+  di `prove/finti-cinestar.js` e `prove/finti-giradischi.js` (`context.route`).
+- Se aggiungi una funzione, aggiungi il suo controllo alla prova del gioco. Guarda gli screenshot prima di chiudere una fase.
+- `prove/` non va nell'elenco `FILE` del service worker (la prova `pwa` la esclude).
 
 ## Nomi
 
-"HINT" e "Hitstar" ricordano giochi commerciali (HINT, Hitster); "CineStar" è anche una catena di cinema.
-Per ora restano così; da rinominare (e regolamento da riscrivere con parole proprie) prima di una condivisione pubblica.
+- **Cinquina** (prima "HINT FAKE") e **Giradischi** (prima "Hitstar"): rinominati per non richiamare i giochi commerciali
+  HINT e Hitster. In Giradischi il grido della sfida è "SCRATCH!". Il regolamento di Cinquina è scritto con parole
+  proprie: se lo modifichi, non copiare testi da regolamenti ufficiali.
+- **CineStar** è anche il nome di una catena di cinema: da valutare prima di una condivisione pubblica.
