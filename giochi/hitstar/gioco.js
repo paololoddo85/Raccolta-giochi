@@ -1446,4 +1446,6 @@ window.onload = function () {
     RG.suoni.alCambio(renderMuteButton);
     document.querySelectorAll('.undo-turn-btn').forEach(b => b.addEventListener('click', undoLastTurn));
     renderResumeBox();
+    // Pagina ricaricata con una partita in corso: si torna subito in partita
+    if (SAVED_GAME.leggi() && RG.partita.ricaricata()) resumeSavedGame();
 };

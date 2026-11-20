@@ -98,6 +98,8 @@ window.onload = function() {
     buildWheelBackground();
     refreshSetupUI();
     RG.suoni.collega(document.getElementById('btn-sound'));
+    // Pagina ricaricata con una partita in corso: si torna subito in partita
+    if (getSavedGame() && RG.partita.ricaricata()) resumeSavedGame();
 };
 
 /**

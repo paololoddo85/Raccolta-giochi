@@ -1545,4 +1545,6 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
   setPlayerCount(Math.max(1, filled));
   renderPlayerNameInputs();
   renderResumeBox();
+  // Pagina ricaricata con una partita in corso: si torna subito in partita
+  if (SAVED_GAME.leggi() && RG.partita.ricaricata()) resumeSavedGame();
 })();

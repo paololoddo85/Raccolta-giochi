@@ -122,6 +122,10 @@ proibito indovinato +2 e proibito errato −2 alternativi tra loro.
 
 ## Salvataggio, ripresa e annulla nei tre giochi
 
+In tutti i giochi: se la pagina viene **ricaricata** (anche dal telefono dopo averla chiusa in sottofondo) con una
+partita in corso, si torna **subito in partita** (`RG.partita.ricaricata()`). Aprendo il gioco dal menù si vede
+invece la schermata iniziale con il riquadro "Partita in corso" (Riprendi / Scarta).
+
 - **HINT FAKE**: salva a ogni turno registrato e carta cambiata; "Annulla turno" riapre il passo 4 del turno precedente.
 - **CineStar**: salva a ogni turno, indizio e piazzamento. Dopo un ricaricamento il film del turno resta lo stesso
   (con gli indizi già pagati). "Annulla" torna a prima del piazzamento: dal risultato, nella premiazione o all'inizio

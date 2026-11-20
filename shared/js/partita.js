@@ -11,6 +11,8 @@
  *   RG.partita.riquadro(elemento, {  riquadro "Partita in corso" con Riprendi / Scarta
  *       riassunto, dettaglio, alRiprendi, alloScarto })
  *   RG.partita.quando(savedAt)       "20 nov, 21:15"
+ *   RG.partita.ricaricata()          true se la pagina è stata ricaricata (anche dal telefono,
+ *                                    dopo averla chiusa in sottofondo): si torna subito in partita
  *
  * Chiave usata: rg-<gioco>-partita
  */
@@ -65,5 +67,16 @@
         elemento.querySelector('[data-azione="scarta"]').onclick = () => alloScarto && alloScarto();
     }
 
-    RG.partita = { crea, quando, riquadro, istantanea: RG.copia };
+    function ricaricata() {
+        try {
+            if (document.wasDiscarded) return true;
+            const nav = performance.getEntriesByType('navigation')[0];
+            if (nav) return nav.type === 'reload';
+            return performance.navigation && performance.navigation.type === 1;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    RG.partita = { crea, quando, riquadro, ricaricata, istantanea: RG.copia };
 })(window.RG = window.RG || {});
