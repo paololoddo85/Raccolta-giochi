@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Combriccola</title>
+    <meta name="description" content="Giochi da festa da fare con il telefono: HINT FAKE, CineStar e Hitstar.">
+    <meta name="theme-color" content="#24142e">
+    <link rel="stylesheet" href="shared/stile/font.css">
+    <link rel="stylesheet" href="shared/stile/base.css">
+    <link rel="stylesheet" href="menu.css">
+</head>
+<body>
+    <main class="pagina">
+        <header class="testata">
+            <h1 class="marchio" aria-label="Combriccola">
+                <span>Com</span><span>bric</span><span>cola</span>
+            </h1>
+            <p class="sottotitolo">Giochi da festa per chi è a tavola stasera. Si gioca con un telefono solo, che passa di mano.</p>
+        </header>
+
+        <section class="giocatori" aria-labelledby="titolo-giocatori">
+            <div class="giocatori-testa">
+                <h2 id="titolo-giocatori">Chi gioca stasera</h2>
+                <button type="button" id="apri-nomi" class="link" aria-expanded="false" aria-controls="modulo-nomi">Modifica</button>
+            </div>
+            <ul id="elenco-nomi" class="nomi" aria-live="polite"></ul>
+            <form id="modulo-nomi" class="modulo-nomi" hidden>
+                <p class="nota">I primi due nomi sono anche le squadre di HINT FAKE. CineStar usa fino a 4 nomi, Hitstar fino a 6.</p>
+                <div class="campi-nomi" id="campi-nomi"></div>
+                <div class="azioni-nomi">
+                    <button type="button" id="svuota-nomi" class="rg-pulsante rg-pulsante-tenue">Svuota</button>
+                    <button type="submit" class="rg-pulsante rg-pulsante-forte">Salva i nomi</button>
+                </div>
+            </form>
+        </section>
+
+        <section aria-labelledby="titolo-giochi">
+            <h2 id="titolo-giochi" class="nascosto">Giochi</h2>
+            <ul class="pila">
+                <li>
+                    <a class="scatola scatola-hint" href="giochi/hint-fake/" data-gioco="hintfake">
+                        <svg class="motivo" viewBox="0 0 100 100" aria-hidden="true">
+                            <g fill="none" stroke="currentColor" stroke-width="3">
+                                <circle cx="50" cy="50" r="46"/>
+                                <path d="M50 50 L50 4 M50 50 L93.7 35.8 M50 50 L77 87.2 M50 50 L23 87.2 M50 50 L6.3 35.8"/>
+                            </g>
+                            <circle cx="50" cy="50" r="10" fill="currentColor"/>
+                        </svg>
+                        <span class="scatola-nome">HINT FAKE</span>
+                        <span class="scatola-descrizione">Fate indovinare 5 parole in 90 secondi, senza mai dire quella proibita.</span>
+                        <span class="scatola-fatti">
+                            <span>2 squadre</span><span>Bambini e adulti</span>
+                        </span>
+                        <span class="in-corso" hidden>Partita in corso</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="scatola scatola-cine" href="cinestar_il_gioco_dei_film.html" data-gioco="cinestar">
+                        <svg class="motivo" viewBox="0 0 100 100" aria-hidden="true">
+                            <rect x="14" y="4" width="72" height="92" rx="4" fill="none" stroke="currentColor" stroke-width="3"/>
+                            <g fill="currentColor">
+                                <rect x="20" y="10" width="8" height="10" rx="1.5"/><rect x="20" y="30" width="8" height="10" rx="1.5"/><rect x="20" y="50" width="8" height="10" rx="1.5"/><rect x="20" y="70" width="8" height="10" rx="1.5"/>
+                                <rect x="72" y="10" width="8" height="10" rx="1.5"/><rect x="72" y="30" width="8" height="10" rx="1.5"/><rect x="72" y="50" width="8" height="10" rx="1.5"/><rect x="72" y="70" width="8" height="10" rx="1.5"/>
+                            </g>
+                        </svg>
+                        <span class="scatola-nome">CineStar</span>
+                        <span class="scatola-descrizione">Guardate la locandina sfocata e mettete il film nell'anno giusto.</span>
+                        <span class="scatola-fatti">
+                            <span>1–4 giocatori</span><span>Locandine online</span>
+                        </span>
+                        <span class="in-corso" hidden>Partita in corso</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="scatola scatola-hit" href="hitstar_il_gioco_della_musica.html" data-gioco="hitstar">
+                        <svg class="motivo" viewBox="0 0 100 100" aria-hidden="true">
+                            <g fill="none" stroke="currentColor">
+                                <circle cx="50" cy="50" r="46" stroke-width="3"/>
+                                <circle cx="50" cy="50" r="36" stroke-width="1.5"/>
+                                <circle cx="50" cy="50" r="28" stroke-width="1.5"/>
+                                <circle cx="50" cy="50" r="20" stroke-width="1.5"/>
+                            </g>
+                            <circle cx="50" cy="50" r="5" fill="currentColor"/>
+                        </svg>
+                        <span class="scatola-nome">Hitstar</span>
+                        <span class="scatola-descrizione">Ascoltate il brano e mettetelo nell'anno giusto della vostra linea del tempo.</span>
+                        <span class="scatola-fatti">
+                            <span>1–6 giocatori</span><span>Serve internet</span>
+                        </span>
+                        <span class="in-corso" hidden>Partita in corso</span>
+                    </a>
+                </li>
+            </ul>
+        </section>
+
+        <footer class="piede">
+            <button type="button" id="pulsante-suoni" class="interruttore">
+                <span class="interruttore-segno" aria-hidden="true"></span>
+                <span class="interruttore-testo">Suoni accesi</span>
+            </button>
+        </footer>
+    </main>
+
+    <script src="shared/js/base.js"></script>
+    <script src="shared/js/migrazioni.js"></script>
+    <script src="shared/js/squadre.js"></script>
+    <script src="shared/js/suoni.js"></script>
+    <script src="shared/js/dialoghi.js"></script>
+    <script src="shared/js/partita.js"></script>
+    <script src="menu.js"></script>
+</body>
+</html>
