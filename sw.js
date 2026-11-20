@@ -11,7 +11,7 @@
  * Quando la versione cambia, nelle pagine compare "Nuova versione disponibile — tocca per aggiornare"
  * (shared/js/aggiornamento.js). Il service worker nuovo si attiva solo dopo quel tocco.
  */
-const VERSIONE = '3';
+const VERSIONE = '4';
 const CACHE = `combriccola-v${VERSIONE}`;
 
 // Percorsi relativi alla cartella del sito (dove sta questo file)
@@ -120,11 +120,9 @@ self.addEventListener('fetch', (evento) => {
         try {
             return await fetch(richiesta);
         } catch (errore) {
-            // Pagina non salvata e niente connessione: si apre il menù
-            if (navigazione) {
-                const menu = await cache.match('./');
-                if (menu) return menu;
-            }
+            // Pagina non salvata e niente connessione: si rimanda al menù, al suo indirizzo
+            // (così stili e script, che hanno percorsi relativi, si trovano)
+            if (navigazione && await cache.match('./')) return Response.redirect(new URL('./', self.location).href, 302);
             throw errore;
         }
     })());

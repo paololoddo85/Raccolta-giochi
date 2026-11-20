@@ -53,6 +53,9 @@ const versioneDi = (testo) => testo.match(/const VERSIONE = '([^']+)';/)[1];
     await page.waitForSelector('#versione-app:not([hidden])');
     ok((await page.textContent('#versione-app')).includes(`Versione ${v1}`), `nel menù compare la versione installata (${v1})`);
     await page.screenshot({ path: SHOTS + 'pwa-menu.png', fullPage: true });
+    await page.click('#cerca-aggiornamenti');
+    await page.waitForSelector('.rg-toast-successo', { timeout: 10000 });
+    ok((await page.textContent('.rg-toast-successo')).includes(`Hai già l'ultima versione (versione ${v1})`), '"Controlla aggiornamenti": risponde che è già l\'ultima versione');
 
     // 3. Senza connessione
     await context.setOffline(true);
@@ -82,7 +85,13 @@ const versioneDi = (testo) => testo.match(/const VERSIONE = '([^']+)';/)[1];
     ok(true, 'offline: Giradischi avvisa che serve internet');
     await page.goto(BASE + 'non-esiste/');
     await page.waitForSelector('.pila', { timeout: 10000 });
-    ok(true, 'offline: un indirizzo sconosciuto apre il menù');
+    await page.waitForFunction(() => window.RG && RG.cercaAggiornamenti, null, { timeout: 10000 });
+    ok(page.url() === BASE, 'offline: un indirizzo sconosciuto rimanda al menù, funzionante');
+    // Il browser di prova, dopo molte pagine offline, a volte torna a dire "online": qui lo si fissa offline
+    await page.evaluate(() => Object.defineProperty(navigator, 'onLine', { get: () => false, configurable: true }));
+    await page.click('#cerca-aggiornamenti');
+    await page.waitForSelector('.rg-toast-errore', { timeout: 15000 });
+    ok((await page.textContent('.rg-toast-errore')).includes('Serve la connessione'), '"Controlla aggiornamenti" offline: avvisa che serve la connessione');
     await context.setOffline(false);
 
     // 4. Nuova versione: avviso, tocco, ricarica e partita ripresa
@@ -93,7 +102,7 @@ const versioneDi = (testo) => testo.match(/const VERSIONE = '([^']+)';/)[1];
     const v2 = v1 + '-prova';
     fs.writeFileSync(swCopia, fs.readFileSync(swCopia, 'utf8').replace(`const VERSIONE = '${v1}';`, `const VERSIONE = '${v2}';`));
     await page.evaluate(() => navigator.serviceWorker.getRegistration().then(r => r.update()));
-    await page.waitForSelector('#rg-aggiorna', { timeout: 15000 });
+    await page.waitForSelector('#rg-aggiorna[data-stato="pronta"]', { timeout: 15000 });
     ok((await page.textContent('#rg-aggiorna')).includes('Nuova versione disponibile — tocca per aggiornare'), 'pubblicata una versione nuova: compare l\'avviso');
     await page.waitForTimeout(500);
     await page.screenshot({ path: SHOTS + 'pwa-avviso.png', clip: { x: 0, y: 0, width: 360, height: 200 } });
@@ -103,14 +112,22 @@ const versioneDi = (testo) => testo.match(/const VERSIONE = '([^']+)';/)[1];
     ok(await page.evaluate(() => RG.versioneApp()) === v2, 'ora è attiva la versione nuova');
     ok(await page.evaluate(async () => (await caches.keys()).join()) === 'combriccola-v' + v2, 'la cache vecchia è stata cancellata');
     ok(!(await page.isVisible('#rg-aggiorna')), 'dopo l\'aggiornamento l\'avviso non compare più');
+    // Versione nuova trovata con il pulsante del menù: prima "in arrivo", poi "disponibile"
     fs.writeFileSync(swCopia, fs.readFileSync(swCopia, 'utf8').replace(`const VERSIONE = '${v2}';`, `const VERSIONE = '${v2}-bis';`));
-    await page.evaluate(() => navigator.serviceWorker.getRegistration().then(r => r.update()));
-    await page.waitForSelector('#rg-aggiorna', { timeout: 15000 });
+    await page.goto(BASE);
+    await page.waitForSelector('#versione-app:not([hidden])');
+    const stati = [];
+    await page.exposeFunction('__stato', s => stati.push(s));
+    await page.evaluate(() => new MutationObserver(() => { const b = document.getElementById('rg-aggiorna'); if (b) window.__stato(b.dataset.stato); }).observe(document.body, { childList: true, subtree: true, attributes: true }));
+    await page.click('#cerca-aggiornamenti');
+    await page.waitForSelector('#rg-aggiorna[data-stato="pronta"]', { timeout: 15000 });
+    ok((await page.textContent('.rg-toast')).includes('versione nuova'), '"Controlla aggiornamenti": trova la versione nuova');
+    ok(stati.includes('in-arrivo') && stati.includes('pronta'), 'durante lo scaricamento compare "Aggiornamento in arrivo…", poi "Nuova versione disponibile"');
     await page.click('.rg-aggiorna-dopo');
     ok(!(await page.isVisible('#rg-aggiorna')), '"Dopo" chiude l\'avviso senza aggiornare');
     ok(errori.length === 0, 'nessun errore in console' + (errori.length ? ':\n' + errori.join('\n') : ''));
   } catch (e) {
-    console.log(e.message, errori); await page.screenshot({ path: SHOTS + 'pwa-errore.png' }); process.exitCode = 1;
+    console.log(e.message, errori); try { console.log('notifiche:', await page.locator('.rg-toast').allTextContents(), 'online:', await page.evaluate(() => navigator.onLine), 'controller:', await page.evaluate(() => !!navigator.serviceWorker.controller)); } catch (x) {} await page.screenshot({ path: SHOTS + 'pwa-errore.png' }); process.exitCode = 1;
   } finally {
     await browser.close(); server.close(); fs.rmSync(copia, { recursive: true, force: true });
   }

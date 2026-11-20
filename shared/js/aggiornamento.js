@@ -5,7 +5,8 @@
  * Toccando, la versione nuova si attiva e la pagina si ricarica: la partita in corso
  * riparte da sola (vedi RG.partita.ricaricata).
  *
- *   RG.versioneApp()   Promise con il numero di versione installata (o null)
+ *   RG.versioneApp()        Promise con il numero di versione installata (o null)
+ *   RG.cercaAggiornamenti() controlla subito se c'è una versione nuova (pulsante del menù)
  *
  * Funziona da qualsiasi pagina: la cartella del sito si ricava dalla posizione di questo file.
  */
@@ -14,6 +15,7 @@
 
     const questoFile = document.currentScript && document.currentScript.src;
     RG.versioneApp = () => Promise.resolve(null);
+    RG.cercaAggiornamenti = () => Promise.resolve('non-disponibile');
     if (!questoFile || !('serviceWorker' in navigator) || location.protocol === 'file:') return;
 
     const cartella = new URL('../../', questoFile); // shared/js/ → cartella del sito
@@ -37,24 +39,89 @@
         });
     };
 
-    function mostraAvviso(lavoratore) {
+    // Barra in alto: "Aggiornamento in arrivo…" mentre si scarica, poi "Nuova versione disponibile"
+    function barra() {
+        let el = document.getElementById('rg-aggiorna');
+        if (!el) {
+            el = document.createElement('div');
+            el.id = 'rg-aggiorna';
+            el.className = 'rg-aggiorna';
+            el.setAttribute('role', 'status');
+            document.body.appendChild(el);
+        }
+        return el;
+    }
+
+    function mostraInArrivo() {
         if (document.getElementById('rg-aggiorna')) return;
-        const barra = document.createElement('div');
-        barra.id = 'rg-aggiorna';
-        barra.className = 'rg-aggiorna';
-        barra.setAttribute('role', 'status');
-        barra.innerHTML = `
+        const el = barra();
+        el.dataset.stato = 'in-arrivo';
+        el.innerHTML = `
+            <span class="rg-aggiorna-tocca rg-aggiorna-attesa"><strong>Aggiornamento in arrivo…</strong> si sta scaricando la versione nuova</span>
+            <button type="button" class="rg-aggiorna-dopo" aria-label="Nascondi">Dopo</button>`;
+        el.querySelector('.rg-aggiorna-dopo').addEventListener('click', () => el.remove());
+    }
+
+    function mostraAvviso(lavoratore) {
+        const esistente = document.getElementById('rg-aggiorna');
+        if (esistente && esistente.dataset.stato === 'pronta') return;
+        const el = barra();
+        el.dataset.stato = 'pronta';
+        el.innerHTML = `
             <button type="button" class="rg-aggiorna-tocca"><strong>Nuova versione disponibile</strong> — tocca per aggiornare</button>
             <button type="button" class="rg-aggiorna-dopo" aria-label="Più tardi">Dopo</button>`;
-        barra.querySelector('.rg-aggiorna-tocca').addEventListener('click', (e) => {
+        el.querySelector('.rg-aggiorna-tocca').addEventListener('click', (e) => {
             aggiornamentoChiesto = true;
             e.currentTarget.disabled = true;
             e.currentTarget.textContent = 'Aggiornamento…';
             lavoratore.postMessage({ tipo: 'aggiorna' });
         });
-        barra.querySelector('.rg-aggiorna-dopo').addEventListener('click', () => barra.remove());
-        document.body.appendChild(barra);
+        el.querySelector('.rg-aggiorna-dopo').addEventListener('click', () => el.remove());
     }
+
+    function togliInArrivo() {
+        const el = document.getElementById('rg-aggiorna');
+        if (el && el.dataset.stato === 'in-arrivo') el.remove();
+    }
+
+    // Segue lo scaricamento di una versione nuova (mai alla prima installazione)
+    function seguiInstallazione(nuovo) {
+        if (!nuovo || !navigator.serviceWorker.controller) return;
+        mostraInArrivo();
+        const controlla = () => {
+            if (nuovo.state === 'installed') mostraAvviso(nuovo);
+            else if (nuovo.state === 'redundant') togliInArrivo(); // scaricamento non riuscito: si riproverà
+        };
+        nuovo.addEventListener('statechange', controlla);
+        controlla();
+    }
+
+    let segnaPronta;
+    const registrazionePronta = new Promise(r => { segnaPronta = r; });
+
+    /*
+     * "Controlla aggiornamenti" (pulsante in fondo al menù). Risponde con:
+     *   'aggiornata'  è già l'ultima versione
+     *   'trovata'     c'è una versione nuova: compare la barra in alto
+     *   'offline'     serve la connessione
+     *   'non-disponibile'  il browser non permette gli aggiornamenti (es. navigazione privata)
+     */
+    RG.cercaAggiornamenti = async function () {
+        const reg = await Promise.race([registrazionePronta, new Promise(r => setTimeout(() => r(null), 4000))]);
+        if (reg && reg.waiting && navigator.serviceWorker.controller) { mostraAvviso(reg.waiting); return 'trovata'; }
+        if (navigator.onLine === false) return 'offline';
+        if (!reg) return 'non-disponibile';
+        // Senza rete il controllo a volte resta appeso: dopo 8 secondi si considera "offline"
+        const tempoScaduto = new Promise((_, no) => setTimeout(() => no(new Error('tempo scaduto')), 8000));
+        try {
+            await Promise.race([reg.update(), tempoScaduto]);
+        } catch (e) {
+            return 'offline';
+        }
+        if (reg.waiting) { mostraAvviso(reg.waiting); return 'trovata'; }
+        if (reg.installing) { seguiInstallazione(reg.installing); return 'trovata'; }
+        return 'aggiornata';
+    };
 
     async function avvia() {
         try {
@@ -62,21 +129,20 @@
                 scope: cartella.href,
                 updateViaCache: 'none' // sw.js si controlla sempre in rete, mai dalla cache del browser
             });
-            const controlla = () => {
-                // Avviso solo se c'era già una versione al lavoro (non alla prima installazione)
-                if (reg.waiting && navigator.serviceWorker.controller) mostraAvviso(reg.waiting);
-            };
-            controlla();
-            reg.addEventListener('updatefound', () => {
-                const nuovo = reg.installing;
-                if (nuovo) nuovo.addEventListener('statechange', () => { if (nuovo.state === 'installed') controlla(); });
-            });
-            // Si cerca una versione nuova quando si torna sulla pagina e ogni 30 minuti
+            segnaPronta(reg);
+            if (reg.waiting && navigator.serviceWorker.controller) mostraAvviso(reg.waiting);
+            else if (reg.installing) seguiInstallazione(reg.installing);
+            reg.addEventListener('updatefound', () => seguiInstallazione(reg.installing));
+            // Si cerca una versione nuova quando si torna sulla pagina, quando torna la connessione e ogni 30 minuti
             const cerca = () => reg.update().catch(() => {});
             document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') cerca(); });
+            window.addEventListener('online', cerca);
             setInterval(cerca, 30 * 60 * 1000);
         } catch (e) {
-            // Service worker non disponibile (es. navigazione privata): il sito funziona lo stesso, solo online
+            // Senza connessione la registrazione non riesce a scaricare sw.js: si usa quella già installata.
+            // Se non c'è (es. navigazione privata) il sito funziona lo stesso, solo online.
+            const esistente = await navigator.serviceWorker.getRegistration(cartella.href).catch(() => null);
+            segnaPronta(esistente || null);
         }
     }
 
