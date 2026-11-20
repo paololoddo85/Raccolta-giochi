@@ -1,5 +1,5 @@
 const { apri, ok, BASE, SHOTS } = require('./comune');
-const { finti, conteggio } = require('./finti-cinestar');
+const { finti, conteggio } = require('./finti-pellicola');
 const MODO = process.argv[2] || 'offline'; // offline | online
 (async () => {
   const { browser, page, esterne, errori } = await apri({ finti: MODO === 'online' ? finti : null });
@@ -26,13 +26,16 @@ const MODO = process.argv[2] || 'offline'; // offline | online
     await page.goto(BASE + 'menu.css');
     await page.evaluate(() => { localStorage.clear(); localStorage.setItem('cinestar_played_movies_v1', JSON.stringify(['psycho__1960'])); localStorage.setItem('rg-comune-squadre', JSON.stringify({ nomi: ['Paolo', 'Giulia', '', '', '', ''] })); });
     await page.goto(BASE + 'cinestar_il_gioco_dei_film.html');
-    await page.waitForURL('**/giochi/cinestar/');
-    ok(true, 'il vecchio indirizzo rimanda a giochi/cinestar/');
+    await page.waitForURL('**/giochi/pellicola/');
+    ok(true, 'il vecchio indirizzo cinestar_il_gioco_dei_film.html rimanda a Pellicola');
+    await page.goto(BASE + 'giochi/cinestar/');
+    await page.waitForURL('**/giochi/pellicola/');
+    ok(true, 'la vecchia cartella giochi/cinestar/ rimanda a Pellicola');
     ok(await page.evaluate(() => JSON.stringify(RG.archivio.spazio('cinestar').leggi('film-giocati'))) === '["psycho__1960"]', 'film già giocati migrati dalla vecchia pagina');
     const nomi = await page.locator('.player-name-input').evaluateAll(els => els.map(e => e.value));
     ok(nomi.join() === 'Paolo,Giulia', 'due giocatori proposti con i nomi di "Chi gioca stasera"');
     await page.selectOption('#target-cards-select', '5');
-    await page.screenshot({ path: SHOTS + `cinestar-${MODO}-1-setup.png`, fullPage: true });
+    await page.screenshot({ path: SHOTS + `pellicola-${MODO}-1-setup.png`, fullPage: true });
     await page.click('#start-game-btn');
     await page.waitForSelector('#game-screen:not(.hidden)', { timeout: 30000 });
     if (MODO === 'online') ok(await page.evaluate(() => gameState.pool.some(m => m._live)), 'online: catalogo live aggiunto al mazzo (iTunes finto)');
@@ -40,17 +43,17 @@ const MODO = process.argv[2] || 'offline'; // offline | online
     if (MODO === 'online') await page.waitForSelector('#mystery-poster-canvas:not(.hidden), #mystery-poster-css-wrapper:not(.hidden)', { timeout: 20000 });
     else await page.waitForSelector('#poster-fallback-card:not(.hidden)', { timeout: 20000 });
     ok(true, MODO === 'online' ? 'locandina pixelata mostrata' : 'offline: nessuna locandina, compare la "Pellicola misteriosa"');
-    await page.screenshot({ path: SHOTS + `cinestar-${MODO}-2-turno.png`, fullPage: true });
+    await page.screenshot({ path: SHOTS + `pellicola-${MODO}-2-turno.png`, fullPage: true });
 
     // indizio + ricarica a metà turno
     await page.click('#clue-director-btn');
     await page.fill('#guess-title-input', 'prova titolo');
     const prima = await stato();
     ok(prima.p[0].s === 9 && prima.indizi.director, 'indizio regista comprato (−1 ★)');
-    await page.goto(BASE + 'giochi/cinestar/');
+    await page.goto(BASE + 'giochi/pellicola/');
     await page.waitForSelector('#resume-box:not([hidden])');
     ok(await page.isVisible('#setup-screen'), 'aperto dal menù: schermata iniziale con "Partita in corso"');
-    await page.screenshot({ path: SHOTS + `cinestar-${MODO}-3-ripresa.png`, fullPage: true });
+    await page.screenshot({ path: SHOTS + `pellicola-${MODO}-3-ripresa.png`, fullPage: true });
     await page.click('#resume-box [data-azione="riprendi"]');
     await filmPronto();
     await page.reload();
@@ -74,7 +77,7 @@ const MODO = process.argv[2] || 'offline'; // offline | online
     }
     await piazza(true);
     ok((await stato()).p[0].t === 2 && (await stato()).p[0].s === 11, 'posizione giusta: +2 ★ e film nella pellicola');
-    await page.screenshot({ path: SHOTS + `cinestar-${MODO}-4-risultato.png`, fullPage: true });
+    await page.screenshot({ path: SHOTS + `pellicola-${MODO}-4-risultato.png`, fullPage: true });
 
     // turno dopo → annulla all'inizio del turno successivo
     await page.click('#next-turn-btn');
@@ -101,7 +104,7 @@ const MODO = process.argv[2] || 'offline'; // offline | online
     ok((await page.textContent('#winner-title')) === 'Vince Paolo', 'vittoria di Paolo con 5 film');
     ok(await page.evaluate(() => localStorage.getItem('rg-cinestar-partita')) === null, 'a fine partita il salvataggio viene cancellato');
     ok(await page.isVisible('#victory-modal .undo-turn-btn'), 'nella premiazione si può annullare l\'ultimo turno');
-    await page.screenshot({ path: SHOTS + `cinestar-${MODO}-5-vittoria.png` });
+    await page.screenshot({ path: SHOTS + `pellicola-${MODO}-5-vittoria.png` });
     await page.click('#victory-modal .undo-turn-btn');
     await page.click('#rg-conferma [data-risposta="si"]');
     await filmPronto();
@@ -122,6 +125,6 @@ const MODO = process.argv[2] || 'offline'; // offline | online
     else ok(true, `offline: ${esterne.length} richieste esterne bloccate (catalogo e locandine), il gioco prosegue con i film inclusi`);
     ok(errori.length === 0, 'nessun errore in console' + (errori.length ? ':\n' + errori.join('\n') : ''));
   } catch (e) {
-    console.log(e.message); console.log('errori:', errori); await page.screenshot({ path: SHOTS + `cinestar-${MODO}-errore.png`, fullPage: true }); process.exitCode = 1;
+    console.log(e.message); console.log('errori:', errori); await page.screenshot({ path: SHOTS + `pellicola-${MODO}-errore.png`, fullPage: true }); process.exitCode = 1;
   } finally { await browser.close(); }
 })();

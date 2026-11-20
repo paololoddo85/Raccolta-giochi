@@ -1,88 +1,8 @@
-/* CineStar: stili propri del gioco */
-/* =========================================================
-   TOKEN
-   ========================================================= */
-:root {
-  --notte: #0A1020;
-  --platea: #131B30;
-  --velluto: #1D2742;
-  --filo: #2A3552;
-  --oro: #E8B04B;
-  --oro-tenue: rgba(232, 176, 75, 0.14);
-  --luce: #F3EBDD;
-  --fumo: #8A93A8;
-  --ok: #4FBF8B;
-  --ko: #E5534B;
-  --display: 'Big Shoulders Display', 'Arial Narrow', 'Roboto Condensed', sans-serif;
-  --testo: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --r-piccolo: 6px;
-  --r-medio: 12px;
-}
-
-*, *::before, *::after { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
-body {
-  margin: 0;
-  min-height: 100vh;
-  background: var(--notte);
-  color: var(--luce);
-  font-family: var(--testo);
-  font-size: 16px;
-  line-height: 1.5;
-  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-  -webkit-font-smoothing: antialiased;
-  -webkit-tap-highlight-color: transparent;
-}
-/* Fascio del proiettore: unica luce di scena, in alto */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0 0 auto 0;
-  height: 70vh;
-  background: radial-gradient(ellipse 60% 100% at 50% 0%, rgba(232, 176, 75, 0.09), transparent 70%);
-  pointer-events: none;
-  z-index: 0;
-}
-button, input, select { font: inherit; color: inherit; touch-action: manipulation; }
-button { cursor: pointer; }
-button:disabled { cursor: not-allowed; }
-:focus-visible { outline: 2px solid var(--oro); outline-offset: 2px; }
+/* Pellicola: stili propri del gioco */
+/* Colori, caratteri, pulsanti e campi stanno in shared/stile/notte.css (stile comune a tutta Combriccola).
+   Il colore guida di Pellicola è l'oro, già predefinito in notte.css. */
 .hidden { display: none !important; }
 .screen { position: relative; z-index: 1; }
-
-/* =========================================================
-   PULSANTI E CAMPI
-   ========================================================= */
-.btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  min-height: 48px; padding: 0 22px;
-  border-radius: var(--r-piccolo); border: 1px solid transparent;
-  font-weight: 600; font-size: 16px;
-  transition: background-color .15s, border-color .15s, transform .1s;
-}
-.btn:active { transform: translateY(1px); }
-.btn-primary { background: var(--oro); color: var(--notte); }
-.btn-primary:hover { background: #F0BF62; }
-.btn-primary:disabled { opacity: .6; }
-.btn-ghost { background: transparent; border-color: var(--filo); color: var(--luce); }
-.btn-ghost:hover { border-color: var(--fumo); }
-.btn-small { min-height: 36px; padding: 0 12px; font-size: 14px; white-space: nowrap; flex-shrink: 0; }
-.btn-block { width: 100%; }
-
-.field-label { display: block; font-size: 14px; font-weight: 600; color: var(--fumo); margin-bottom: 8px; }
-.input, .select {
-  width: 100%; min-height: 48px; padding: 0 14px;
-  background: var(--notte); border: 1px solid var(--filo); border-radius: var(--r-piccolo);
-  font-size: 16px;
-}
-.input::placeholder { color: #5C6680; }
-.input:focus, .select:focus { outline: none; border-color: var(--oro); }
-.select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--fumo) 50%), linear-gradient(135deg, var(--fumo) 50%, transparent 50%); background-position: calc(100% - 20px) 21px, calc(100% - 15px) 21px; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 36px; }
-
-.segmented { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--filo); border-radius: var(--r-piccolo); overflow: hidden; }
-.count-btn { min-height: 48px; background: transparent; border: 0; border-left: 1px solid var(--filo); font-family: var(--display); font-weight: 800; font-size: 24px; color: var(--fumo); }
-.count-btn:first-child { border-left: 0; }
-.count-btn.is-active { background: var(--oro); color: var(--notte); }
 
 /* =========================================================
    SCHERMATA INIZIALE
@@ -92,7 +12,7 @@ button:disabled { cursor: not-allowed; }
 
 .marquee {
   font-family: var(--display); font-weight: 900; text-transform: uppercase;
-  font-size: clamp(76px, 22vw, 168px); line-height: .82; letter-spacing: -0.01em;
+  font-size: clamp(60px, 19vw, 150px); line-height: .82; letter-spacing: -0.01em;
   margin: 0; color: var(--oro);
   text-shadow: 0 0 40px rgba(232, 176, 75, 0.25);
 }
@@ -320,72 +240,14 @@ canvas.pixelated-canvas { image-rendering: pixelated; image-rendering: crisp-edg
 }
 
 /* =========================================================
-   PARTI COMUNI DI COMBRICCOLA (finestre, notifiche, "Partita in corso")
+   RITOCCHI DEL GIOCO
    ========================================================= */
-:root {
-  --rg-accento: var(--oro);
-  --rg-accento-chiaro: var(--oro);
-  --rg-su-accento: var(--notte);
-  --rg-superficie: var(--platea);
-  --rg-testo: var(--luce);
-  --rg-testo-tenue: var(--fumo);
-  --rg-tenue: var(--velluto);
-  --rg-forte: var(--oro);
-  --rg-su-forte: var(--notte);
-  --rg-toast-fondo: var(--velluto);
-  --rg-toast-testo: var(--luce);
-  --rg-velo: rgba(5, 8, 15, 0.9);
-  --rg-raggio: var(--r-medio);
-  --rg-font: var(--testo);
-}
-.rg-finestra { border: 1px solid var(--filo); }
-.rg-pulsante { border-radius: var(--r-piccolo); font-weight: 600; font-size: 15px; }
-.rg-toast { border-radius: var(--r-piccolo); font-weight: 500; font-size: 15px; text-align: left; border-left: 4px solid var(--oro); }
-.rg-toast-successo { border-left-color: var(--ok); box-shadow: 0 12px 30px -10px rgba(0, 0, 0, .8); }
-.rg-toast-errore { border-left-color: var(--ko); box-shadow: 0 12px 30px -10px rgba(0, 0, 0, .8); }
-.rg-riprendi { background: var(--velluto); color: var(--luce); border: 1px solid var(--oro); border-radius: var(--r-medio); }
-.rg-riprendi .rg-pulsante-tenue { background: transparent; border: 1px solid var(--filo); }
-
 .setup header .rg-indietro { margin-bottom: 20px; }
-.result-actions { gap: 10px; flex-wrap: wrap; }
-.undo-turn-btn[hidden] { display: none; }
-.undo-inline { justify-self: start; }
-.dialog > .link-btn { justify-self: center; font-size: 15px; }
-
-/* =========================================================
-   PARTI COMUNI DI COMBRICCOLA (finestre, notifiche, "Partita in corso")
-   ========================================================= */
-:root {
-  --rg-accento: var(--oro);
-  --rg-accento-chiaro: var(--oro);
-  --rg-su-accento: var(--notte);
-  --rg-superficie: var(--platea);
-  --rg-testo: var(--luce);
-  --rg-testo-tenue: var(--fumo);
-  --rg-tenue: var(--velluto);
-  --rg-forte: var(--oro);
-  --rg-su-forte: var(--notte);
-  --rg-toast-fondo: var(--velluto);
-  --rg-toast-testo: var(--luce);
-  --rg-velo: rgba(5, 8, 15, 0.9);
-  --rg-raggio: var(--r-medio);
-  --rg-font: var(--testo);
-}
-.rg-finestra { border: 1px solid var(--filo); }
-.rg-pulsante { border-radius: var(--r-piccolo); font-weight: 600; font-size: 15px; }
-.rg-toast { border-radius: var(--r-piccolo); font-weight: 500; font-size: 15px; text-align: left; border-left: 4px solid var(--oro); }
-.rg-toast-successo { border-left-color: var(--ok); box-shadow: 0 12px 30px -10px rgba(0, 0, 0, .8); }
-.rg-toast-errore { border-left-color: var(--ko); box-shadow: 0 12px 30px -10px rgba(0, 0, 0, .8); }
-.rg-riprendi { background: var(--velluto); color: var(--luce); border: 1px solid var(--oro); border-radius: var(--r-medio); }
-.rg-riprendi .rg-pulsante-tenue { background: transparent; border: 1px solid var(--filo); }
-
-.setup header .rg-indietro { margin-bottom: 20px; }
-.result-actions { gap: 10px; flex-wrap: wrap; }
-.undo-turn-btn[hidden] { display: none; }
-.undo-inline { justify-self: start; }
-.dialog > .link-btn { justify-self: center; font-size: 15px; }
-.result-actions { flex-wrap: nowrap; }
+.result-actions { gap: 10px; flex-wrap: nowrap; }
 .result-actions .btn { padding: 0 14px; }
+.undo-turn-btn[hidden] { display: none; }
+.undo-inline { justify-self: start; }
+.dialog > .link-btn { justify-self: center; font-size: 15px; }
 
 /* Telefoni stretti (320px): la griglia può restringersi e la didascalia va a capo */
 .game-main, .stage { grid-template-columns: minmax(0, 1fr); }

@@ -1,5 +1,5 @@
 /*
- * CineStar - logica del gioco.
+ * Pellicola (prima "CineStar") - logica del gioco.
  * I film stanno in dati/film.js; le parti comuni (memoria, nomi, finestre, notifiche,
  * salvataggio) arrivano da shared/js/ tramite l'oggetto globale RG.
  */

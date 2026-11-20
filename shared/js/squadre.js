@@ -1,7 +1,7 @@
 /*
  * CHI GIOCA STASERA - nomi di giocatori e squadre condivisi tra i giochi.
  * Un unico elenco di 6 posti (chiave rg-comune-squadre). Ogni gioco usa i primi N:
- * Cinquina i primi 2 come nomi delle squadre, CineStar fino a 4, Giradischi fino a 6.
+ * Cinquina i primi 2 come nomi delle squadre, Pellicola fino a 4, Giradischi fino a 6.
  *
  *   RG.squadre.tutti()                 i 6 posti ('' se vuoto)
  *   RG.squadre.nomi(n, predefiniti)    n nomi, con i predefiniti al posto dei vuoti

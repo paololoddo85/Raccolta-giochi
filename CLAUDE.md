@@ -24,7 +24,7 @@ Sito statico con giochi da festa da usare sul telefono (un telefono solo che pas
   il sito vive in una sottocartella e deve funzionare anche in locale.
 - **Niente CDN a runtime**: stili, font e librerie stanno nel sito, così funziona offline.
   Le uniche richieste esterne ammesse sono i contenuti online dei giochi
-  (catalogo e locandine di CineStar, catalogo e audio di Giradischi).
+  (catalogo e locandine di Pellicola, catalogo e audio di Giradischi).
 - **Mai `confirm()`, `alert()` o `prompt()`** del browser: usa `RG.conferma()` e `RG.toast()`.
 - **Mobile-first**, schermi da 360px in su; nessuno scorrimento orizzontale della pagina.
 - Carte e contenuti dei giochi stanno in **file dati separati** (`dati/*.js`), non nel codice.
@@ -41,9 +41,10 @@ icone/                             icone dell'app (192, 512, maskable, apple-tou
 HINT_FAKE.html                     vecchi indirizzi → rinvio automatico alla pagina nuova
 cinestar_il_gioco_dei_film.html    (non cancellarli: sono nei preferiti e nelle app installate)
 hitstar_il_gioco_della_musica.html
-giochi/hint-fake/  giochi/hitstar/ vecchie cartelle: contengono solo il rinvio a cinquina/ e giradischi/
+giochi/hint-fake/  giochi/hitstar/  giochi/cinestar/   vecchie cartelle: solo il rinvio a cinquina/, giradischi/, pellicola/
 shared/
-  stile/font.css                   @font-face dei font inclusi (font/*.woff2, licenza OFL)
+  stile/font.css                   @font-face dei font inclusi: Big Shoulders Display e Instrument Sans (licenza OFL)
+  stile/notte.css                  stile comune "notte": colori, caratteri, pulsanti, campi, colore guida --accento
   stile/tailwind.css               Tailwind già compilato (vedi sotto)
   stile/tailwind-sorgente.css      da dove si rigenera tailwind.css
   stile/base.css                   componenti comuni: finestre, notifiche, "Partita in corso", tasto ←
@@ -60,7 +61,7 @@ shared/
 giochi/<nome>/
   index.html  gioco.js  stile.css  dati/…
 giochi/cinquina/dati/carte.js      le 304 carte di Cinquina (prima "HINT FAKE")
-giochi/cinestar/dati/film.js       88 film inclusi, titoli alternativi, ricerche del catalogo online
+giochi/pellicola/dati/film.js      88 film inclusi, titoli alternativi, ricerche del catalogo online (prima "CineStar")
 giochi/giradischi/dati/ricerche.js ricerche iTunes e parole che scartano raccolte/remaster/live (prima "Hitstar")
 giochi/giradischi/icone.js         icone Font Awesome incluse (SVG), licenza CC BY 4.0
 prove/                             prove automatiche (Playwright): `node prove/esegui.js` — non fanno parte del sito
@@ -68,15 +69,28 @@ prove/                             prove automatiche (Playwright): `node prove/e
 
 Ordine di caricamento degli script comuni: `base.js` sempre per primo, poi `migrazioni.js`, poi gli altri.
 
-### Colori dei giochi
-Ogni gioco ha la sua identità; le parti comuni si adattano ridefinendo le variabili `--rg-*` in `stile.css`.
+### Stile comune "notte" e colori dei giochi
 
-| Gioco | Colore | Note |
+Tutte le pagine usano lo stile di Pellicola, scritto una volta sola in `shared/stile/notte.css`: fondo blu notte
+(`--notte #0A1020`, riquadri `--platea`, superfici `--velluto`, bordi `--filo`), testo `--luce`, titoli alti e stretti
+in **Big Shoulders Display** (maiuscolo), testo in **Instrument Sans**, pulsanti e bordi sobri: niente vetro, niente
+sfumature, ombre minime. Ogni pagina sceglie solo il suo colore guida in `stile.css`:
+
+| Pagina | `--accento` | Note |
 |---|---|---|
-| Menù Combriccola | prugna `#24142E`, latte `#FFF4E6` | font Bricolage Grotesque |
-| Cinquina | verde acqua `#4D9496`, nero `#1E2024` | font Inter, Tailwind |
-| CineStar | oro `#E8B04B` su notte `#0A1020` | font Big Shoulders Display + Instrument Sans, CSS proprio |
-| Giradischi | rosa `#EC4899` e ciano `#22D3EE` su viola notte | font Inter + Space Grotesk, Tailwind, icone.js |
+| Menù Combriccola | oro (predefinito) | scatole dei giochi nei loro colori |
+| Cinquina | verde acqua `#4D9496` | Tailwind + strato "notte" in fondo a `stile.css` |
+| Pellicola | oro `#E8B04B` | CSS proprio |
+| Giradischi | rosa `#EC4899` (secondo colore ciano `#22D3EE`) | Tailwind + strato "notte" in fondo a `stile.css`, icone.js |
+
+Ordine dei fogli di stile in ogni pagina: `font.css`, (`tailwind.css`), `base.css`, `notte.css`, `stile.css` del gioco.
+
+**Strato "notte" sopra Tailwind** (Cinquina e Giradischi): i due giochi sono scritti con classi Tailwind chiare o
+"al neon". In fondo al loro `stile.css` ogni classe di colore usata viene riportata sul fondo notte
+(es. `.bg-white` → `--platea`, `.text-slate-900` → `--luce`). Sono regole fuori da `@layer`, quindi vincono sulle
+utilità di Tailwind e l'HTML non va toccato. **Se usi una classe di colore nuova in quei giochi, aggiungi lì la sua
+versione scura** e guarda lo screenshot. Le regole sugli elementi di `notte.css` stanno in `@layer base`, così
+le classi di Tailwind (es. `font-black`) restano più forti.
 
 ## Memoria sul dispositivo (localStorage)
 
@@ -97,8 +111,8 @@ per questo tutte le chiavi hanno il prefisso `rg-`. Usa sempre `RG.archivio`, ma
 | `rg-hitstar-partita` | partita in corso, compresi brano del turno, carte già verificate e "annulla" |
 | `rg-<gioco>-migrazione` | segno che la migrazione è già stata fatta |
 
-**Nomi interni**: i giochi si chiamavano "HINT FAKE" e "Hitstar". Le chiavi di memoria (`rg-hintfake-…`, `rg-hitstar-…`)
-e i valori `data-gioco="hintfake"` / `"hitstar"` del menù **restano con il nome vecchio**: non si vedono e cambiarli
+**Nomi interni**: i giochi si chiamavano "HINT FAKE", "Hitstar" e "CineStar". Le chiavi di memoria (`rg-hintfake-…`, `rg-hitstar-…`, `rg-cinestar-…`)
+e i valori `data-gioco="hintfake"` / `"hitstar"` / `"cinestar"` del menù **restano con il nome vecchio**: non si vedono e cambiarli
 costringerebbe a migrare di nuovo partite e carte. Non rinominarli.
 
 Le vecchie chiavi (`hintfake-…`, `cinestar_…`, `hitstar_…`) vengono **copiate** una volta sola e **non cancellate** (copia di sicurezza).
@@ -137,7 +151,7 @@ partita in corso, si torna **subito in partita** (`RG.partita.ricaricata()`). Ap
 invece la schermata iniziale con il riquadro "Partita in corso" (Riprendi / Scarta).
 
 - **Cinquina**: salva a ogni turno registrato e carta cambiata; "Annulla turno" riapre il passo 4 del turno precedente.
-- **CineStar**: salva a ogni turno, indizio e piazzamento. Dopo un ricaricamento il film del turno resta lo stesso
+- **Pellicola**: salva a ogni turno, indizio e piazzamento. Dopo un ricaricamento il film del turno resta lo stesso
   (con gli indizi già pagati). "Annulla" torna a prima del piazzamento: dal risultato, nella premiazione o all'inizio
   del turno dopo, finché non si compra un indizio.
 - **Giradischi**: salva a ogni carta, scelta, sfida, gettone e conferma. "Annulla" torna a prima della conferma
@@ -176,7 +190,7 @@ invece la schermata iniziale con il riquadro "Partita in corso" (Riprendi / Scar
 ## Tailwind
 
 `shared/stile/tailwind.css` è Tailwind v4 **già compilato** e fa parte del repository: non serve nessun passaggio
-per pubblicare. Contiene solo le classi usate in `giochi/cinquina/` e `giochi/giradischi/` (CineStar e il menù hanno
+per pubblicare. Contiene solo le classi usate in `giochi/cinquina/` e `giochi/giradischi/` (Pellicola e il menù hanno
 CSS proprio). Se aggiungi classi Tailwind nuove in quei giochi, rigeneralo da un ambiente con Node e committalo:
 
 ```
@@ -209,19 +223,19 @@ con uno schermo da 360×780, blocca le richieste verso internet e salva gli scre
 |---|---|
 | `menu` | nomi condivisi, "Partita in corso", interruttore suoni |
 | `cinquina` | vecchi indirizzi, migrazione, partita completa, annulla, ripresa, timer, import, muto |
-| `cinestar offline` / `online` | partita completa, indizi, ripresa, annulla (3 casi); online con risposte finte |
+| `pellicola offline` / `online` | partita completa, indizi, ripresa, annulla (3 casi); online con risposte finte |
 | `giradischi`, `giradischi-offline` | ascolto, sfida, gettoni, bonus Pro, annulla, ripresa, rete persa, avvio senza internet |
 | `larghezze` | nessuno scorrimento orizzontale in ogni schermata, a 320 e 360px (anche con pellicola lunga) |
 | `pwa` | elenco `FILE` completo, installabilità, tutte le pagine offline, avviso di nuova versione (su una copia del sito) |
 
 - iTunes, MusicBrainz, Wikidata e Wikipedia non sono raggiungibili dall'ambiente cloud: le prove usano le risposte finte
-  di `prove/finti-cinestar.js` e `prove/finti-giradischi.js` (`context.route`).
+  di `prove/finti-pellicola.js` e `prove/finti-giradischi.js` (`context.route`).
 - Se aggiungi una funzione, aggiungi il suo controllo alla prova del gioco. Guarda gli screenshot prima di chiudere una fase.
 - `prove/` non va nell'elenco `FILE` del service worker (la prova `pwa` la esclude).
 
 ## Nomi
 
-- **Cinquina** (prima "HINT FAKE") e **Giradischi** (prima "Hitstar"): rinominati per non richiamare i giochi commerciali
-  HINT e Hitster. In Giradischi il grido della sfida è "SCRATCH!". Il regolamento di Cinquina è scritto con parole
-  proprie: se lo modifichi, non copiare testi da regolamenti ufficiali.
-- **CineStar** è anche il nome di una catena di cinema: da valutare prima di una condivisione pubblica.
+- **Cinquina** (prima "HINT FAKE"), **Pellicola** (prima "CineStar") e **Giradischi** (prima "Hitstar"): rinominati
+  per non richiamare giochi commerciali (HINT, Hitster) né la catena di cinema CineStar. In Giradischi il grido della
+  sfida è "SCRATCH!". Il regolamento di Cinquina è scritto con parole proprie: se lo modifichi, non copiare testi da
+  regolamenti ufficiali.

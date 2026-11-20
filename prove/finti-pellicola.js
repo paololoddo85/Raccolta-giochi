@@ -1,4 +1,4 @@
-// Risposte finte dei servizi online usati da CineStar
+// Risposte finte dei servizi online usati da Pellicola
 const fs = require('fs');
 const POSTER = fs.readFileSync(__dirname + '/risorse/locandina.jpg');
 const CORS = { 'access-control-allow-origin': '*' };

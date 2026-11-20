@@ -1,0 +1,153 @@
+/*
+ * COMBRICCOLA - stile "notte", comune al menù e a tutti i giochi (nato da Pellicola).
+ *
+ * Fondo blu notte, una sola luce di scena in alto, titoli alti e stretti (Big Shoulders Display),
+ * testo in Instrument Sans, pulsanti e bordi sobri: niente vetro, niente sfumature, ombre minime.
+ * Ogni pagina sceglie il suo COLORE GUIDA ridefinendo, nel proprio stile.css:
+ *   --accento         colore del gioco (pulsanti principali, evidenze, titoli)
+ *   --accento-chiaro  versione chiara, per testi colorati sul fondo scuro
+ *   --su-accento      testo sopra il colore del gioco
+ *   --accento-luce    colore del fascio di luce in alto (rgba)
+ *
+ * Caricare dopo base.css e prima dello stile.css del gioco.
+ */
+:root {
+    /* fondo e superfici */
+    --notte: #0A1020;      /* pagina */
+    --platea: #131B30;     /* riquadri */
+    --velluto: #1D2742;    /* superfici interne, pulsanti secondari */
+    --filo: #2A3552;       /* bordi e separatori */
+    /* testo */
+    --luce: #F3EBDD;       /* testo principale */
+    --luce-tenue: #C9C3B8; /* testo secondario */
+    --fumo: #8A93A8;       /* note, etichette */
+    /* esiti */
+    --ok: #4FBF8B;
+    --ko: #E5534B;
+    --avviso: #E8B04B;
+    /* colori dei giochi */
+    --oro: #E8B04B;        /* Pellicola */
+    --verde-acqua: #4D9496;/* Cinquina */
+    --rosa: #EC4899;       /* Giradischi */
+    --ciano: #22D3EE;      /* Giradischi, secondo colore */
+    /* colore guida della pagina (oro se il gioco non ne sceglie uno) */
+    --accento: var(--oro);
+    --accento-chiaro: #F0C877;
+    --su-accento: var(--notte);
+    --accento-luce: rgba(232, 176, 75, 0.09);
+    --accento-tenue: color-mix(in srgb, var(--accento) 14%, transparent);
+    --oro-tenue: rgba(232, 176, 75, 0.14);
+    /* caratteri e forme */
+    --display: 'Big Shoulders Display', 'Arial Narrow', 'Roboto Condensed', sans-serif;
+    --testo: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --r-piccolo: 6px;
+    --r-medio: 12px;
+
+    /* parti comuni di Combriccola (finestre, notifiche, "Partita in corso", avviso di aggiornamento) */
+    --rg-accento: var(--accento);
+    --rg-accento-chiaro: var(--accento-chiaro);
+    --rg-su-accento: var(--su-accento);
+    --rg-superficie: var(--platea);
+    --rg-testo: var(--luce);
+    --rg-testo-tenue: var(--fumo);
+    --rg-tenue: var(--velluto);
+    --rg-forte: var(--accento);
+    --rg-su-forte: var(--su-accento);
+    --rg-pericolo: var(--ko);
+    --rg-toast-fondo: var(--velluto);
+    --rg-toast-testo: var(--luce);
+    --rg-velo: rgba(5, 8, 15, 0.9);
+    --rg-raggio: var(--r-medio);
+    --rg-font: var(--testo);
+}
+
+/* Regole sugli elementi nel livello "base": nei giochi con Tailwind le classi
+   (font-black, bg-…) restano più forti di queste, come previsto. */
+@layer base {
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--notte);
+        color: var(--luce);
+        font-family: var(--testo);
+        font-size: 16px;
+        line-height: 1.5;
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        -webkit-font-smoothing: antialiased;
+        -webkit-tap-highlight-color: transparent;
+    }
+    /* Fascio del proiettore: unica luce di scena, in alto, nel colore del gioco */
+    body::before {
+        content: '';
+        position: fixed;
+        inset: 0 0 auto 0;
+        height: 70vh;
+        background: radial-gradient(ellipse 60% 100% at 50% 0%, var(--accento-luce), transparent 70%);
+        pointer-events: none;
+        z-index: 0;
+    }
+    button, input, select, textarea { font: inherit; color: inherit; touch-action: manipulation; }
+    button { cursor: pointer; }
+    button:disabled { cursor: not-allowed; }
+}
+:focus-visible { outline: 2px solid var(--accento); outline-offset: 2px; }
+
+/* Titoli in stile cartellone */
+.titolo-display {
+    font-family: var(--display); font-weight: 800; text-transform: uppercase;
+    letter-spacing: 0.01em; line-height: 1;
+}
+
+/* =========================================================
+   PULSANTI E CAMPI
+   ========================================================= */
+.btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: 48px; padding: 0 22px;
+    border-radius: var(--r-piccolo); border: 1px solid transparent;
+    font-weight: 600; font-size: 16px;
+    transition: background-color .15s, border-color .15s, transform .1s, filter .15s;
+}
+.btn:active { transform: translateY(1px); }
+.btn-primary { background: var(--accento); color: var(--su-accento); }
+.btn-primary:hover { filter: brightness(1.08); }
+.btn-primary:disabled { opacity: .6; }
+.btn-ghost { background: transparent; border-color: var(--filo); color: var(--luce); }
+.btn-ghost:hover { border-color: var(--fumo); }
+.btn-small { min-height: 36px; padding: 0 12px; font-size: 14px; white-space: nowrap; flex-shrink: 0; }
+.btn-block { width: 100%; }
+
+.field-label { display: block; font-size: 14px; font-weight: 600; color: var(--fumo); margin-bottom: 8px; }
+.input, .select {
+    width: 100%; min-height: 48px; padding: 0 14px;
+    background: var(--notte); border: 1px solid var(--filo); border-radius: var(--r-piccolo);
+    font-size: 16px;
+}
+.input::placeholder { color: #5C6680; }
+.input:focus, .select:focus { outline: none; border-color: var(--accento); }
+.select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--fumo) 50%), linear-gradient(135deg, var(--fumo) 50%, transparent 50%); background-position: calc(100% - 20px) 21px, calc(100% - 15px) 21px; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 36px; }
+
+.segmented { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--filo); border-radius: var(--r-piccolo); overflow: hidden; }
+.count-btn { min-height: 48px; background: transparent; border: 0; border-left: 1px solid var(--filo); font-family: var(--display); font-weight: 800; font-size: 24px; color: var(--fumo); }
+.count-btn:first-child { border-left: 0; }
+.count-btn.is-active { background: var(--accento); color: var(--su-accento); }
+
+/* =========================================================
+   PARTI COMUNI IN STILE NOTTE
+   ========================================================= */
+.rg-indietro { background: transparent; border: 1px solid var(--filo); border-radius: var(--r-piccolo); color: var(--luce); }
+.rg-indietro:hover { background: transparent; border-color: var(--fumo); }
+.rg-finestra { border: 1px solid var(--filo); box-shadow: 0 30px 60px -20px rgba(0, 0, 0, .9); }
+.rg-finestra-titolo { font-family: var(--display); font-weight: 800; font-size: 26px; text-transform: uppercase; letter-spacing: .01em; line-height: 1; margin-bottom: 10px; }
+.rg-pulsante { border-radius: var(--r-piccolo); font-weight: 600; font-size: 15px; }
+.rg-pulsante-tenue { background: transparent; border: 1px solid var(--filo); color: var(--luce); }
+.rg-toast { border-radius: var(--r-piccolo); font-weight: 500; font-size: 15px; text-align: left; border-left: 4px solid var(--accento); box-shadow: 0 12px 30px -10px rgba(0, 0, 0, .8); }
+.rg-toast-successo { border-left-color: var(--ok); box-shadow: 0 12px 30px -10px rgba(0, 0, 0, .8); }
+.rg-toast-errore { border-left-color: var(--ko); box-shadow: 0 12px 30px -10px rgba(0, 0, 0, .8); }
+.rg-toast-avviso { border-left-color: var(--avviso); box-shadow: 0 12px 30px -10px rgba(0, 0, 0, .8); }
+.rg-riprendi { background: var(--velluto); color: var(--luce); border: 1px solid var(--accento); border-radius: var(--r-medio); }
+.rg-riprendi-titolo { color: var(--accento-chiaro); }
+.rg-riprendi .rg-pulsante-tenue { background: transparent; border: 1px solid var(--filo); }
+.rg-aggiorna-tocca strong { font-weight: 700; }

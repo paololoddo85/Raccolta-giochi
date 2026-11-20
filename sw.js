@@ -2,7 +2,7 @@
  * COMBRICCOLA - service worker
  *
  * Al primo accesso salva sul telefono tutti i file del sito: dopo si gioca anche senza connessione.
- * I contenuti online dei giochi (catalogo e locandine di CineStar, catalogo e AUDIO di Giradischi)
+ * I contenuti online dei giochi (catalogo e locandine di Pellicola, catalogo e AUDIO di Giradischi)
  * non passano di qui: arrivano sempre da internet e non vengono mai salvati.
  *
  * A OGNI RILASCIO:
@@ -11,7 +11,7 @@
  * Quando la versione cambia, nelle pagine compare "Nuova versione disponibile — tocca per aggiornare"
  * (shared/js/aggiornamento.js). Il service worker nuovo si attiva solo dopo quel tocco.
  */
-const VERSIONE = '2';
+const VERSIONE = '3';
 const CACHE = `combriccola-v${VERSIONE}`;
 
 // Percorsi relativi alla cartella del sito (dove sta questo file)
@@ -44,12 +44,10 @@ const FILE = [
     'shared/js/timer.js',
     'shared/stile/base.css',
     'shared/stile/font.css',
+    'shared/stile/notte.css',
     'shared/stile/tailwind.css',
     'shared/stile/font/big-shoulders-display.woff2',
-    'shared/stile/font/bricolage-grotesque.woff2',
     'shared/stile/font/instrument-sans.woff2',
-    'shared/stile/font/inter.woff2',
-    'shared/stile/font/space-grotesk.woff2',
     'shared/vendor/confetti.js',
 
     // vecchie cartelle (rinvio a Cinquina e Giradischi)
@@ -65,12 +63,14 @@ const FILE = [
     'giochi/cinquina/gioco.js',
     'giochi/cinquina/dati/carte.js',
 
-    // CineStar
+    // Pellicola (prima CineStar; la vecchia cartella rimanda qui)
     'giochi/cinestar/',
     'giochi/cinestar/index.html',
-    'giochi/cinestar/stile.css',
-    'giochi/cinestar/gioco.js',
-    'giochi/cinestar/dati/film.js',
+    'giochi/pellicola/',
+    'giochi/pellicola/index.html',
+    'giochi/pellicola/stile.css',
+    'giochi/pellicola/gioco.js',
+    'giochi/pellicola/dati/film.js',
 
     // Giradischi
     'giochi/giradischi/',

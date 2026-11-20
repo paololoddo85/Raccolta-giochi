@@ -1,14 +1,8 @@
 /* Giradischi: stili propri del gioco */
+/* Fondo, testo e caratteri arrivano dallo stile comune (shared/stile/notte.css), vedi in fondo */
 body {
-    font-family: 'Inter', sans-serif;
-    background: radial-gradient(circle at top left, #1e1035, #0f0c29 45%, #090617 100%);
-    color: #f8fafc;
     min-height: 100vh;
     overflow-x: hidden;
-}
-
-.font-display {
-    font-family: 'Space Grotesk', sans-serif;
 }
 
 /* Effetto vetro / neon */
@@ -151,30 +145,119 @@ i[data-icona] svg { height: 1em; width: auto; overflow: visible; vertical-align:
     button:not(:disabled), [role="button"] { cursor: pointer; }
 }
 
-/* Colori delle parti comuni di Combriccola (finestre, notifiche, "Partita in corso") */
-:root {
-    --rg-accento: #22d3ee;
-    --rg-accento-chiaro: #67e8f9;
-    --rg-su-accento: #0f0c29;
-    --rg-superficie: #171136;
-    --rg-testo: #f8fafc;
-    --rg-testo-tenue: #9ca3af;
-    --rg-tenue: rgba(255, 255, 255, 0.1);
-    --rg-forte: #ec4899;
-    --rg-su-forte: #ffffff;
-    --rg-toast-fondo: #1e1b4b;
-    --rg-velo: rgba(0, 0, 0, 0.8);
-    --rg-font: 'Inter', system-ui, sans-serif;
-}
-.rg-finestra { border: 1px solid rgba(236, 72, 153, 0.45); }
-.rg-toast { border: 1px solid rgba(34, 211, 238, 0.35); }
-.rg-riprendi { background: linear-gradient(135deg, rgba(236, 72, 153, 0.22), rgba(34, 211, 238, 0.14)); border: 1px solid rgba(236, 72, 153, 0.45); color: #fff; }
 .undo-turn-btn[hidden] { display: none; }
 
 /* Telefoni stretti: con il tasto ← in più, il disco accanto al titolo si nasconde */
 @media (max-width: 399px) {
     .logo-disco { display: none; }
 }
-@media (max-width: 359px) {
+@media (max-width: 419px) {
     header button[onclick="openRulesModal()"] span { display: none; }
 }
+
+/* =========================================================
+   STILE "NOTTE" (shared/stile/notte.css) SOPRA LE CLASSI TAILWIND
+   Giradischi è scritto con vetro, bagliori e sfumature: qui sotto diventano
+   superfici piene e bordi sottili come in Pellicola, con il rosa come colore guida.
+   Le regole fuori da @layer vincono sulle utilità di Tailwind: l'HTML non cambia.
+   ========================================================= */
+:root {
+    --accento: #EC4899;
+    --accento-chiaro: #F58FC0;
+    --su-accento: var(--notte);
+    --accento-luce: rgba(236, 72, 153, 0.10);
+    --secondo: #22D3EE;
+}
+body { background: var(--notte) !important; color: var(--luce) !important; font-family: var(--testo) !important; }
+main, header { position: relative; z-index: 1; }
+.font-display { font-family: var(--display) !important; font-weight: 800; text-transform: uppercase; letter-spacing: .01em; }
+
+/* Niente sfumature (resta solo l'easter egg) */
+[class*="bg-gradient-to-"]:not(#vasco-poop-disc) { background-image: none !important; }
+.bg-clip-text.text-transparent { color: var(--accento-chiaro) !important; -webkit-text-fill-color: currentColor; }
+#reveal-year { color: var(--accento-chiaro) !important; filter: none; }
+
+/* Intestazione come quella di Pellicola */
+body > header { background: rgba(10, 16, 32, 0.92) !important; border-bottom: 1px solid var(--filo) !important; }
+body > header h1 { font-size: 26px; line-height: 1; }
+
+/* Superfici piene al posto del vetro */
+.glass-panel { background: var(--platea) !important; border: 1px solid var(--filo) !important; box-shadow: none !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; border-radius: var(--r-medio) !important; }
+.card-face { background-color: var(--platea) !important; }
+.neon-border-pink { border-color: var(--accento) !important; box-shadow: none !important; }
+.neon-border-cyan { border-color: var(--secondo) !important; box-shadow: none !important; }
+#victory-screen .glass-panel { border-color: var(--accento) !important; }
+
+/* Pulsanti principali nel colore del gioco, come in Pellicola */
+#btn-start-game, #btn-play-pause, button[onclick="nextTurn()"], #victory-screen button[onclick="resetToSetup()"] {
+    background-color: var(--accento) !important; color: var(--su-accento) !important; box-shadow: none !important; border-radius: var(--r-piccolo) !important;
+}
+#btn-confirm-placement { background-color: var(--ok) !important; color: var(--su-accento) !important; border-radius: var(--r-piccolo) !important; }
+#btn-start-game:hover, #btn-play-pause:hover, button[onclick="nextTurn()"]:hover { filter: brightness(1.08); transform: none; }
+
+/* Piccoli dischi e numeri nel colore del gioco */
+.logo-disco, #player-inputs-container .rounded-full, #vinyl-disc > div, #victory-screen .rounded-full.w-20 { background-color: var(--accento) !important; box-shadow: none !important; }
+.logo-disco i, #victory-screen .rounded-full.w-20 i { color: var(--su-accento); }
+.from-pink-600\/30 { background-color: var(--accento-tenue) !important; }
+.from-\[\#1e1b4b\] { background-color: var(--velluto) !important; }
+input.player-name-input { color: var(--luce); }
+select { background-color: var(--notte) !important; border-color: var(--filo) !important; border-radius: var(--r-piccolo) !important; }
+
+/* Vinile senza alone neon, equalizzatore e cursori nel colore del gioco */
+.vinyl-record { box-shadow: 0 0 0 1px var(--filo) !important; }
+.eq-bar { background: var(--accento) !important; }
+input[type="range"].audio-slider { background: var(--filo) !important; }
+input[type="range"].audio-slider::-webkit-slider-thumb { background: var(--accento) !important; box-shadow: none !important; }
+.timeline-scroll::-webkit-scrollbar-thumb { background: var(--filo) !important; }
+.slot-selected { background: var(--accento-tenue) !important; border-color: var(--accento) !important; box-shadow: none !important; }
+.bg-white\/5 { background-color: var(--velluto); }
+.hover\:bg-white\/5:hover { background-color: var(--velluto); }
+.bg-white\/10 { background-color: var(--velluto); }
+.hover\:bg-white\/10:hover { background-color: var(--velluto); }
+.bg-black\/30 { background-color: var(--velluto); }
+.hover\:bg-black\/30:hover { background-color: var(--velluto); }
+.bg-black\/35 { background-color: var(--velluto); }
+.hover\:bg-black\/35:hover { background-color: var(--velluto); }
+.bg-black\/40 { background-color: var(--velluto); }
+.hover\:bg-black\/40:hover { background-color: var(--velluto); }
+.bg-indigo-950\/60 { background-color: var(--velluto); }
+.hover\:bg-indigo-950\/60:hover { background-color: var(--velluto); }
+.bg-white\/20 { background-color: var(--filo); }
+.hover\:bg-white\/20:hover { background-color: var(--filo); }
+.bg-\[\#16123b\] { background-color: var(--notte); }
+.bg-\[\#0f0c29\] { background-color: var(--notte); }
+.bg-\[\#171136\] { background-color: var(--platea); }
+.bg-\[\#140e30\] { background-color: var(--platea); }
+.border-white\/5 { border-color: var(--filo); }
+.hover\:border-white\/5:hover { border-color: var(--filo); }
+.border-white\/10 { border-color: var(--filo); }
+.hover\:border-white\/10:hover { border-color: var(--filo); }
+.border-white\/15 { border-color: var(--filo); }
+.hover\:border-white\/15:hover { border-color: var(--filo); }
+.border-white\/20 { border-color: var(--filo); }
+.hover\:border-white\/20:hover { border-color: var(--filo); }
+.border-white\/25 { border-color: var(--filo); }
+.hover\:border-white\/25:hover { border-color: var(--filo); }
+.border-indigo-400\/30 { border-color: var(--filo); }
+.hover\:border-indigo-400\/30:hover { border-color: var(--filo); }
+.border-cyan-400\/40 { border-color: var(--filo); }
+.hover\:border-cyan-400\/40:hover { border-color: var(--filo); }
+.text-gray-200 { color: var(--luce-tenue); }
+.text-gray-300 { color: var(--luce-tenue); }
+.text-gray-400 { color: var(--fumo); }
+.text-gray-500 { color: var(--fumo); }
+.text-pink-300 { color: var(--accento-chiaro); }
+.text-pink-400 { color: var(--accento-chiaro); }
+.text-cyan-300 { color: #67E8F9; }
+.text-cyan-400 { color: #67E8F9; }
+.shadow-lg { box-shadow: none; }
+.shadow-xl { box-shadow: none; }
+.shadow-2xl { box-shadow: none; }
+.shadow-inner { box-shadow: none; }
+.shadow-pink-500\/30 { box-shadow: none; }
+.shadow-pink-600\/30 { box-shadow: none; }
+.shadow-pink-500\/20 { box-shadow: none; }
+.shadow-emerald-600\/25 { box-shadow: none; }
+.shadow-amber-500\/20 { box-shadow: none; }
+.rounded-3xl { border-radius: var(--r-medio); }
+.rounded-2xl { border-radius: 10px; }

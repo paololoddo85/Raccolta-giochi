@@ -19,6 +19,7 @@
             'hintfake-partita-in-corso': 'partita'
         },
         // Vecchia pagina cinestar_il_gioco_dei_film.html
+        // (Pellicola; le chiavi "cinestar" restano come nome interno)
         cinestar: {
             'cinestar_played_movies_v1': 'film-giocati'
         },

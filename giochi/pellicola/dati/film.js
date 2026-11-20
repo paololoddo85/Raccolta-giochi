@@ -1,5 +1,5 @@
 /*
- * CineStar - catalogo dei film inclusi nel gioco (usati anche senza connessione).
+ * Pellicola (prima "CineStar") - catalogo dei film inclusi nel gioco (usati anche senza connessione).
  *
  * film: id fisso, itTitle (titolo italiano), originalTitle (titolo originale o internazionale,
  *       usato per cercare la locandina), year, category ("classic", "modern", "italian"),
