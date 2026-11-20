@@ -52,6 +52,15 @@ const { apri, ok, BASE, SHOTS } = require('./comune');
     await page.waitForSelector('#setup-screen:not(.hidden)');
     ok(await page.evaluate(() => window.__segno === undefined && localStorage.getItem('rg-cinestar-partita') === null), 'pagina ridata dalla memoria dopo "Azzera": si ricarica pulita, la partita non torna');
     esterne.length = richiestePrima;
+    // Stesso caso in Cinquina con una partita solo ripresa (nessun turno nuovo, quindi nessun salvataggio)
+    await page.goto(BASE + 'menu.css');
+    await page.evaluate(() => localStorage.setItem('rg-hintfake-partita', JSON.stringify({ v: 1, savedAt: Date.now(), mode: 'adulti', includeHot: false, teams: [{ name: 'A', score: 3, turnsPlayed: 1 }, { name: 'B', score: 1, turnsPlayed: 1 }], activeTeamIdx: 0, totalTurnsPlayed: 2, wheelSlots: [null, null, null, null, null], history: [], lastTurnUndo: null })));
+    await page.goto(BASE + 'giochi/cinquina/');
+    await page.click('#resume-box [data-azione="riprendi"]');
+    await page.evaluate(() => { window.__segno = 'vecchia'; localStorage.removeItem('rg-hintfake-partita'); });
+    await Promise.all([page.waitForNavigation({ timeout: 10000 }), page.evaluate(() => window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true })))]);
+    await page.waitForSelector('#setup-screen:not(.hidden)');
+    ok(await page.evaluate(() => window.__segno === undefined && localStorage.getItem('rg-hintfake-partita') === null), 'Cinquina con partita solo ripresa: dopo "Azzera" si ricarica pulita');
     await page.goto(BASE);
     for (const w of [320, 412]) { await page.setViewportSize({ width: w, height: 800 }); const sw = await page.evaluate(() => document.documentElement.scrollWidth); ok(sw <= w, `nessuno scorrimento orizzontale a ${w}px`); }
     await page.setViewportSize({ width: 360, height: 780 });

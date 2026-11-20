@@ -65,8 +65,7 @@
     // "Partita in corso" sulle scatole dei giochi che hanno un salvataggio
     function segnaPartite() {
         document.querySelectorAll('.scatola[data-gioco]').forEach(a => {
-            const dati = RG.archivio.spazio(a.dataset.gioco).leggi('partita', null);
-            const salvata = !!dati && typeof dati === 'object' && typeof dati.v === 'number'; // salvataggio valido
+            const salvata = typeof RG.archivio.spazio(a.dataset.gioco).leggi('partita', null)?.v === 'number'; // salvataggio valido
             a.querySelector('.in-corso').hidden = !salvata;
             const azzera = document.querySelector(`.azzera[data-gioco="${a.dataset.gioco}"]`);
             if (azzera) azzera.hidden = !salvata;
