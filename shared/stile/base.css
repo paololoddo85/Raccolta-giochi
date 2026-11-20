@@ -106,3 +106,24 @@
     .rg-finestra { animation: none; }
     .rg-toast { transition: none; }
 }
+
+/* Avviso "Nuova versione disponibile — tocca per aggiornare" (shared/js/aggiornamento.js) */
+.rg-aggiorna {
+    position: fixed; left: 0; right: 0; top: 0; z-index: 110;
+    display: flex; align-items: stretch; gap: 1px;
+    padding-top: env(safe-area-inset-top, 0px);
+    background: var(--rg-accento); color: var(--rg-su-accento);
+    font-family: var(--rg-font);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.55);
+    animation: rg-scende .3s ease-out;
+}
+.rg-aggiorna button {
+    border: 0; background: none; color: inherit; font: inherit; font-family: var(--rg-font);
+    min-height: 52px; cursor: pointer; touch-action: manipulation;
+}
+.rg-aggiorna-tocca { flex: 1; padding: 8px 16px; font-size: 14px; text-align: left; line-height: 1.35; }
+.rg-aggiorna-tocca strong { font-weight: 900; }
+.rg-aggiorna-dopo { padding: 0 16px; font-size: 13px; font-weight: 700; opacity: .75; border-left: 1px solid currentColor !important; }
+.rg-aggiorna button:focus-visible { outline: 3px solid var(--rg-su-accento); outline-offset: -4px; }
+@keyframes rg-scende { from { transform: translateY(-100%); } to { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .rg-aggiorna { animation: none; } }

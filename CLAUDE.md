@@ -34,7 +34,10 @@ Sito statico con giochi da festa da usare sul telefono (un telefono solo che pas
 ## Struttura
 
 ```
-index.html  menu.css  menu.js      menù della raccolta ("Chi gioca stasera", scatole dei giochi, suoni)
+index.html  menu.css  menu.js      menù della raccolta ("Chi gioca stasera", scatole dei giochi, suoni, versione)
+manifest.webmanifest               app installabile: nome, icone, start_url e scope "./", scorciatoie ai giochi
+sw.js                              service worker: VERSIONE + elenco FILE salvati offline (deve stare in radice)
+icone/                             icone dell'app (192, 512, maskable, apple-touch, favicon)
 HINT_FAKE.html                     vecchi indirizzi → rinvio automatico a giochi/<nome>/
 cinestar_il_gioco_dei_film.html    (non cancellarli: sono nei preferiti e nelle app installate)
 hitstar_il_gioco_della_musica.html
@@ -44,6 +47,7 @@ shared/
   stile/tailwind-sorgente.css      da dove si rigenera tailwind.css
   stile/base.css                   componenti comuni: finestre, notifiche, "Partita in corso", tasto ←
   js/base.js                       spazio globale RG, utilità, RG.archivio (localStorage)
+  js/aggiornamento.js              registra sw.js, avviso "Nuova versione disponibile — tocca per aggiornare"
   js/migrazioni.js                 copia dei dati dalle vecchie pagine alle chiavi nuove
   js/squadre.js                    "Chi gioca stasera": 6 nomi condivisi
   js/timer.js                      RG.Timer, schermo sempre acceso (Wake Lock), RG.vibra
@@ -145,8 +149,23 @@ invece la schermata iniziale con il riquadro "Partita in corso" (Riprendi / Scar
    (chiave `partita`, così il menù mostra "Partita in corso"), `RG.squadre.nomi(n, predefiniti)` per i nomi.
 5. Ridefinisci le variabili `--rg-*` in `stile.css` con i colori del gioco.
 6. Aggiungi la scatola del gioco in `index.html` (classe `scatola`, `data-gioco="<nome>"`) e il suo colore in `menu.css`.
-7. Aggiungi i file nuovi alla lista del service worker e alza il suo numero di versione (dalla fase 4).
+7. Aggiungi i file nuovi all'elenco `FILE` di `sw.js` (anche la cartella `giochi/<nome>/`), alza `VERSIONE`
+   e aggiungi la scorciatoia in `manifest.webmanifest`. Carica `../../shared/js/aggiornamento.js` dopo `base.js`
+   e collega manifest e icone nella `<head>` come negli altri giochi.
 8. Aggiorna questo file e prova tutto nel browser.
+
+## App installabile, offline e aggiornamenti (PWA)
+
+- `manifest.webmanifest` e `sw.js` stanno nella radice; `start_url` e `scope` sono `./`, cioè la cartella del sito.
+- Ogni pagina carica `shared/js/aggiornamento.js`, che registra `sw.js` ricavando la cartella del sito dalla sua posizione.
+- Al primo accesso il service worker salva tutti i file dell'elenco `FILE`; poi i file del sito arrivano dalla cache
+  (anche offline). Le richieste verso altri siti (iTunes, anteprime audio, locandine, Wikipedia…) non passano dalla cache.
+- **A ogni rilascio** (ogni pull request che cambia file del sito):
+  1. alza `VERSIONE` in `sw.js` (`'1'` → `'2'`…): senza, i telefoni continuano a usare i file vecchi;
+  2. se hai aggiunto, tolto o rinominato file, aggiorna l'elenco `FILE` (la prova automatica controlla che sia completo).
+- Quando c'è una versione nuova compare "Nuova versione disponibile — tocca per aggiornare" (con "Dopo" per chiuderlo).
+  Toccando, la pagina si ricarica con la versione nuova e la partita in corso riparte da sola.
+- Nel menù, in fondo, si vede la versione installata ("Versione 1 · funziona anche senza connessione").
 
 ## Tailwind
 
@@ -177,6 +196,8 @@ percorso presi dal file SVG di Font Awesome Free (stesso nome, senza `fa-`).
 - Controlla lo scorrimento orizzontale in **ogni schermata** di ogni gioco (non solo nella prima), a 320 e 360px.
 - CineStar e Hitstar usano servizi online (iTunes, MusicBrainz, Wikidata, Wikipedia): nell'ambiente cloud non sono
   raggiungibili, quindi si provano con risposte finte servite da Playwright (`context.route`), più una prova offline.
+- PWA: elenco `FILE` completo, installabilità (`Page.getInstallabilityErrors` via CDP), tutte le pagine offline con
+  `context.setOffline(true)`, e l'avviso di aggiornamento cambiando `VERSIONE` in una **copia** del sito.
 - Controlla gli screenshot prima di chiudere la fase.
 
 ## Nomi
