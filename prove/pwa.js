@@ -125,6 +125,26 @@ const versioneDi = (testo) => testo.match(/const VERSIONE = '([^']+)';/)[1];
     ok(stati.includes('in-arrivo') && stati.includes('pronta'), 'durante lo scaricamento compare "Aggiornamento in arrivo…", poi "Nuova versione disponibile"');
     await page.click('.rg-aggiorna-dopo');
     ok(!(await page.isVisible('#rg-aggiorna')), '"Dopo" chiude l\'avviso senza aggiornare');
+
+    // Due versioni di fila mentre l'avviso è aperto: il tocco porta all'ultima (non resta bloccato)
+    await page.goto(BASE);
+    await page.waitForSelector('#versione-app:not([hidden])');
+    await page.click('#cerca-aggiornamenti');
+    await page.waitForSelector('#rg-aggiorna[data-stato="pronta"]', { timeout: 15000 });
+    const v3 = `${v2}-ter`;
+    fs.writeFileSync(swCopia, fs.readFileSync(swCopia, 'utf8').replace(`const VERSIONE = '${v2}-bis';`, `const VERSIONE = '${v3}';`));
+    await page.evaluate(() => navigator.serviceWorker.getRegistration().then(r => r.update()));
+    await page.waitForFunction(() => navigator.serviceWorker.getRegistration().then(r => r.waiting && !r.installing), null, { timeout: 15000 });
+    await page.waitForTimeout(500);
+    await Promise.all([page.waitForNavigation({ timeout: 15000 }), page.click('.rg-aggiorna-tocca')]);
+    await page.waitForSelector('#versione-app:not([hidden])');
+    ok(await page.evaluate(() => RG.versioneApp()) === v3, 'due versioni uscite di fila con l\'avviso aperto: il tocco porta all\'ultima');
+
+    // Nessun errore in console nei secondi dopo un controllo riuscito
+    await page.click('#cerca-aggiornamenti');
+    await page.waitForSelector('.rg-toast-successo', { timeout: 15000 });
+    await page.waitForTimeout(9000);
+
     ok(errori.length === 0, 'nessun errore in console' + (errori.length ? ':\n' + errori.join('\n') : ''));
   } catch (e) {
     console.log(e.message, errori); try { console.log('notifiche:', await page.locator('.rg-toast').allTextContents(), 'online:', await page.evaluate(() => navigator.onLine), 'controller:', await page.evaluate(() => !!navigator.serviceWorker.controller)); } catch (x) {} await page.screenshot({ path: SHOTS + 'pwa-errore.png' }); process.exitCode = 1;

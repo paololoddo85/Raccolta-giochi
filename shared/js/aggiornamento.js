@@ -62,9 +62,13 @@
         el.querySelector('.rg-aggiorna-dopo').addEventListener('click', () => el.remove());
     }
 
+    let lavoratoreAvviso = null; // la versione a cui si riferisce l'avviso mostrato
+
     function mostraAvviso(lavoratore) {
         const esistente = document.getElementById('rg-aggiorna');
-        if (esistente && esistente.dataset.stato === 'pronta') return;
+        // Se nel frattempo è arrivata un'altra versione, l'avviso si ricollega a quella nuova
+        if (esistente && esistente.dataset.stato === 'pronta' && lavoratoreAvviso === lavoratore) return;
+        lavoratoreAvviso = lavoratore;
         const el = barra();
         el.dataset.stato = 'pronta';
         el.innerHTML = `
@@ -104,20 +108,31 @@
      *   'aggiornata'  è già l'ultima versione
      *   'trovata'     c'è una versione nuova: compare la barra in alto
      *   'offline'     serve la connessione
+     *   'attendi'     l'app si sta ancora preparando: riprovare tra poco
      *   'non-disponibile'  il browser non permette gli aggiornamenti (es. navigazione privata)
      */
+    const ATTESA = Symbol('attesa');
+    const entro = (promessa, ms) => {
+        let timer;
+        return Promise.race([promessa, new Promise(r => { timer = setTimeout(() => r(ATTESA), ms); })])
+            .finally(() => clearTimeout(timer));
+    };
+
     RG.cercaAggiornamenti = async function () {
-        const reg = await Promise.race([registrazionePronta, new Promise(r => setTimeout(() => r(null), 4000))]);
-        if (reg && reg.waiting && navigator.serviceWorker.controller) { mostraAvviso(reg.waiting); return 'trovata'; }
+        const reg = await entro(registrazionePronta, 10000);
+        const controllata = !!navigator.serviceWorker.controller;
+        if (reg && reg !== ATTESA && reg.waiting && controllata) { mostraAvviso(reg.waiting); return 'trovata'; }
         if (navigator.onLine === false) return 'offline';
+        if (reg === ATTESA) return 'attendi';          // la pagina sta ancora preparando l'app
         if (!reg) return 'non-disponibile';
         // Senza rete il controllo a volte resta appeso: dopo 8 secondi si considera "offline"
-        const tempoScaduto = new Promise((_, no) => setTimeout(() => no(new Error('tempo scaduto')), 8000));
         try {
-            await Promise.race([reg.update(), tempoScaduto]);
+            if (await entro(reg.update(), 8000) === ATTESA) return 'offline';
         } catch (e) {
             return 'offline';
         }
+        // Alla prima installazione non c'è niente da aggiornare: il sito si sta solo salvando sul telefono
+        if (!controllata) return 'aggiornata';
         if (reg.waiting) { mostraAvviso(reg.waiting); return 'trovata'; }
         if (reg.installing) { seguiInstallazione(reg.installing); return 'trovata'; }
         return 'aggiornata';

@@ -27,4 +27,9 @@ if (prima && prima === dopo) {
   console.log(`  ma VERSIONE in sw.js è ancora '${dopo}'. Alzala (es. '${Number(dopo) + 1 || dopo + '-1'}'), altrimenti i telefoni non si aggiornano.`);
   process.exit(1);
 }
+// Con numeri interi la versione deve crescere: tornare a un numero già usato non aggiorna i telefoni
+if (/^\d+$/.test(prima || '') && /^\d+$/.test(dopo || '') && Number(dopo) <= Number(prima)) {
+  console.log(`✗ VERSIONE in sw.js è '${dopo}', ma su ${base} è già '${prima}': deve essere più alta (es. '${Number(prima) + 1}').`);
+  process.exit(1);
+}
 console.log(`✓ VERSIONE alzata: '${prima}' → '${dopo}' (${delSito.length} file del sito cambiati).`);

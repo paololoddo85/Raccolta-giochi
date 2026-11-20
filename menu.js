@@ -101,6 +101,7 @@
         if (esito === 'aggiornata') RG.toast(`Hai già l'ultima versione${versione ? ` (versione ${versione})` : ''}.`, 'successo');
         else if (esito === 'trovata') RG.toast('C\'è una versione nuova: guarda in alto.', 'info');
         else if (esito === 'offline') RG.toast('Serve la connessione per controllare gli aggiornamenti.', 'errore');
+        else if (esito === 'attendi') RG.toast('L\'app si sta ancora preparando: riprova tra qualche secondo.', 'avviso');
         else RG.toast('Questo browser non permette gli aggiornamenti automatici: ricarica la pagina.', 'avviso');
     });
 

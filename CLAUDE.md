@@ -13,6 +13,12 @@ Sito statico con giochi da festa da usare sul telefono (un telefono solo che pas
 - Il proprietario lavora da Claude Code sul web: niente installazioni locali, tutto passa da GitHub.
 - **Piccoli passi**, commit chiari in italiano. Alla fine di ogni fase apri una pull request verso `main`
   con una descrizione semplice di cosa cambia e cosa provare. **Non unire mai le pull request**: lo fa il proprietario.
+- **Prima di aprire ogni pull request** (richiesta del proprietario, vale in ogni sessione), sulle modifiche del ramo:
+  1. `/code-review` — cerca errori; correggi quelli reali e aggiungi una prova che li copra;
+  2. `/security-review` — soprattutto dove entra testo da fuori (import delle carte, nomi, risposte di iTunes ecc.);
+  3. `/simplify` — ripulisce il codice cambiato senza cambiarne il comportamento;
+  poi rilancia `node prove/esegui.js` e scrivi nella pull request cosa hanno trovato le revisioni e cosa è stato corretto.
+  Per le parti grafiche nuove usa anche la skill `frontend-design`.
 - Se una scelta non si può annullare o non è chiara, chiedi prima.
 - Ogni gioco deve continuare a funzionare come prima: nessuna funzione persa.
 - Prima di dire che una fase è finita: prova davvero nel browser (vedi "Come provare").
@@ -185,7 +191,14 @@ invece la schermata iniziale con il riquadro "Partita in corso" (Riprendi / Scar
   2. se hai aggiunto, tolto o rinominato file, aggiorna l'elenco `FILE` (la prova automatica controlla che sia completo).
 - Quando c'è una versione nuova compare "Nuova versione disponibile — tocca per aggiornare" (con "Dopo" per chiuderlo).
   Toccando, la pagina si ricarica con la versione nuova e la partita in corso riparte da sola.
-- Nel menù, in fondo, si vede la versione installata ("Versione 1 · funziona anche senza connessione").
+- Mentre la versione nuova si scarica compare "Aggiornamento in arrivo…"; se nel frattempo ne esce un'altra,
+  l'avviso si ricollega sempre all'ultima.
+- Nel menù, in fondo, si vede la versione installata ("Versione 4 · funziona anche senza connessione") e il pulsante
+  **"Controlla aggiornamenti"** (`RG.cercaAggiornamenti()`): risponde "ultima versione", "versione nuova trovata",
+  "serve la connessione" o "l'app si sta ancora preparando".
+- Offline, un indirizzo che non è tra i file salvati **rimanda** al menù (al suo indirizzo, così stili e script si trovano).
+- Su **iPhone** l'app installata ha una memoria separata da Safari: cancellare l'icona cancella partite, nomi e carte
+  importate. Su Android la memoria è condivisa con Chrome.
 
 ## Tailwind
 
@@ -221,17 +234,27 @@ con uno schermo da 360×780, blocca le richieste verso internet e salva gli scre
 
 | Prova | Cosa controlla |
 |---|---|
+| `carte` | mazzo di Cinquina: abilità, 5 oggetti, parola proibita non ripetuta, temi senza doppioni |
 | `menu` | nomi condivisi, "Partita in corso", interruttore suoni |
 | `cinquina` | vecchi indirizzi, migrazione, partita completa, annulla, ripresa, timer, import, muto |
 | `pellicola offline` / `online` | partita completa, indizi, ripresa, annulla (3 casi); online con risposte finte |
 | `giradischi`, `giradischi-offline` | ascolto, sfida, gettoni, bonus Pro, annulla, ripresa, rete persa, avvio senza internet |
 | `larghezze` | nessuno scorrimento orizzontale in ogni schermata, a 320 e 360px (anche con pellicola lunga) |
-| `pwa` | elenco `FILE` completo, installabilità, tutte le pagine offline, avviso di nuova versione (su una copia del sito) |
+| `pwa` | elenco `FILE` completo, installabilità, pagine offline, avviso e "Controlla aggiornamenti" (su una copia del sito) |
 
 - iTunes, MusicBrainz, Wikidata e Wikipedia non sono raggiungibili dall'ambiente cloud: le prove usano le risposte finte
   di `prove/finti-pellicola.js` e `prove/finti-giradischi.js` (`context.route`).
 - Se aggiungi una funzione, aggiungi il suo controllo alla prova del gioco. Guarda gli screenshot prima di chiudere una fase.
 - `prove/` non va nell'elenco `FILE` del service worker (la prova `pwa` la esclude).
+
+### Prove automatiche su GitHub (CI)
+
+`.github/workflows/prove.yml` lancia da solo, a ogni pull request e a ogni unione in `main`, tutte le prove
+(Chromium installato da Playwright) e allega gli screenshot all'esecuzione. In ogni pull request
+`prove/controlla-versione.js` blocca la pull request se cambiano file del sito ma `VERSIONE` in `sw.js` non sale
+(non contano `prove/`, `.github/`, i `.md`, `.gitignore` e la sorgente di Tailwind). La pubblicazione del sito resta
+quella di GitHub Pages: il flusso delle prove non pubblica niente. Se una prova fallisce, la pull request mostra una X
+rossa: va corretta prima di unire.
 
 ## Nomi
 
