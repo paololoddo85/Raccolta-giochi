@@ -83,6 +83,12 @@
         RG.suoni.bip(660, 0.08);
     });
 
+    // Versione installata sul telefono (dal service worker): utile per capire se l'aggiornamento è arrivato
+    RG.versioneApp().then(v => {
+        const el = document.getElementById('versione-app');
+        if (v) { el.textContent = `Versione ${v} · funziona anche senza connessione`; el.hidden = false; }
+    });
+
     disegnaNomi();
     segnaPartite();
     // Tornando indietro dal gioco la pagina può arrivare dalla cache del browser: si aggiorna

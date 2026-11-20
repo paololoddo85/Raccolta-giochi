@@ -6,6 +6,13 @@
     <title>Combriccola</title>
     <meta name="description" content="Giochi da festa da fare con il telefono: HINT FAKE, CineStar e Hitstar.">
     <meta name="theme-color" content="#24142e">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" type="image/png" sizes="32x32" href="icone/favicon-32.png">
+    <link rel="apple-touch-icon" href="icone/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Combriccola">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="stylesheet" href="shared/stile/font.css">
     <link rel="stylesheet" href="shared/stile/base.css">
     <link rel="stylesheet" href="menu.css">
@@ -99,10 +106,12 @@
                 <span class="interruttore-segno" aria-hidden="true"></span>
                 <span class="interruttore-testo">Suoni accesi</span>
             </button>
+            <p id="versione-app" class="versione" hidden></p>
         </footer>
     </main>
 
     <script src="shared/js/base.js"></script>
+    <script src="shared/js/aggiornamento.js"></script>
     <script src="shared/js/migrazioni.js"></script>
     <script src="shared/js/squadre.js"></script>
     <script src="shared/js/suoni.js"></script>
