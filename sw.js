@@ -11,7 +11,7 @@
  * Quando la versione cambia, nelle pagine compare "Nuova versione disponibile — tocca per aggiornare"
  * (shared/js/aggiornamento.js). Il service worker nuovo si attiva solo dopo quel tocco.
  */
-const VERSIONE = '6';
+const VERSIONE = '7';
 const CACHE = `combriccola-v${VERSIONE}`;
 
 // Percorsi relativi alla cartella del sito (dove sta questo file)

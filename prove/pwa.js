@@ -75,6 +75,12 @@ const versioneDi = (testo) => testo.match(/const VERSIONE = '([^']+)';/)[1];
     await page.click('text=Registra Punti e Gira la Ruota');
     await page.waitForFunction(() => state.totalTurnsPlayed === 1 && !state.animating);
     ok(true, 'offline: Cinquina si gioca');
+    // dal menù, offline, toccando Pellicola l'avviso compare subito e si resta nel menù
+    await page.goto(BASE);
+    await page.evaluate(() => Object.defineProperty(navigator, 'onLine', { get: () => false, configurable: true }));
+    await page.click('.scatola-cine');
+    await page.waitForSelector('.rg-toast-errore', { timeout: 10000 });
+    ok((await page.textContent('.rg-toast-errore')).includes('Pellicola ha bisogno di internet') && page.url() === BASE, 'offline: toccando Pellicola nel menù compare l\'avviso e si resta nel menù');
     await page.goto(BASE + 'giochi/pellicola/');
     await page.click('#start-game-btn');
     await page.waitForSelector('.rg-toast-errore', { timeout: 30000 });

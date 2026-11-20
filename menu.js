@@ -72,6 +72,15 @@
         });
     }
 
+    // Giochi "solo online" (data-solo-online): senza connessione non si apre il gioco,
+    // l'avviso compare subito qui nel menù. Il gioco controlla comunque da sé (rete lenta, scorciatoie).
+    document.querySelectorAll('.scatola[data-solo-online]').forEach(a => a.addEventListener('click', (e) => {
+        if (navigator.onLine !== false) return;
+        e.preventDefault();
+        const nome = a.querySelector('.scatola-nome').textContent;
+        RG.toast(`${nome} ha bisogno di internet: controlla la connessione e riprova.`, 'errore');
+    }));
+
     // "Azzera la partita in corso": cancella solo la partita salvata di quel gioco.
     // Cosa resta, per gioco (i nomi di "Chi gioca stasera" restano sempre)
     const RESTA = {
