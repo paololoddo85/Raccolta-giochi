@@ -17,6 +17,14 @@
             'hintfake-carte-uscite-adulti': 'carte-uscite-adulti',
             'hintfake-carte-importate': 'carte-importate',
             'hintfake-partita-in-corso': 'partita'
+        },
+        // Vecchia pagina cinestar_il_gioco_dei_film.html
+        cinestar: {
+            'cinestar_played_movies_v1': 'film-giocati'
+        },
+        // Vecchia pagina hitstar_il_gioco_della_musica.html
+        hitstar: {
+            'hitstar_played_songs_v1': 'brani-giocati'
         }
     };
 
