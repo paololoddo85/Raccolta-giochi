@@ -10,7 +10,7 @@
     'use strict';
 
     const MAPPE = {
-        // Vecchia pagina HINT_FAKE.html
+        // Vecchia pagina HINT_FAKE.html (Cinquina; le chiavi "hintfake" restano come nome interno)
         hintfake: {
             'hintfake-impostazioni': 'impostazioni',
             'hintfake-carte-uscite-bambini': 'carte-uscite-bambini',
@@ -22,7 +22,7 @@
         cinestar: {
             'cinestar_played_movies_v1': 'film-giocati'
         },
-        // Vecchia pagina hitstar_il_gioco_della_musica.html
+        // Vecchia pagina hitstar_il_gioco_della_musica.html (Giradischi; le chiavi "hitstar" restano come nome interno)
         hitstar: {
             'hitstar_played_songs_v1': 'brani-giocati'
         }

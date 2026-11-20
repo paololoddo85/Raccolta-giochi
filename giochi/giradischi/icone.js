@@ -1,5 +1,5 @@
 /*
- * Hitstar - icone incluse nel sito (al posto di Font Awesome caricato da internet).
+ * Giradischi - icone incluse nel sito (al posto di Font Awesome caricato da internet).
  * Le icone sono di Font Awesome Free 7 (https://fontawesome.com), licenza CC BY 4.0.
  *
  * Nel codice resta la stessa scrittura di prima: <i class="fa-solid fa-play"></i>.

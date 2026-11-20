@@ -1,5 +1,5 @@
 /*
- * Hitstar - logica del gioco.
+ * Giradischi (prima "Hitstar") - logica del gioco.
  * Le liste di ricerca stanno in dati/ricerche.js; le parti comuni (memoria, nomi, suoni,
  * finestre, notifiche, salvataggio) arrivano da shared/js/ tramite l'oggetto globale RG.
  * Le icone <i class="fa-…"> sono disegnate da icone.js.
@@ -42,12 +42,12 @@ function markSongAsPlayed(song) {
 }
 
 /* ================= CATALOGO LIVE ITUNES (liste in dati/ricerche.js) ================= */
-const LIVE_SEARCH_POOLS = window.HITSTAR_DATI.ricerche;
+const LIVE_SEARCH_POOLS = window.GIRADISCHI_DATI.ricerche;
 // Raccolte, compilation, remaster o versioni non originali nel titolo dell'ALBUM (parole intere)
-const BANNED_ALBUM_KEYWORDS = window.HITSTAR_DATI.paroleAlbumVietate;
+const BANNED_ALBUM_KEYWORDS = window.GIRADISCHI_DATI.paroleAlbumVietate;
 // Nel titolo del BRANO si controllano solo le "etichette" di versione: quello che sta
 // tra parentesi/quadre o dopo un trattino ("Song - Live", "Song (2011 Remaster)").
-const BANNED_TRACK_VERSION_KEYWORDS = window.HITSTAR_DATI.paroleVersioneVietate;
+const BANNED_TRACK_VERSION_KEYWORDS = window.GIRADISCHI_DATI.paroleVersioneVietate;
 
 function escapeRegex(str) {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -680,7 +680,7 @@ async function startGame() {
 
         const liveTracks = await fetchLiveItunesPool(genreFilter);
         if (liveTracks.length === 0) {
-            showToast("Impossibile caricare i brani: Hitstar ha bisogno di internet. Controlla la connessione e riprova.", "error");
+            showToast("Impossibile caricare i brani: Giradischi ha bisogno di internet. Controlla la connessione e riprova.", "error");
             return;
         }
 
@@ -959,7 +959,7 @@ function lockActivePlayerPowers() {
     if (buyBtn) buyBtn.disabled = true;
 }
 
-/* ================= POTERI GETTONI HITSTAR ================= */
+/* ================= POTERI DEI GETTONI ================= */
 function useTokenSkipSong() {
     const activePlayer = gameState.players[gameState.currentPlayerIndex];
     if (activePlayer.tokens < 1 || gameState.revealed || gameState.challenge || !gameState.currentCard) return;
@@ -1007,7 +1007,7 @@ async function useTokenBuyCard() {
     saveGame();
 }
 
-/* ================= SFIDA "HITSTAR!" (RUBA LA CARTA) ================= */
+/* ================= SFIDA "SCRATCH!" (RUBA LA CARTA) ================= */
 function openChallengeModal() {
     // Una sola sfida per turno, e solo prima della rivelazione
     if (gameState.challenge || gameState.revealed || gameState.selectedSlotIndex === null) return;
@@ -1059,7 +1059,7 @@ function confirmChallenge() {
     };
 
     closeChallengeModal();
-    showToast(`⚡ ${challenger.name} urla "HITSTAR!" e contesta il piazzamento!`, "warning");
+    showToast(`⚡ ${challenger.name} urla "SCRATCH!" e contesta il piazzamento!`, "warning");
     // Niente seconda sfida, niente cambio brano o acquisti: ora si può solo confermare
     document.getElementById('btn-open-challenge').disabled = true;
     lockActivePlayerPowers();

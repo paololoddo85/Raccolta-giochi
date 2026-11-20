@@ -1,7 +1,7 @@
 {
   "name": "Combriccola",
   "short_name": "Combriccola",
-  "description": "Giochi da festa da fare con un telefono solo: HINT FAKE, CineStar e Hitstar.",
+  "description": "Giochi da festa da fare con un telefono solo: Cinquina, CineStar e Giradischi.",
   "lang": "it",
   "dir": "ltr",
   "id": "./",
@@ -18,8 +18,8 @@
     { "src": "icone/icona-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
-    { "name": "HINT FAKE", "url": "giochi/hint-fake/", "icons": [{ "src": "icone/icona-192.png", "sizes": "192x192" }] },
+    { "name": "Cinquina", "url": "giochi/cinquina/", "icons": [{ "src": "icone/icona-192.png", "sizes": "192x192" }] },
     { "name": "CineStar", "url": "giochi/cinestar/", "icons": [{ "src": "icone/icona-192.png", "sizes": "192x192" }] },
-    { "name": "Hitstar", "url": "giochi/hitstar/", "icons": [{ "src": "icone/icona-192.png", "sizes": "192x192" }] }
+    { "name": "Giradischi", "url": "giochi/giradischi/", "icons": [{ "src": "icone/icona-192.png", "sizes": "192x192" }] }
   ]
 }

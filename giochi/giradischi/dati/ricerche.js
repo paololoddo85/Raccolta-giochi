@@ -1,5 +1,5 @@
 /*
- * Hitstar - liste usate per pescare i brani dal catalogo online di iTunes.
+ * Giradischi (prima "Hitstar") - liste usate per pescare i brani dal catalogo online di iTunes.
  * Il gioco non ha brani inclusi: per giocare serve la connessione.
  *
  * ricerche: ricerche iTunes per catalogo ("all", "rock", "italian", "7080", "9000", "modern").
@@ -9,7 +9,7 @@
  * paroleVersioneVietate: parole che, tra parentesi o dopo " - " nel titolo del BRANO,
  *           indicano versioni live, remix, cover…
  */
-window.HITSTAR_DATI = {
+window.GIRADISCHI_DATI = {
   ricerche: {
       all: [
           "top hits 1960s", "top hits 1970s", "number one hits 70s",
