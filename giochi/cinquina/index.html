@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>HINT FAKE · Combriccola</title>
+    <title>Cinquina · Combriccola</title>
     <meta name="theme-color" content="#4d9496">
     <link rel="manifest" href="../../manifest.webmanifest">
     <link rel="icon" type="image/png" sizes="32x32" href="../../icone/favicon-32.png">
@@ -18,7 +18,7 @@
 </head>
 <body class="min-h-screen flex flex-col pb-12">
 
-    <!-- HEADER PRINCIPALE STILE HINT -->
+    <!-- INTESTAZIONE -->
     <header class="bg-[#4d9496] text-white sticky top-0 z-30 shadow-md">
         <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
             <div class="flex items-center gap-2.5 min-w-0">
@@ -26,10 +26,10 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
                 </a>
                 <div class="w-10 h-10 shrink-0 rounded-2xl bg-[#1e2024] text-white flex items-center justify-center font-black text-sm tracking-tighter shadow-inner border border-white/15">
-                    HF
+                    5
                 </div>
                 <div>
-                    <h1 class="text-base sm:text-lg font-black leading-tight whitespace-nowrap">HINT FAKE</h1>
+                    <h1 class="text-base sm:text-lg font-black leading-tight whitespace-nowrap">Cinquina</h1>
                     <p id="header-deck-info" class="text-[11px] text-white/85 font-medium mt-0.5 whitespace-nowrap">Gioco di squadra</p>
                 </div>
             </div>
@@ -61,9 +61,9 @@
         <section id="setup-screen" class="bg-white rounded-3xl p-6 sm:p-8 shadow-md border border-slate-200 animate-enter">
             <div class="text-center max-w-lg mx-auto mb-6">
                 <span class="inline-block text-xs font-black uppercase tracking-widest text-[#4d9496] bg-[#e6f2f2] px-3 py-1 rounded-full mb-2">Preparazione Partita</span>
-                <h2 class="text-2xl sm:text-3xl font-black text-slate-900">Pronti a giocare a HINT FAKE?</h2>
+                <h2 class="text-2xl sm:text-3xl font-black text-slate-900">Pronti a giocare a Cinquina?</h2>
                 <p class="text-xs sm:text-sm text-slate-500 mt-1.5">
-                    Dividetevi in <strong>due squadre</strong>. Vince la prima squadra che raggiunge <strong>20 punti o più</strong> a parità di turni giocati!
+                    Due squadre, una carta a testa per turno: fate indovinare <strong>cinque oggetti in 90 secondi</strong>. Si arriva a <strong>20 punti</strong>, sempre con lo stesso numero di turni giocati.
                 </p>
             </div>
 
@@ -112,12 +112,12 @@
             <div class="bg-[#e6f2f2]/70 border border-[#4d9496]/30 rounded-2xl p-4 max-w-xl mx-auto mb-6 text-xs text-slate-700 space-y-1.5">
                 <div class="font-black text-[#366f71] uppercase tracking-wider flex items-center gap-1.5">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    <span>Come funziona la Ruota a 5 Slot</span>
+                    <span>La ruota in breve</span>
                 </div>
-                <p>• All'inizio ci sono sempre <strong>3 carte</strong> inserite nei 5 slot intorno alla ruota.</p>
-                <p>• <strong>Slot Bonus Nero (+1):</strong> facoltativo, se lo scegli ottieni +1 punto extra.</p>
-                <p>• <strong>Slot Bonus Blu (+1):</strong> <span class="underline font-bold text-[#2b6b87]">OBBLIGATORIO</span>! Se c'è una carta qui devi sceglierla e ottieni +1 punto extra.</p>
-                <p>• <strong>Slot Freccia:</strong> a fine turno la ruota gira in senso orario e qui entra la nuova carta.</p>
+                <p>• Sulla ruota ci sono sempre <strong>3 carte</strong> da scegliere, sparse nei 5 spicchi.</p>
+                <p>• <strong>Spicchio nero (+1):</strong> se prendete la carta che sta lì, guadagnate un punto in più.</p>
+                <p>• <strong>Spicchio blu (+1):</strong> quando c'è una carta, <span class="underline font-bold text-[#2b6b87]">dovete prendere quella</span>, e vale anch'essa un punto in più.</p>
+                <p>• <strong>Freccia in alto:</strong> dopo ogni turno la ruota avanza di uno spicchio e lì arriva una carta nuova.</p>
             </div>
 
             <div class="text-center">
@@ -126,7 +126,6 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
                 </button>
             </div>
-            <p class="text-[10px] text-slate-400 text-center mt-5 max-w-md mx-auto leading-relaxed">HINT FAKE è una versione amatoriale e non ufficiale, ispirata al gioco da tavolo HINT. Non è affiliata ai suoi autori né all'editore.</p>
         </section>
 
         <!-- AREA DI GIOCO ATTIVA (NASCOSTA DURANTE SETUP) -->
@@ -163,13 +162,13 @@
             <!-- ===================================================================== -->
             <section id="step-1-wheel-view" class="animate-enter space-y-4">
                 
-                <!-- Avviso Carta Obbligatoria se presente nello Slot Bonus Blu -->
+                <!-- Avviso carta obbligatoria nello spicchio blu -->
                 <div id="obligatory-banner" class="hidden bg-[#4696b8] text-white p-3.5 rounded-2xl shadow-md flex items-center justify-between gap-3 obligatory-pulse">
                     <div class="flex items-center gap-3">
                         <div class="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center font-black text-sm shrink-0">+1</div>
                         <div>
-                            <h3 class="font-black text-sm uppercase tracking-wide">Carta Obbligatoria nello Slot Bonus Blu!</h3>
-                            <p class="text-xs text-white/90">Come da regolamento, dovete scegliere questa carta e ricevete subito <strong>+1 punto bonus</strong>.</p>
+                            <h3 class="font-black text-sm uppercase tracking-wide">Carta obbligatoria nello spicchio blu</h3>
+                            <p class="text-xs text-white/90">Tocca a voi prendere questa carta: vale <strong>1 punto in più</strong>.</p>
                         </div>
                     </div>
                 </div>
@@ -203,7 +202,7 @@
             <section id="step-2-privacy-view" class="hidden animate-enter">
                 <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-md border border-slate-200 max-w-lg mx-auto text-center">
                     <span id="privacy-slot-pill" class="inline-block text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full bg-slate-100 text-slate-600 mb-4">
-                        Slot Selezionato
+                        Carta scelta
                     </span>
 
                     <div class="card-back-black text-white rounded-3xl p-6 mb-6 text-left relative overflow-hidden">
@@ -268,7 +267,7 @@
                                     ABILITÀ
                                 </span>
                                 <span id="play-slot-bonus-tag" class="hidden text-[10px] font-black uppercase tracking-wider bg-white text-slate-900 px-2.5 py-1 rounded-full">
-                                    +1 BONUS SLOT
+                                    +1 BONUS
                                 </span>
                             </div>
                             <h3 id="play-card-theme" class="text-lg sm:text-xl font-black uppercase tracking-tight">Tema Carta</h3>
@@ -295,7 +294,7 @@
 
                         <!-- Riepilogo Parziale Round -->
                         <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
-                            <span id="bonus-active-pill" class="text-xs font-bold text-slate-500">Slot senza bonus</span>
+                            <span id="bonus-active-pill" class="text-xs font-bold text-slate-500">Carta senza bonus</span>
                             <div class="flex items-center gap-2">
                                 <span class="text-xs font-bold text-slate-500">Punteggio parziale:</span>
                                 <span id="active-round-score-preview" class="text-2xl font-black text-slate-900">0 pt</span>
@@ -453,13 +452,13 @@
     <!-- MODALI (REGOLAMENTO COMPLETO, REGOLA ABILITÀ, SCHEMA RUOTA, VITTORIA)  -->
     <!-- ===================================================================== -->
 
-    <!-- MODAL 1: REGOLAMENTO UFFICIALE COMPLETO -->
+    <!-- MODAL 1: REGOLAMENTO COMPLETO -->
     <div id="rules-modal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl max-h-[88vh] overflow-y-auto">
             <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
                 <div>
                     <span class="text-[10px] font-black uppercase tracking-widest text-[#4d9496]">Regole</span>
-                    <h3 class="text-xl font-black text-slate-900">Regolamento HINT FAKE</h3>
+                    <h3 class="text-xl font-black text-slate-900">Come si gioca a Cinquina</h3>
                 </div>
                 <button onclick="closeModal('rules-modal')" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -468,40 +467,41 @@
 
             <div class="space-y-4 text-xs sm:text-sm text-slate-600 leading-relaxed">
                 <div class="bg-[#e6f2f2]/60 p-4 rounded-2xl border border-[#4d9496]/30">
-                    <h4 class="font-black text-[#366f71] uppercase text-xs mb-1">Regola Generale</h4>
-                    <p>Si può comunicare con la propria squadra per confermare o rifiutare le proposte. Potete comunicare numeri e simboli, ma <strong>non potete comunicare alcuna lettera</strong>. Se la squadra attiva viola il regolamento, non ottiene punti per l'oggetto indovinato (ma la squadra avversaria può comunque tentare di indovinarlo allo scadere del tempo).</p>
+                    <h4 class="font-black text-[#366f71] uppercase text-xs mb-1">Il turno</h4>
+                    <p>La squadra di turno sceglie una carta sulla ruota e decide chi farà da <strong>suggeritore</strong>. Solo lui guarda la carta: c'è un tema, il modo in cui dare gli indizi e sei parole. Cinque sono da far indovinare ai compagni entro <strong>90 secondi</strong>; la sesta, la <strong>parola proibita</strong>, è la risposta più scontata del tema e conviene che nessuno della squadra la dica.</p>
+                    <p class="mt-2">I compagni possono tirare a indovinare quante volte vogliono. Il suggeritore, oltre a seguire il modo indicato sulla carta, può fare sì o no con la testa e mostrare numeri o simboli con le dita, ma <strong>mai lettere</strong>. Se infrange una regola, l'oggetto indovinato in quel modo non dà punti alla sua squadra; resta però libero per la replica degli avversari.</p>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
                         <span class="font-black text-sky-700 uppercase text-xs block mb-1">Parlare</span>
-                        Non potete gesticolare in nessun modo o pronunciare gli oggetti. Non sono permesse traduzioni o rime.
+                        Solo parole, mani ferme. Non si può dire l'oggetto, né tradurlo in un'altra lingua, né suggerirlo con una rima.
                     </div>
                     <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
                         <span class="font-black text-emerald-700 uppercase text-xs block mb-1">Mimare</span>
-                        Non potete emettere alcun suono, ma potete usare tutto il corpo per mimare.
+                        Muto come un pesce: si usa tutto il corpo, ma senza nessun suono.
                     </div>
                     <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
                         <span class="font-black text-fuchsia-700 uppercase text-xs block mb-1">Canticchiare</span>
-                        Potete canticchiare, fischiettare ed emettere suoni senza senso come "la-di-da". Potete canticchiare le parole o gli strumenti musicali e anche canzoni non presenti sulla carta, se può essere d'aiuto. Non potete assolutamente parlare o gesticolare.
+                        Solo suoni: canticchiare, fischiare, fare versi o "na-na-na", anche su canzoni che non c'entrano con la carta, se aiutano. Niente parole e niente gesti.
                     </div>
                     <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
                         <span class="font-black text-amber-700 uppercase text-xs block mb-1">Disegnare</span>
-                        Potete disegnare sul blocchetto. Non potete assolutamente emettere alcun suono o fare alcun gesto.
+                        Solo matita e foglio: niente parole, niente suoni e niente gesti.
                     </div>
                 </div>
 
                 <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                    <h4 class="font-black text-slate-900 uppercase text-xs mb-1.5">Calcolo dei Punti</h4>
+                    <h4 class="font-black text-slate-900 uppercase text-xs mb-1.5">I punti</h4>
                     <ul class="space-y-1">
-                        <li>• <strong>Squadra Attiva:</strong> +1 punto per ogni oggetto indovinato; +1 punto bonus se la carta era in uno slot bonus (Nero o Blu); <strong>-2 punti</strong> se propone l'oggetto proibito.</li>
-                        <li>• <strong>Squadra Avversaria (a tempo scaduto):</strong> +1 punto se indovina un oggetto rimanente; per l'oggetto proibito <strong>+2 punti</strong> se lo indovina oppure <strong>-2 punti</strong> se lo sbaglia. Oggetto normale e proibito si possono tentare entrambi.</li>
+                        <li>• <strong>Squadra di turno:</strong> 1 punto per ogni oggetto indovinato, 1 punto in più se la carta veniva dallo spicchio nero o da quello blu, <strong>2 punti in meno</strong> se qualcuno della squadra dice la parola proibita.</li>
+                        <li>• <strong>Replica degli avversari</strong>, a tempo scaduto: possono provare a indovinare uno degli oggetti rimasti (1 punto) e anche la parola proibita, che vale <strong>2 punti</strong> se è giusta e ne toglie <strong>2</strong> se è sbagliata. I due tentativi si possono fare entrambi.</li>
                     </ul>
                 </div>
 
                 <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-950">
-                    <h4 class="font-black uppercase text-xs mb-1">Chi è il Vincitore?</h4>
-                    Per vincere la partita, una squadra deve raggiungere <strong>20 punti o più</strong> dopo che entrambe le squadre hanno giocato lo stesso numero di turni. In caso di parità si effettua uno spareggio di un turno ciascuno ad oltranza.
+                    <h4 class="font-black uppercase text-xs mb-1">Chi vince</h4>
+                    Si controlla il punteggio quando le due squadre hanno giocato lo stesso numero di turni: se almeno una è arrivata a <strong>20 punti</strong>, vince quella che ne ha di più. Se sono in parità, si gioca un altro turno a testa, e così via finché una delle due resta davanti.
                 </div>
             </div>
 
@@ -518,7 +518,7 @@
             <h3 id="quick-ability-title" class="text-xl font-black text-slate-900 mb-2">Regola Abilità</h3>
             <p id="quick-ability-body" class="text-sm text-slate-600 leading-relaxed mb-4"></p>
             <div class="p-3 rounded-2xl bg-slate-100 text-xs text-slate-600 mb-5">
-                <strong>Ricorda:</strong> Puoi confermare o rifiutare le proposte dei tuoi compagni e indicare numeri/simboli, ma mai lettere dell'alfabeto!
+                <strong>Ricorda:</strong> puoi fare sì o no con la testa e mostrare numeri o simboli con le dita, ma mai lettere.
             </div>
             <button onclick="closeModal('ability-quick-modal')" class="w-full py-3 bg-[#4d9496] text-white font-extrabold rounded-2xl text-sm">Torna al Round</button>
         </div>
@@ -527,13 +527,13 @@
     <!-- MODAL 3: SCHEMA FUNZIONAMENTO RUOTA -->
     <div id="wheel-help-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl">
-            <h3 class="text-lg font-black text-slate-900 mb-2">Come funziona la Ruota a 5 Slot</h3>
+            <h3 class="text-lg font-black text-slate-900 mb-2">Come funziona la ruota</h3>
             <div class="space-y-2.5 text-xs sm:text-sm text-slate-600 leading-relaxed">
-                <p>1. All'inizio di ogni turno ci sono <strong>3 carte</strong> inserite in 3 dei 5 slot della ruota (gli altri 2 slot restano vuoti).</p>
-                <p>2. <strong>Slot Bonus Nero (+1):</strong> Se scegliete questa carta, ottenete 1 punto aggiuntivo.</p>
-                <p>3. <strong>Slot Bonus Blu (+1):</strong> Indica che <strong>DOVETE</strong> prendere questa carta se è il turno della vostra squadra e ottenete 1 punto aggiuntivo.</p>
-                <p>4. A fine turno la ruota gira di <strong>una tacca in senso orario</strong> (1/5 di giro) e una nuova carta entra nello spicchio con la freccia bianca, in alto.</p>
-                <p>5. Le carte stanno direttamente sulla ruota: toccane una per sceglierla. Con il tasto <strong>↻</strong> la cambi se l’avete già giocata.</p>
+                <p>1. La ruota ha <strong>5 spicchi</strong> e ospita sempre <strong>3 carte</strong>: due spicchi restano vuoti.</p>
+                <p>2. <strong>Spicchio nero:</strong> la carta che sta qui vale un punto in più, se decidete di prenderla.</p>
+                <p>3. <strong>Spicchio blu:</strong> quando c'è una carta, la squadra di turno <strong>deve</strong> prendere quella; anche questa vale un punto in più.</p>
+                <p>4. Finito il turno, la carta giocata esce, la ruota avanza di <strong>uno spicchio in senso orario</strong> e una carta nuova entra dallo spicchio con la freccia bianca, in alto.</p>
+                <p>5. Per scegliere una carta basta toccarla sulla ruota. Se l'avete già giocata in un'altra partita, il tasto <strong>↻</strong> la cambia.</p>
             </div>
             <button onclick="closeModal('wheel-help-modal')" class="mt-5 w-full py-3 bg-slate-900 text-white font-extrabold rounded-2xl text-sm">Chiudi</button>
         </div>

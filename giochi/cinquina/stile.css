@@ -1,11 +1,11 @@
-/* HINT FAKE: stili propri del gioco */
+/* Cinquina: stili propri del gioco */
 :root {
-    --hint-teal: #4d9496;
-    --hint-teal-dark: #366f71;
-    --hint-teal-light: #e6f2f2;
-    --hint-black: #1e2024;
-    --hint-blue: #4696b8;
-    --hint-red: #dc2626;
+    --cinquina-teal: #4d9496;
+    --cinquina-teal-dark: #366f71;
+    --cinquina-teal-light: #e6f2f2;
+    --cinquina-black: #1e2024;
+    --cinquina-blue: #4696b8;
+    --cinquina-red: #dc2626;
 }
 body {
     font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
