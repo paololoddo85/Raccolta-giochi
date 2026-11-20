@@ -160,6 +160,8 @@ invece la schermata iniziale con il riquadro "Partita in corso" (Riprendi / Scar
 - **Pellicola**: salva a ogni turno, indizio e piazzamento. Dopo un ricaricamento il film del turno resta lo stesso
   (con gli indizi già pagati). "Annulla" torna a prima del piazzamento: dal risultato, nella premiazione o all'inizio
   del turno dopo, finché non si compra un indizio.
+  Senza connessione Pellicola non parte e non riprende una partita: compare "Pellicola ha bisogno di internet"
+  e si resta nella preparazione, con la partita salvata.
 - **Giradischi**: salva a ogni carta, scelta, sfida, gettone e conferma. "Annulla" torna a prima della conferma
   (anche il gettone bonus Pro incassato dopo si perde): dalla carta girata, nella vittoria o all'inizio del turno dopo,
   finché non si usano gettoni o sfide. L'audio non si salva mai: per riascoltare serve la connessione.
@@ -237,7 +239,7 @@ con uno schermo da 360×780, blocca le richieste verso internet e salva gli scre
 | `carte` | mazzo di Cinquina: abilità, 5 oggetti, parola proibita non ripetuta, temi senza doppioni |
 | `menu` | nomi condivisi, "Partita in corso", interruttore suoni |
 | `cinquina` | vecchi indirizzi, migrazione, partita completa, annulla, ripresa, timer, import, muto |
-| `pellicola offline` / `online` | partita completa, indizi, ripresa, annulla (3 casi); online con risposte finte |
+| `pellicola offline` / `online` | offline: avviso "serve internet", niente partita né ripresa; online (risposte finte): partita completa, indizi, ripresa, annulla (3 casi) |
 | `giradischi`, `giradischi-offline` | ascolto, sfida, gettoni, bonus Pro, annulla, ripresa, rete persa, avvio senza internet |
 | `larghezze` | nessuno scorrimento orizzontale in ogni schermata, a 320 e 360px (anche con pellicola lunga) |
 | `pwa` | elenco `FILE` completo, installabilità, pagine offline, avviso e "Controlla aggiornamenti" (su una copia del sito) |

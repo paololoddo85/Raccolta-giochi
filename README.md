@@ -17,7 +17,7 @@ I nomi di "Chi gioca stasera" si scrivono una volta nel menù e valgono per tutt
 - **Android (Chrome)**: apri il sito, menù ⋮ → **Installa app** (o "Aggiungi a schermata Home").
 - **iPhone (Safari)**: apri il sito, tasto Condividi → **Aggiungi alla schermata Home**.
 
-Dopo il primo accesso si gioca anche senza connessione. Fanno eccezione le locandine di Pellicola e tutto Giradischi, che
+Dopo il primo accesso si gioca anche senza connessione. Fanno eccezione Pellicola e Giradischi, che
 usano contenuti online. Quando esce una versione nuova compare in alto "Nuova versione disponibile — tocca per aggiornare".
 
 Per chi modifica il sito: regole, struttura e formato delle carte sono in [CLAUDE.md](CLAUDE.md);

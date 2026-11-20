@@ -700,6 +700,8 @@ function showToast(message, type = 'info') {
   RG.toast(message, TOAST_TYPES[type] || 'info');
 }
 
+const OFFLINE_MESSAGE = 'Impossibile caricare i film: Pellicola ha bisogno di internet. Controlla la connessione e riprova.';
+
 // Nomi: "Chi gioca stasera" di Combriccola (primi 4 posti)
 const DEFAULT_NAMES = ['Cinefilo 1', 'Cinefilo 2', 'Cinefilo 3', 'Cinefilo 4'];
 
@@ -798,9 +800,11 @@ function prefetchNextCard() {
  */
 // Catalogo della partita: film curati della categoria + film live da iTunes.
 // I film mai giocati finiscono in fondo all'array: pop() li pesca per primi.
-// Restituisce i film mai visti.
+// Restituisce i film mai visti, oppure null se il catalogo online non risponde:
+// Pellicola non si gioca senza connessione (servono catalogo e locandine).
 async function buildPoolAndDeck(excludeKeys = new Set()) {
   const liveMovies = await fetchLiveMoviesCatalog(gameState.eraFilter);
+  if (!liveMovies.length) return null;
   const curatedMovies = MOVIES_DATABASE.filter(m => eraMatches(m, gameState.eraFilter));
 
   // I film curati hanno la precedenza sui doppioni live
@@ -834,13 +838,17 @@ async function startNewGame(triggerBtn) {
   btn.textContent = 'Preparo il mazzo…';
 
   try {
-    gameState.turnToken++;
     const nameInputs = document.querySelectorAll('.player-name-input');
     gameState.eraFilter = document.getElementById('era-select').value;
+    const unseen = await buildPoolAndDeck();
+    if (!unseen) {
+      showToast(OFFLINE_MESSAGE, 'error');
+      return;
+    }
+
+    gameState.turnToken++;
     gameState.targetCards = parseInt(document.getElementById('target-cards-select').value, 10);
     gameState.players = [];
-
-    const unseen = await buildPoolAndDeck();
 
     // Carte iniziali: sempre dal catalogo curato (anno certo), preferendo quelle mai viste
     const pickStarter = () => {
@@ -1459,8 +1467,19 @@ async function resumeSavedGame() {
   const btn = document.querySelector('#resume-box [data-azione="riprendi"]');
   if (btn) { btn.disabled = true; btn.textContent = 'Preparo il mazzo…'; }
 
-  gameState.turnToken++;
+  // Il mazzo si ricostruisce (il catalogo live va riscaricato) senza i film già in gioco.
+  // Senza connessione la partita resta salvata e si resta nella preparazione.
+  const exclude = new Set();
+  g.players.forEach(p => p.timeline.forEach(m => exclude.add(movieKey(m))));
+  if (g.turn && g.turn.movie) exclude.add(movieKey(g.turn.movie));
   gameState.eraFilter = g.eraFilter;
+  if (!(await buildPoolAndDeck(exclude))) {
+    showToast(OFFLINE_MESSAGE, 'error');
+    renderResumeBox();
+    return;
+  }
+
+  gameState.turnToken++;
   gameState.targetCards = g.targetCards;
   gameState.players = g.players.map(p => ({ name: p.name, stars: p.stars, timeline: p.timeline }));
   gameState.currentPlayerIndex = Math.min(g.currentPlayerIndex, g.players.length - 1);
@@ -1469,11 +1488,6 @@ async function resumeSavedGame() {
   gameState.currentMovie = null;
   gameState.isTurnResolved = false;
   gameState.started = true;
-
-  // Il mazzo si ricostruisce (il catalogo live va riscaricato) senza i film già in gioco
-  const exclude = moviesInPlayKeys();
-  if (g.turn && g.turn.movie) exclude.add(movieKey(g.turn.movie));
-  await buildPoolAndDeck(exclude);
 
   document.getElementById('setup-screen').classList.add('hidden');
   document.getElementById('victory-modal').classList.add('hidden');
