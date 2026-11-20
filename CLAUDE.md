@@ -13,6 +13,8 @@ Sito statico con giochi da festa da usare sul telefono (un telefono solo che pas
 - Il proprietario lavora da Claude Code sul web: niente installazioni locali, tutto passa da GitHub.
 - **Piccoli passi**, commit chiari in italiano. Alla fine di ogni fase apri una pull request verso `main`
   con una descrizione semplice di cosa cambia e cosa provare. **Non unire mai le pull request**: lo fa il proprietario.
+- Quando parli di una pull request (aperta, aggiornata, da controllare o da unire) scrivi **sempre il suo link**
+  completo, es. `https://github.com/paololoddo85/Raccolta-giochi/pull/8`.
 - **Prima di aprire ogni pull request** (richiesta del proprietario, vale in ogni sessione), sulle modifiche del ramo:
   1. `/code-review` — cerca errori; correggi quelli reali e aggiungi una prova che li copra;
   2. `/security-review` — soprattutto dove entra testo da fuori (import delle carte, nomi, risposte di iTunes ecc.);
