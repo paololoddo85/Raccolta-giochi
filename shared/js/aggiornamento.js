@@ -39,8 +39,8 @@
         });
     };
 
-    // Barra in alto: "Aggiornamento in arrivo…" mentre si scarica, poi "Nuova versione disponibile"
-    function barra() {
+    // Barra in alto, in due stati: "in-arrivo" (si sta scaricando) e "pronta" (tocca per aggiornare)
+    function disegnaBarra(stato, contenuto, alTocco) {
         let el = document.getElementById('rg-aggiorna');
         if (!el) {
             el = document.createElement('div');
@@ -49,17 +49,16 @@
             el.setAttribute('role', 'status');
             document.body.appendChild(el);
         }
-        return el;
+        el.dataset.stato = stato;
+        el.innerHTML = `${contenuto}
+            <button type="button" class="rg-aggiorna-dopo" aria-label="${stato === 'pronta' ? 'Più tardi' : 'Nascondi'}">Dopo</button>`;
+        el.querySelector('.rg-aggiorna-dopo').addEventListener('click', () => el.remove());
+        if (alTocco) el.querySelector('.rg-aggiorna-tocca').addEventListener('click', alTocco);
     }
 
     function mostraInArrivo() {
         if (document.getElementById('rg-aggiorna')) return;
-        const el = barra();
-        el.dataset.stato = 'in-arrivo';
-        el.innerHTML = `
-            <span class="rg-aggiorna-tocca rg-aggiorna-attesa"><strong>Aggiornamento in arrivo…</strong> si sta scaricando la versione nuova</span>
-            <button type="button" class="rg-aggiorna-dopo" aria-label="Nascondi">Dopo</button>`;
-        el.querySelector('.rg-aggiorna-dopo').addEventListener('click', () => el.remove());
+        disegnaBarra('in-arrivo', '<span class="rg-aggiorna-tocca rg-aggiorna-attesa"><strong>Aggiornamento in arrivo…</strong> si sta scaricando la versione nuova</span>');
     }
 
     let lavoratoreAvviso = null; // la versione a cui si riferisce l'avviso mostrato
@@ -69,18 +68,12 @@
         // Se nel frattempo è arrivata un'altra versione, l'avviso si ricollega a quella nuova
         if (esistente && esistente.dataset.stato === 'pronta' && lavoratoreAvviso === lavoratore) return;
         lavoratoreAvviso = lavoratore;
-        const el = barra();
-        el.dataset.stato = 'pronta';
-        el.innerHTML = `
-            <button type="button" class="rg-aggiorna-tocca"><strong>Nuova versione disponibile</strong> — tocca per aggiornare</button>
-            <button type="button" class="rg-aggiorna-dopo" aria-label="Più tardi">Dopo</button>`;
-        el.querySelector('.rg-aggiorna-tocca').addEventListener('click', (e) => {
+        disegnaBarra('pronta', '<button type="button" class="rg-aggiorna-tocca"><strong>Nuova versione disponibile</strong> — tocca per aggiornare</button>', (e) => {
             aggiornamentoChiesto = true;
             e.currentTarget.disabled = true;
             e.currentTarget.textContent = 'Aggiornamento…';
             lavoratore.postMessage({ tipo: 'aggiorna' });
         });
-        el.querySelector('.rg-aggiorna-dopo').addEventListener('click', () => el.remove());
     }
 
     function togliInArrivo() {

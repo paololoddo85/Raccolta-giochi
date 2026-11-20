@@ -90,19 +90,25 @@
     });
 
     // "Controlla aggiornamenti": risponde sempre, anche quando non c'è niente di nuovo
+    const RISPOSTE = {
+        trovata: ["C'è una versione nuova: guarda in alto.", 'info'],
+        offline: ['Serve la connessione per controllare gli aggiornamenti.', 'errore'],
+        attendi: ["L'app si sta ancora preparando: riprova tra qualche secondo.", 'avviso'],
+        'non-disponibile': ['Questo browser non permette gli aggiornamenti automatici: ricarica la pagina.', 'avviso']
+    };
     const cerca = document.getElementById('cerca-aggiornamenti');
     cerca.addEventListener('click', async () => {
         cerca.disabled = true;
         cerca.textContent = 'Controllo in corso…';
         const esito = await RG.cercaAggiornamenti();
-        const versione = await RG.versioneApp();
+        if (esito === 'aggiornata') {
+            const versione = await RG.versioneApp();
+            RG.toast(`Hai già l'ultima versione${versione ? ` (versione ${versione})` : ''}.`, 'successo');
+        } else {
+            RG.toast(...(RISPOSTE[esito] || RISPOSTE['non-disponibile']));
+        }
         cerca.disabled = false;
         cerca.textContent = 'Controlla aggiornamenti';
-        if (esito === 'aggiornata') RG.toast(`Hai già l'ultima versione${versione ? ` (versione ${versione})` : ''}.`, 'successo');
-        else if (esito === 'trovata') RG.toast('C\'è una versione nuova: guarda in alto.', 'info');
-        else if (esito === 'offline') RG.toast('Serve la connessione per controllare gli aggiornamenti.', 'errore');
-        else if (esito === 'attendi') RG.toast('L\'app si sta ancora preparando: riprova tra qualche secondo.', 'avviso');
-        else RG.toast('Questo browser non permette gli aggiornamenti automatici: ricarica la pagina.', 'avviso');
     });
 
     disegnaNomi();
