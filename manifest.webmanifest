@@ -1,0 +1,25 @@
+{
+  "name": "Combriccola",
+  "short_name": "Combriccola",
+  "description": "Giochi da festa da fare con un telefono solo: HINT FAKE, CineStar e Hitstar.",
+  "lang": "it",
+  "dir": "ltr",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#24142e",
+  "theme_color": "#24142e",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    { "src": "icone/icona-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icone/icona-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icone/icona-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "HINT FAKE", "url": "giochi/hint-fake/", "icons": [{ "src": "icone/icona-192.png", "sizes": "192x192" }] },
+    { "name": "CineStar", "url": "giochi/cinestar/", "icons": [{ "src": "icone/icona-192.png", "sizes": "192x192" }] },
+    { "name": "Hitstar", "url": "giochi/hitstar/", "icons": [{ "src": "icone/icona-192.png", "sizes": "192x192" }] }
+  ]
+}
