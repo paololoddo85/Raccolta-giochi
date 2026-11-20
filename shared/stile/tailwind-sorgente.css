@@ -1,0 +1,9 @@
+/*
+ * Sorgente di shared/stile/tailwind.css (Tailwind v4).
+ * NON serve per pubblicare il sito: tailwind.css è già compilato e committato.
+ * Va rigenerato solo se in HINT FAKE o Hitstar si usano classi Tailwind nuove, da un ambiente con Node:
+ *   npx @tailwindcss/cli -i shared/stile/tailwind-sorgente.css -o shared/stile/tailwind.css --minify
+ */
+@import "tailwindcss" source(none);
+@source "../../giochi/hint-fake";
+@source "../../giochi/hitstar";
