@@ -1,0 +1,48 @@
+# Prove automatiche di Combriccola: partono da sole a ogni pull request (e a ogni unione in main).
+# Non pubblicano niente: il sito resta pubblicato da GitHub Pages ("Deploy from a branch", main, root).
+name: Prove automatiche
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prove:
+    name: Prove nel browser
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Scarica il repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Prepara Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Numero di versione dell'app alzato
+        if: github.event_name == 'pull_request'
+        run: node prove/controlla-versione.js origin/${{ github.base_ref }}
+
+      - name: Installa Playwright e Chromium
+        run: |
+          npm install --no-save --no-package-lock playwright@1.63.0
+          npx playwright install --with-deps chromium
+
+      - name: Tutte le prove (menù, giochi, larghezze, app offline)
+        run: node prove/esegui.js
+
+      - name: Allega gli screenshot delle prove
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshot-prove
+          path: prove/screenshot/
+          retention-days: 7
