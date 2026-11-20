@@ -242,12 +242,12 @@ con uno schermo da 360×780, blocca le richieste verso internet e salva gli scre
 | Prova | Cosa controlla |
 |---|---|
 | `carte` | mazzo di Cinquina: abilità, 5 oggetti, parola proibita non ripetuta, temi senza doppioni |
-| `menu` | nomi condivisi, "Partita in corso", interruttore suoni |
+| `menu` | nomi condivisi, "Partita in corso", interruttore suoni, ingresso in Pellicola dalla scatola |
 | `cinquina` | vecchi indirizzi, migrazione, partita completa, annulla, ripresa, timer, import, muto |
 | `pellicola offline` / `online` | offline: avviso "serve internet", niente partita né ripresa; online (risposte finte): partita completa, indizi, ripresa, annulla (3 casi) |
 | `giradischi`, `giradischi-offline` | ascolto, sfida, gettoni, bonus Pro, annulla, ripresa, rete persa, avvio senza internet |
 | `larghezze` | nessuno scorrimento orizzontale in ogni schermata, a 320 e 360px (anche con pellicola lunga) |
-| `pwa` | elenco `FILE` completo, installabilità, pagine offline, avviso e "Controlla aggiornamenti" (su una copia del sito) |
+| `pwa` | elenco `FILE` completo, installabilità, pagine offline, avviso "Pellicola ha bisogno di internet" dal menù, avviso e "Controlla aggiornamenti" (su una copia del sito) |
 
 - iTunes, MusicBrainz, Wikidata e Wikipedia non sono raggiungibili dall'ambiente cloud: le prove usano le risposte finte
   di `prove/finti-pellicola.js` e `prove/finti-giradischi.js` (`context.route`).

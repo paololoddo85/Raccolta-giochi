@@ -77,10 +77,13 @@ const versioneDi = (testo) => testo.match(/const VERSIONE = '([^']+)';/)[1];
     ok(true, 'offline: Cinquina si gioca');
     // dal menù, offline, toccando Pellicola l'avviso compare subito e si resta nel menù
     await page.goto(BASE);
+    // il browser di prova, dopo molte pagine offline, a volte torna a dire "online": qui lo si fissa offline
     await page.evaluate(() => Object.defineProperty(navigator, 'onLine', { get: () => false, configurable: true }));
     await page.click('.scatola-cine');
     await page.waitForSelector('.rg-toast-errore', { timeout: 10000 });
     ok((await page.textContent('.rg-toast-errore')).includes('Pellicola ha bisogno di internet') && page.url() === BASE, 'offline: toccando Pellicola nel menù compare l\'avviso e si resta nel menù');
+    await page.click('.scatola-cine'); await page.click('.scatola-cine');
+    ok(await page.locator('.rg-toast-errore').count() === 1, 'offline: tocchi ripetuti su Pellicola non accumulano avvisi uguali');
     await page.goto(BASE + 'giochi/pellicola/');
     await page.click('#start-game-btn');
     await page.waitForSelector('.rg-toast-errore', { timeout: 30000 });
