@@ -65,10 +65,34 @@
     // "Partita in corso" sulle scatole dei giochi che hanno un salvataggio
     function segnaPartite() {
         document.querySelectorAll('.scatola[data-gioco]').forEach(a => {
-            const salvata = RG.archivio.spazio(a.dataset.gioco).leggi('partita', null);
+            const salvata = typeof RG.archivio.spazio(a.dataset.gioco).leggi('partita', null)?.v === 'number'; // salvataggio valido
             a.querySelector('.in-corso').hidden = !salvata;
+            const azzera = document.querySelector(`.azzera[data-gioco="${a.dataset.gioco}"]`);
+            if (azzera) azzera.hidden = !salvata;
         });
     }
+
+    // "Azzera la partita in corso": cancella solo la partita salvata di quel gioco.
+    // Cosa resta, per gioco (i nomi di "Chi gioca stasera" restano sempre)
+    const RESTA = {
+        hintfake: 'le carte importate e la memoria delle carte già uscite',
+        cinestar: 'la memoria dei film già usciti',
+        hitstar: 'la memoria dei brani già usciti'
+    };
+    document.querySelectorAll('.azzera').forEach(b => b.addEventListener('click', async () => {
+        const gioco = b.dataset.gioco;
+        const nome = document.querySelector(`.scatola[data-gioco="${gioco}"] .scatola-nome`).textContent;
+        const si = await RG.conferma({
+            titolo: `Azzerare la partita di ${nome}?`,
+            testo: `La partita salvata viene cancellata e la prossima volta si ricomincia da capo. Restano i nomi${RESTA[gioco] ? ' e ' + RESTA[gioco] : ''}.`,
+            ok: 'Azzera',
+            pericolo: true
+        });
+        if (!si) return;
+        RG.archivio.spazio(gioco).togli('partita');
+        segnaPartite();
+        RG.toast(`Partita di ${nome} azzerata: si ricomincia da capo.`, 'successo');
+    }));
 
     // Interruttore suoni
     const suoni = document.getElementById('pulsante-suoni');

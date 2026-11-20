@@ -21,14 +21,28 @@
 
     function crea(gioco, { versione = 1, valida = () => true, chiave = 'partita' } = {}) {
         const archivio = RG.archivio.spazio(gioco);
+        let conPartita = false; // questa pagina ha letto o scritto una partita salvata
+        let azzerata = false;  // la partita è stata azzerata da un'altra pagina: niente più salvataggi qui
+        // Tornando a questa pagina con "indietro" il browser può ridarla dalla memoria così com'era:
+        // se nel frattempo la partita è stata azzerata dal menù, si ricarica la pagina pulita
+        // (altrimenti il prossimo salvataggio rimetterebbe la partita cancellata).
+        window.addEventListener('pageshow', (e) => {
+            if (e.persisted && conPartita && archivio.leggi(chiave, null) === null) {
+                azzerata = true; // anche il salvataggio automatico mentre la pagina si chiude non deve rimetterla
+                location.reload();
+            }
+        });
         return {
             chiave: archivio.chiave(chiave),
             salva(dati) {
+                if (azzerata) return false;
+                conPartita = true;
                 return archivio.scrivi(chiave, { ...dati, v: versione, savedAt: Date.now() });
             },
             leggi() {
                 const d = archivio.leggi(chiave, null);
                 if (!d || d.v !== versione) return null;
+                conPartita = true;
                 try {
                     return valida(d) ? d : null;
                 } catch (e) {
@@ -36,6 +50,7 @@
                 }
             },
             cancella() {
+                conPartita = false;
                 archivio.togli(chiave);
             }
         };
