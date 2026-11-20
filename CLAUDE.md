@@ -35,12 +35,13 @@ Sito statico con giochi da festa da usare sul telefono (un telefono solo che pas
 
 ```
 index.html  menu.css  menu.js      menù della raccolta ("Chi gioca stasera", scatole dei giochi, suoni)
-HINT_FAKE.html                     vecchio indirizzo → rinvio a giochi/hint-fake/
-cinestar_il_gioco_dei_film.html    CineStar (verrà spostato in giochi/cinestar/)
-hitstar_il_gioco_della_musica.html Hitstar (verrà spostato in giochi/hitstar/)
+HINT_FAKE.html                     vecchi indirizzi → rinvio automatico a giochi/<nome>/
+cinestar_il_gioco_dei_film.html    (non cancellarli: sono nei preferiti e nelle app installate)
+hitstar_il_gioco_della_musica.html
 shared/
   stile/font.css                   @font-face dei font inclusi (font/*.woff2, licenza OFL)
   stile/tailwind.css               Tailwind già compilato (vedi sotto)
+  stile/tailwind-sorgente.css      da dove si rigenera tailwind.css
   stile/base.css                   componenti comuni: finestre, notifiche, "Partita in corso", tasto ←
   js/base.js                       spazio globale RG, utilità, RG.archivio (localStorage)
   js/migrazioni.js                 copia dei dati dalle vecchie pagine alle chiavi nuove
@@ -50,8 +51,13 @@ shared/
   js/dialoghi.js                   RG.conferma, RG.toast
   js/partita.js                    salvataggio/ripresa, istantanee per "Annulla ultimo turno"
   js/importa.js                    import di pacchetti JSON, copia negli appunti
+  vendor/confetti.js               canvas-confetti (coriandoli di Hitstar), licenza ISC
 giochi/<nome>/
   index.html  gioco.js  stile.css  dati/…
+giochi/hint-fake/dati/carte.js     le 304 carte di HINT FAKE
+giochi/cinestar/dati/film.js       88 film inclusi, titoli alternativi, ricerche del catalogo online
+giochi/hitstar/dati/ricerche.js    ricerche iTunes e parole che scartano raccolte/remaster/live
+giochi/hitstar/icone.js            icone Font Awesome incluse (SVG), licenza CC BY 4.0
 ```
 
 Ordine di caricamento degli script comuni: `base.js` sempre per primo, poi `migrazioni.js`, poi gli altri.
@@ -63,8 +69,8 @@ Ogni gioco ha la sua identità; le parti comuni si adattano ridefinendo le varia
 |---|---|---|
 | Menù Combriccola | prugna `#24142E`, latte `#FFF4E6` | font Bricolage Grotesque |
 | HINT FAKE | verde acqua `#4D9496`, nero `#1E2024` | font Inter, Tailwind |
-| CineStar | oro `#E8B04B` su notte `#0A1020` | |
-| Hitstar | rosa `#EC4899` e ciano `#22D3EE` su viola notte | |
+| CineStar | oro `#E8B04B` su notte `#0A1020` | font Big Shoulders Display + Instrument Sans, CSS proprio |
+| Hitstar | rosa `#EC4899` e ciano `#22D3EE` su viola notte | font Inter + Space Grotesk, Tailwind, icone.js |
 
 ## Memoria sul dispositivo (localStorage)
 
@@ -79,9 +85,13 @@ per questo tutte le chiavi hanno il prefisso `rg-`. Usa sempre `RG.archivio`, ma
 | `rg-hintfake-carte-uscite-bambini` / `-adulti` | id delle carte già uscite |
 | `rg-hintfake-carte-importate` | carte importate |
 | `rg-hintfake-partita` | partita in corso (`v`, `savedAt`, …) |
+| `rg-cinestar-film-giocati` | film già usciti (ultimi 600), prima `cinestar_played_movies_v1` |
+| `rg-cinestar-partita` | partita in corso, compreso il film del turno e "annulla" |
+| `rg-hitstar-brani-giocati` | brani già usciti (ultimi 500), prima `hitstar_played_songs_v1` |
+| `rg-hitstar-partita` | partita in corso, compresi brano del turno, carte già verificate e "annulla" |
 | `rg-<gioco>-migrazione` | segno che la migrazione è già stata fatta |
 
-Le vecchie chiavi (`hintfake-…`) vengono **copiate** una volta sola e **non cancellate** (copia di sicurezza).
+Le vecchie chiavi (`hintfake-…`, `cinestar_…`, `hitstar_…`) vengono **copiate** una volta sola e **non cancellate** (copia di sicurezza).
 Le regole stanno in `shared/js/migrazioni.js`. Chi cambia il formato di un salvataggio alza la `versione`
 in `RG.partita.crea(...)` e gestisce i salvataggi vecchi.
 
@@ -110,6 +120,17 @@ Le carte doppie (stesso tema e stessa proibita) vengono saltate.
 Regola della replica avversaria (non cambiarla): oggetto normale +1 combinabile con tutto;
 proibito indovinato +2 e proibito errato −2 alternativi tra loro.
 
+## Salvataggio, ripresa e annulla nei tre giochi
+
+- **HINT FAKE**: salva a ogni turno registrato e carta cambiata; "Annulla turno" riapre il passo 4 del turno precedente.
+- **CineStar**: salva a ogni turno, indizio e piazzamento. Dopo un ricaricamento il film del turno resta lo stesso
+  (con gli indizi già pagati). "Annulla" torna a prima del piazzamento: dal risultato, nella premiazione o all'inizio
+  del turno dopo, finché non si compra un indizio.
+- **Hitstar**: salva a ogni carta, scelta, sfida, gettone e conferma. "Annulla" torna a prima della conferma
+  (anche il gettone bonus Pro incassato dopo si perde): dalla carta girata, nella vittoria o all'inizio del turno dopo,
+  finché non si usano gettoni o sfide. L'audio non si salva mai: per riascoltare serve la connessione.
+  Se la connessione cade, la partita non finisce: compare "Riprova".
+
 ## Come aggiungere un nuovo gioco
 
 1. Crea `giochi/<nome>/` con `index.html`, `gioco.js`, `stile.css` e `dati/`.
@@ -126,8 +147,21 @@ proibito indovinato +2 e proibito errato −2 alternativi tra loro.
 ## Tailwind
 
 `shared/stile/tailwind.css` è Tailwind v4 **già compilato** e fa parte del repository: non serve nessun passaggio
-per pubblicare. Contiene solo le classi usate nei file. Se aggiungi classi Tailwind nuove, va rigenerato
-(in un ambiente con Node) scansionando i giochi che lo usano, e il file risultante va committato.
+per pubblicare. Contiene solo le classi usate in `giochi/hint-fake/` e `giochi/hitstar/` (CineStar e il menù hanno
+CSS proprio). Se aggiungi classi Tailwind nuove in quei giochi, rigeneralo da un ambiente con Node e committalo:
+
+```
+npx @tailwindcss/cli -i shared/stile/tailwind-sorgente.css -o shared/stile/tailwind.css --minify
+```
+
+Hitstar era scritto per Tailwind v3: le piccole differenze sono compensate in `giochi/hitstar/stile.css`
+(bordi grigi di default, cursore sui pulsanti). Dopo la rigenerazione confronta gli screenshot di HINT FAKE e Hitstar.
+
+## Icone di Hitstar
+
+Nel codice di Hitstar le icone si scrivono come prima, `<i class="fa-solid fa-play"></i>`: `giochi/hitstar/icone.js`
+le disegna come SVG incluse, anche quando cambiano dopo. Per un'icona nuova aggiungi a `ICONE` il `viewBox` e il
+percorso presi dal file SVG di Font Awesome Free (stesso nome, senza `fa-`).
 
 ## Come provare (prima di ogni pull request)
 
@@ -136,6 +170,9 @@ per pubblicare. Contiene solo le classi usate nei file. Se aggiungi classi Tailw
 - Playwright (già presente nell'ambiente cloud): schermo 360×780, blocca le richieste esterne per simulare l'offline,
   nessun errore in console, nessuno scorrimento orizzontale.
 - Per ogni gioco: partita completa, annulla turno, ripresa dopo il ricaricamento, import (dove c'è).
+- Controlla lo scorrimento orizzontale in **ogni schermata** di ogni gioco (non solo nella prima), a 320 e 360px.
+- CineStar e Hitstar usano servizi online (iTunes, MusicBrainz, Wikidata, Wikipedia): nell'ambiente cloud non sono
+  raggiungibili, quindi si provano con risposte finte servite da Playwright (`context.route`), più una prova offline.
 - Controlla gli screenshot prima di chiudere la fase.
 
 ## Nomi
