@@ -29,6 +29,8 @@ function jsonp(route, data) {
 }
 module.exports = { stato, BRANI, async finti(context) {
   await context.route(/itunes\.apple\.com\/search/, route => {
+    // ricerche di film (Pellicola): passano alle loro risposte finte
+    if (new URL(route.request().url()).searchParams.get('media') === 'movie') return route.fallback();
     if (!stato.rete) return route.abort();
     stato.richieste.itunes++;
     const u = new URL(route.request().url());

@@ -114,13 +114,8 @@ function markMovieAsPlayed(movie) {
  * JSONP iTunes (search + lookup) senza blocchi CORS
  * ============================================================================
  */
-// Risultati della ricerca; [] anche se il servizio non risponde (vedi jsonpRisposta)
-async function jsonp(baseUrl, timeoutMs) {
-  return (await jsonpRisposta(baseUrl, timeoutMs)) || [];
-}
-
 // Risultati della ricerca, oppure null se il servizio non risponde (rete assente, errore o tempo scaduto)
-function jsonpRisposta(baseUrl, timeoutMs = 5500) {
+function jsonp(baseUrl, timeoutMs = 5500) {
   return new Promise((resolve) => {
     const callbackName = `__itunesCb_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
     const script = document.createElement('script');
@@ -144,12 +139,8 @@ function jsonpRisposta(baseUrl, timeoutMs = 5500) {
   });
 }
 
-function iTunesSearchUrl(term, country, media, entity, limit) {
-  return `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&country=${country}&media=${media}&entity=${entity}&limit=${limit}`;
-}
-
 function fetchITunesJsonp(term, country = 'us', media = 'movie', entity = 'movie', limit = 10) {
-  return jsonp(iTunesSearchUrl(term, country, media, entity, limit));
+  return jsonp(`https://itunes.apple.com/search?term=${encodeURIComponent(term)}&country=${country}&media=${media}&entity=${entity}&limit=${limit}`);
 }
 
 function fetchITunesLookup(id, country = 'it') {
@@ -167,13 +158,15 @@ async function fetchLiveMoviesCatalog(eraFilter) {
   const selectedQueries = shuffleArray(pool).slice(0, 10);
   const liveMovies = [];
   const seenKeys = new Set();
+  // Il telefono sa già di essere offline: inutile aspettare le ricerche
+  if (navigator.onLine === false) return { movies: liveMovies, reachable: false };
   let reachable = false;
 
   await Promise.all(selectedQueries.map(async (q) => {
     try {
       const isIt = eraFilter === 'italian' || ITALIAN_QUERY_RE.test(q);
       const country = isIt ? 'it' : 'us';
-      const results = await jsonpRisposta(iTunesSearchUrl(q, country, 'movie', 'movie', 25));
+      const results = await fetchITunesJsonp(q, country, 'movie', 'movie', 25);
       if (!results) return;
       reachable = true;
 
@@ -358,7 +351,7 @@ async function doEnrichLiveMovie(movie) {
 
   // 1. Scheda dello store italiano: titolo, trama e genere in italiano
   if (movie._country !== 'it') {
-    const res = await fetchITunesLookup(movie._trackId, 'it');
+    const res = (await fetchITunesLookup(movie._trackId, 'it')) || [];
     const it = res.find(r => r.trackId === movie._trackId) || res[0];
     if (it) {
       if (it.trackName) { movie.itTitle = cleanITunesTitle(it.trackName); gotItalianTitle = true; }
@@ -469,7 +462,7 @@ async function fetchPosterFromITunes(movie) {
   for (const q of queries) {
     try {
       const results = await fetchITunesJsonp(q.term, q.country, 'movie', 'movie', 10);
-      if (!results.length) continue;
+      if (!results || !results.length) continue;
 
       const candidates = results
         .filter(item => item.kind === 'feature-movie' && item.artworkUrl100)
@@ -759,9 +752,9 @@ document.querySelectorAll('.count-btn').forEach(btn => {
  * MAZZO: costruzione, pesca, ricarica
  * ============================================================================
  */
-function moviesInPlayKeys() {
+function moviesInPlayKeys(players = gameState.players) {
   const keys = new Set();
-  gameState.players.forEach(p => p.timeline.forEach(m => keys.add(movieKey(m))));
+  players.forEach(p => p.timeline.forEach(m => keys.add(movieKey(m))));
   return keys;
 }
 
@@ -820,7 +813,6 @@ function prefetchNextCard() {
 async function buildPoolAndDeck(eraFilter, excludeKeys = new Set()) {
   const { movies: liveMovies, reachable } = await fetchLiveMoviesCatalog(eraFilter);
   if (!reachable) return null;
-  gameState.eraFilter = eraFilter;
   const curatedMovies = MOVIES_DATABASE.filter(m => eraMatches(m, eraFilter));
 
   // I film curati hanno la precedenza sui doppioni live
@@ -871,6 +863,7 @@ async function startNewGame(triggerBtn) {
     }
 
     gameState.turnToken++;
+    gameState.eraFilter = document.getElementById('era-select').value;
     gameState.targetCards = parseInt(document.getElementById('target-cards-select').value, 10);
     gameState.players = [];
 
@@ -1494,11 +1487,10 @@ async function resumeSavedGame() {
 
   // Il mazzo si ricostruisce (il catalogo live va riscaricato) senza i film già in gioco.
   // Senza connessione la partita resta salvata e si resta nella preparazione.
-  const exclude = new Set();
-  g.players.forEach(p => p.timeline.forEach(m => exclude.add(movieKey(m))));
+  const exclude = moviesInPlayKeys(g.players);
   if (g.turn && g.turn.movie) exclude.add(movieKey(g.turn.movie));
-  const ready = await buildPoolAndDeck(g.eraFilter, exclude);
-  setPreparingDeck(false);
+  let ready;
+  try { ready = await buildPoolAndDeck(g.eraFilter, exclude); } finally { setPreparingDeck(false); }
   g = SAVED_GAME.leggi(); // nel frattempo la partita può essere stata azzerata dal menù
   if (!ready || !g) {
     if (!ready) showToast(OFFLINE_MESSAGE, 'error');
@@ -1507,6 +1499,7 @@ async function resumeSavedGame() {
   }
 
   gameState.turnToken++;
+  gameState.eraFilter = g.eraFilter;
   gameState.targetCards = g.targetCards;
   gameState.players = g.players.map(p => ({ name: p.name, stars: p.stars, timeline: p.timeline }));
   gameState.currentPlayerIndex = Math.min(g.currentPlayerIndex, g.players.length - 1);

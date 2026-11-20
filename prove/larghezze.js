@@ -11,7 +11,7 @@ async function controlla(page, nome) {
   await page.setViewportSize({ width: 360, height: 760 });
 }
 (async () => {
-  let { browser, page } = await apri({ finti: async c => { await fh.finti(c); await fc.finti(c); } });
+  let { browser, page } = await apri({ finti: async c => { await fc.finti(c); await fh.finti(c); } });
   await page.goto(BASE); await controlla(page, 'menù');
   // Cinquina
   await page.goto(BASE + 'giochi/cinquina/'); await controlla(page, 'Cinquina preparazione');
