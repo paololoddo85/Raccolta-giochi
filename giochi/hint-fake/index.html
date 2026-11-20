@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>HINT FAKE · Combriccola</title>
+    <meta name="theme-color" content="#4d9496">
+    <link rel="stylesheet" href="../../shared/stile/font.css">
+    <link rel="stylesheet" href="../../shared/stile/tailwind.css">
+    <link rel="stylesheet" href="../../shared/stile/base.css">
+    <link rel="stylesheet" href="stile.css">
+</head>
+<body class="min-h-screen flex flex-col pb-12">
+
+    <!-- HEADER PRINCIPALE STILE HINT -->
+    <header class="bg-[#4d9496] text-white sticky top-0 z-30 shadow-md">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <a href="../../" class="rg-indietro" aria-label="Torna a Combriccola" title="Torna a Combriccola">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+                </a>
+                <div class="w-10 h-10 shrink-0 rounded-2xl bg-[#1e2024] text-white flex items-center justify-center font-black text-sm tracking-tighter shadow-inner border border-white/15">
+                    HF
+                </div>
+                <div>
+                    <h1 class="text-base sm:text-lg font-black leading-tight whitespace-nowrap">HINT FAKE</h1>
+                    <p id="header-deck-info" class="text-[11px] text-white/85 font-medium mt-0.5 whitespace-nowrap">Gioco di squadra</p>
+                </div>
+            </div>
+
+            <!-- Azioni Rapide Header -->
+            <div class="flex items-center gap-1.5 sm:gap-2">
+                <button type="button" onclick="toggleSound()" id="btn-sound" class="pulsante-suoni p-2 rounded-xl bg-white/15 hover:bg-white/25 transition" title="Attiva/Disattiva Audio">
+                    <svg id="icon-sound-on" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+                    <svg id="icon-sound-off" class="w-5 h-5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"></path></svg>
+                </button>
+
+                <button onclick="openImportModal()" class="flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-xs font-bold px-3 py-2 rounded-xl transition" title="Importa nuove carte">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4"></path></svg>
+                    <span class="hidden min-[400px]:inline">Importa</span>
+                </button>
+
+                <button onclick="openModal('rules-modal')" title="Regolamento" class="flex items-center gap-1.5 bg-[#1e2024] hover:bg-black text-white text-xs font-extrabold px-3 py-2 rounded-xl shadow-sm transition">
+                    <svg class="w-4 h-4 text-[#6ec2c4]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    <span class="hidden sm:inline">Regolamento</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTENITORE PRINCIPALE -->
+    <main class="max-w-4xl w-full mx-auto px-3 sm:px-4 pt-4 flex-1 flex flex-col gap-5">
+
+        <!-- SCHERMATA 0: SETUP PARTITA (VISIBILE ALL'AVVIO O SU RESET) -->
+        <section id="setup-screen" class="bg-white rounded-3xl p-6 sm:p-8 shadow-md border border-slate-200 animate-enter">
+            <div class="text-center max-w-lg mx-auto mb-6">
+                <span class="inline-block text-xs font-black uppercase tracking-widest text-[#4d9496] bg-[#e6f2f2] px-3 py-1 rounded-full mb-2">Preparazione Partita</span>
+                <h2 class="text-2xl sm:text-3xl font-black text-slate-900">Pronti a giocare a HINT FAKE?</h2>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1.5">
+                    Dividetevi in <strong>due squadre</strong>. Vince la prima squadra che raggiunge <strong>20 punti o più</strong> a parità di turni giocati!
+                </p>
+            </div>
+
+            <!-- PARTITA SALVATA DA RIPRENDERE -->
+            <div id="resume-box" class="max-w-xl mx-auto mb-5" hidden></div>
+
+            <!-- SCELTA VERSIONE: BAMBINI / ADULTI -->
+            <div class="max-w-xl mx-auto mb-5">
+                <div class="text-[11px] font-black uppercase tracking-wider text-slate-500 mb-2">Versione</div>
+                <div class="grid grid-cols-2 gap-3">
+                    <button type="button" id="mode-btn-bambini" onclick="setMode('bambini')" class="mode-btn rounded-2xl border-2 p-3.5 text-left">
+                        <span class="text-2xl block">🧒</span>
+                        <span class="font-black text-sm block">Bambini</span>
+                        <span class="text-[11px] opacity-75">Temi adatti ai più piccoli</span>
+                    </button>
+                    <button type="button" id="mode-btn-adulti" onclick="setMode('adulti')" class="mode-btn rounded-2xl border-2 p-3.5 text-left">
+                        <span class="text-2xl block">🔞</span>
+                        <span class="font-black text-sm block">Adulti</span>
+                        <span class="text-[11px] opacity-75">Temi da grandi</span>
+                    </button>
+                </div>
+                <label id="hot-toggle-row" class="mt-3 flex items-center justify-between gap-3 bg-rose-50 border border-rose-200 rounded-2xl px-4 py-3 cursor-pointer">
+                    <span>
+                        <span class="font-black text-sm text-rose-900 block">🌶️ Includi carte hot</span>
+                        <span class="text-[11px] text-rose-800/80">Parolacce, doppi sensi e temi piccanti</span>
+                    </span>
+                    <input id="hot-toggle" type="checkbox" onchange="setHot(this.checked)" class="w-5 h-5 accent-rose-600 shrink-0">
+                </label>
+                <div class="mt-3 flex items-center justify-between gap-2 text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5">
+                    <span id="setup-deck-info">—</span>
+                    <button type="button" onclick="restartDeck()" class="font-extrabold text-[#366f71] hover:underline shrink-0">Ricomincia mazzo</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl mx-auto mb-6">
+                <div class="bg-slate-50 p-4 rounded-2xl border-2 border-[#4d9496]/40">
+                    <label class="block text-[11px] font-black uppercase tracking-wider text-[#366f71] mb-1.5">Nome Squadra 1 (Inizia)</label>
+                    <input id="setup-team-1" type="text" value="Squadra A" maxlength="20" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 font-extrabold text-slate-900 focus:outline-none focus:border-[#4d9496]">
+                </div>
+                <div class="bg-slate-50 p-4 rounded-2xl border-2 border-slate-200">
+                    <label class="block text-[11px] font-black uppercase tracking-wider text-slate-500 mb-1.5">Nome Squadra 2</label>
+                    <input id="setup-team-2" type="text" value="Squadra B" maxlength="20" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 font-extrabold text-slate-900 focus:outline-none focus:border-[#4d9496]">
+                </div>
+            </div>
+
+            <div class="bg-[#e6f2f2]/70 border border-[#4d9496]/30 rounded-2xl p-4 max-w-xl mx-auto mb-6 text-xs text-slate-700 space-y-1.5">
+                <div class="font-black text-[#366f71] uppercase tracking-wider flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>Come funziona la Ruota a 5 Slot</span>
+                </div>
+                <p>• All'inizio ci sono sempre <strong>3 carte</strong> inserite nei 5 slot intorno alla ruota.</p>
+                <p>• <strong>Slot Bonus Nero (+1):</strong> facoltativo, se lo scegli ottieni +1 punto extra.</p>
+                <p>• <strong>Slot Bonus Blu (+1):</strong> <span class="underline font-bold text-[#2b6b87]">OBBLIGATORIO</span>! Se c'è una carta qui devi sceglierla e ottieni +1 punto extra.</p>
+                <p>• <strong>Slot Freccia:</strong> a fine turno la ruota gira in senso orario e qui entra la nuova carta.</p>
+            </div>
+
+            <div class="text-center">
+                <button onclick="startGame()" class="bg-[#4d9496] hover:bg-[#366f71] active:scale-95 text-white font-black text-base px-8 py-4 rounded-2xl shadow-lg transition inline-flex items-center gap-2.5">
+                    <span>Inizia la Partita</span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                </button>
+            </div>
+            <p class="text-[10px] text-slate-400 text-center mt-5 max-w-md mx-auto leading-relaxed">HINT FAKE è una versione amatoriale e non ufficiale, ispirata al gioco da tavolo HINT. Non è affiliata ai suoi autori né all'editore.</p>
+        </section>
+
+        <!-- AREA DI GIOCO ATTIVA (NASCOSTA DURANTE SETUP) -->
+        <div id="active-game-container" class="hidden flex-col gap-4">
+
+            <!-- BARRA STATO TURNO & PASSO CORRENTE -->
+            <section class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div id="turn-badge-avatar" class="w-11 h-11 rounded-2xl bg-[#4d9496] text-white flex items-center justify-center font-black text-lg shadow-sm shrink-0">
+                        1
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Squadra Attiva</span>
+                            <span id="round-number-badge" class="text-[10px] font-black bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">Turno 1</span>
+                        </div>
+                        <h2 id="active-team-title" class="text-xl font-black text-slate-900 leading-tight">Squadra A</h2>
+                    </div>
+                </div>
+
+                <!-- Indicatore dei 7 Passi del Regolamento -->
+                <div class="flex items-center gap-2 bg-[#f3f4f2] px-3.5 py-2.5 rounded-2xl border border-slate-200/80">
+                    <span id="step-pill" class="text-[11px] font-black uppercase tracking-wider bg-[#1e2024] text-white px-2.5 py-1 rounded-lg shrink-0">
+                        Passo 1
+                    </span>
+                    <span id="step-description" class="text-xs sm:text-sm font-bold text-slate-700">
+                        Scegli una carta intorno alla ruota
+                    </span>
+                </div>
+            </section>
+
+            <!-- ===================================================================== -->
+            <!-- PASSO 1: LA RUOTA ROTANTE A 5 SLOT CON LE 3 CARTE ATTIVE              -->
+            <!-- ===================================================================== -->
+            <section id="step-1-wheel-view" class="animate-enter space-y-4">
+                
+                <!-- Avviso Carta Obbligatoria se presente nello Slot Bonus Blu -->
+                <div id="obligatory-banner" class="hidden bg-[#4696b8] text-white p-3.5 rounded-2xl shadow-md flex items-center justify-between gap-3 obligatory-pulse">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center font-black text-sm shrink-0">+1</div>
+                        <div>
+                            <h3 class="font-black text-sm uppercase tracking-wide">Carta Obbligatoria nello Slot Bonus Blu!</h3>
+                            <p class="text-xs text-white/90">Come da regolamento, dovete scegliere questa carta e ricevete subito <strong>+1 punto bonus</strong>.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Plancia della Ruota: le carte stanno direttamente sugli spicchi -->
+                <div class="bg-white rounded-3xl p-3 sm:p-6 shadow-sm border border-slate-200">
+                    <div class="flex items-start justify-between gap-2 mb-3 px-1">
+                        <div>
+                            <h3 class="font-black text-base text-slate-900">La Ruota</h3>
+                            <p class="text-xs text-slate-500">Tocca una carta sulla ruota per sceglierla. <strong>↻</strong> = già fatta, cambiala.</p>
+                        </div>
+                        <button onclick="openModal('wheel-help-modal')" class="text-xs font-bold text-[#366f71] bg-[#e6f2f2] hover:bg-[#d5e9e9] px-3 py-1.5 rounded-xl transition shrink-0">
+                            Come funziona?
+                        </button>
+                    </div>
+                    <div id="wheel-board" class="wheel-board">
+                        <svg id="wheel-bg" class="wheel-bg" viewBox="0 0 100 100" aria-hidden="true"></svg>
+                        <div id="wheel-tiles"></div>
+                    </div>
+                    <div class="flex flex-wrap justify-center gap-x-3 gap-y-1 mt-3 text-[10px] font-bold text-slate-500">
+                        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#334155]"></span>Ingresso nuova carta</span>
+                        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#1e2024] ring-2 ring-[#f5c84c]"></span>+1 facoltativo</span>
+                        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#4696b8]"></span>+1 obbligatorio</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===================================================================== -->
+            <!-- PASSO 2: SCHERMO PRIVACY SUGGERITORE (PRIMA DI GIRARE LA CARTA)        -->
+            <!-- ===================================================================== -->
+            <section id="step-2-privacy-view" class="hidden animate-enter">
+                <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-md border border-slate-200 max-w-lg mx-auto text-center">
+                    <span id="privacy-slot-pill" class="inline-block text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full bg-slate-100 text-slate-600 mb-4">
+                        Slot Selezionato
+                    </span>
+
+                    <div class="card-back-black text-white rounded-3xl p-6 mb-6 text-left relative overflow-hidden">
+                        <div id="privacy-card-ability-badge" class="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider px-3 py-1 rounded-full bg-[#4d9496] text-white mb-3">
+                            ABILITÀ
+                        </div>
+                        <h3 id="privacy-card-theme" class="text-xl sm:text-2xl font-black uppercase tracking-tight leading-snug">
+                            Tema della Carta
+                        </h3>
+                    </div>
+
+                    <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6 text-xs sm:text-sm text-amber-950">
+                        <p class="font-bold">Passa il dispositivo a chi formulerà gli indizi per <strong id="privacy-team-name">Squadra A</strong>!</p>
+                        <p class="text-amber-800 mt-1">Assicurati che i compagni di squadra non guardino lo schermo prima di girare la carta.</p>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-2.5">
+                        <button type="button" onclick="cancelCardSelection()" class="sm:w-1/4 py-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs sm:text-sm transition">
+                            ← Indietro
+                        </button>
+                        <button type="button" onclick="replaceSelectedCardInPrivacy()" class="sm:w-1/3 py-3.5 rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-extrabold text-xs sm:text-sm transition">
+                            ↻ Già fatta (Cambia)
+                        </button>
+                        <button type="button" onclick="revealCardAndStartRound()" class="sm:w-5/12 py-3.5 rounded-2xl bg-[#4d9496] hover:bg-[#366f71] text-white font-black text-sm sm:text-base shadow-lg transition">
+                            Gira e Avvia 90s ➔
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===================================================================== -->
+            <!-- PASSO 3: FRONTE CARTA BIANCO + TIMER UFFICIALE DA 90 SECONDI          -->
+            <!-- ===================================================================== -->
+            <section id="step-3-play-view" class="hidden animate-enter space-y-4">
+                <!-- Barra Timer 90 Secondi -->
+                <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200">
+                    <div class="flex items-center justify-between gap-3 mb-2.5">
+                        <div>
+                            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 block">Tempo Rimanente</span>
+                            <span id="timer-clock" class="text-4xl sm:text-5xl font-black text-slate-900 tabular-nums tracking-tight">01:30</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button type="button" id="btn-pause-timer" onclick="toggleTimerPause()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold text-xs sm:text-sm transition">
+                                Pausa
+                            </button>
+                            <button type="button" onclick="endActiveTimerEarly()" class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs sm:text-sm shadow-sm transition">
+                                Fine Tempo ➔
+                            </button>
+                        </div>
+                    </div>
+                    <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div id="timer-bar" class="h-full bg-[#4d9496] transition-all duration-300 ease-linear rounded-full" style="width: 100%"></div>
+                    </div>
+                </div>
+
+                <!-- Fronte Carta Bianco Ufficiale -->
+                <div class="card-front-white rounded-3xl overflow-hidden border border-slate-200 max-w-2xl mx-auto">
+                    <div id="play-card-banner" class="bg-sky-600 text-white p-4 sm:p-5 flex items-center justify-between gap-2">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span id="play-ability-badge" class="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider bg-black/25 px-2.5 py-1 rounded-full">
+                                    ABILITÀ
+                                </span>
+                                <span id="play-slot-bonus-tag" class="hidden text-[10px] font-black uppercase tracking-wider bg-white text-slate-900 px-2.5 py-1 rounded-full">
+                                    +1 BONUS SLOT
+                                </span>
+                            </div>
+                            <h3 id="play-card-theme" class="text-lg sm:text-xl font-black uppercase tracking-tight">Tema Carta</h3>
+                        </div>
+                        <button type="button" onclick="openModal('ability-quick-modal')" class="px-3 py-2 rounded-xl bg-white/20 hover:bg-white/30 text-xs font-extrabold shrink-0 transition">
+                            Regola
+                        </button>
+                    </div>
+
+                    <div class="p-4 sm:p-6 space-y-4">
+                        <!-- Oggetto Proibito (-2 pt) -->
+                        <div id="forbidden-box" onclick="toggleForbiddenWord()" class="cursor-pointer rounded-2xl p-3.5 bg-red-50 border-2 border-red-200 flex items-center justify-between gap-3 transition">
+                            <div>
+                                <span class="text-[10px] font-black uppercase tracking-wider text-red-600 block">🚫 Oggetto Proibito (Evitare!)</span>
+                                <span id="play-forbidden-text" class="text-base sm:text-lg font-black text-red-900">Oggetto Proibito</span>
+                            </div>
+                            <span id="forbidden-pill-status" class="text-xs font-extrabold px-3 py-1.5 rounded-xl bg-white border border-red-200 text-red-700 shrink-0">
+                                Nominato? (-2)
+                            </span>
+                        </div>
+
+                        <!-- I 5 Oggetti da Indovinare -->
+                        <div id="play-objects-list" class="space-y-2.5"></div>
+
+                        <!-- Riepilogo Parziale Round -->
+                        <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                            <span id="bonus-active-pill" class="text-xs font-bold text-slate-500">Slot senza bonus</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold text-slate-500">Punteggio parziale:</span>
+                                <span id="active-round-score-preview" class="text-2xl font-black text-slate-900">0 pt</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===================================================================== -->
+            <!-- PASSO 4: TEMPO SCADUTO -> VERIFICA RISPOSTE + TURNO AVVERSARI         -->
+            <!-- ===================================================================== -->
+            <section id="step-4-opponent-view" class="hidden animate-enter">
+                <div class="bg-white rounded-3xl p-5 sm:p-7 shadow-md border border-slate-200 max-w-2xl mx-auto">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-11 h-11 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <div>
+                            <span class="text-[11px] font-black uppercase tracking-wider text-amber-600">Passo 4 • Tempo Scaduto!</span>
+                            <h3 class="text-xl font-black text-slate-900">
+                                Verifica Risposte & Replica di <span id="opponent-team-name" class="text-[#366f71] underline">Squadra B</span>
+                            </h3>
+                        </div>
+                    </div>
+
+                    <!-- 1. Verifica/Modifica risposte della Squadra Attiva anche dopo lo scadere del tempo -->
+                    <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 mb-5">
+                        <div class="flex items-center justify-between mb-2.5">
+                            <span class="text-xs font-black uppercase text-slate-700">1. Risposte Squadra Attiva (modificabili):</span>
+                            <span id="opponent-card-theme-label" class="text-xs font-bold text-slate-500">Tema</span>
+                        </div>
+                        <div id="opponent-review-list" class="space-y-2 text-sm">
+                            <!-- Oggetto proibito + 5 oggetti cliccabili anche dopo il timer -->
+                        </div>
+                        <div class="mt-3 pt-2.5 border-t border-slate-200 flex items-center justify-between text-xs">
+                            <span class="font-bold text-slate-500">Totale squadra attiva:</span>
+                            <span id="step4-active-score-badge" class="font-black text-base text-slate-900">0 pt</span>
+                        </div>
+                    </div>
+
+                    <!-- 2. Esito Replica Squadra Avversaria (normale combinabile; proibito indovinato/errato alternativi) -->
+                    <div class="text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
+                        2. Replica di <span id="opponent-team-name-2">Squadra B</span>:
+                    </div>
+                    <p class="text-xs text-slate-500 mb-3">
+                        Puoi segnare sia un oggetto normale sia l'oggetto proibito. Per il proibito scegli "indovinato" oppure "errato". Se non ha proposto nulla, lascia tutto deselezionato.
+                    </p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-5">
+                        <button type="button" onclick="toggleOpponentChoice('normal')" id="opp-btn-normal" class="text-left p-3.5 rounded-2xl border-2 border-slate-200 hover:border-emerald-500 transition flex items-center justify-between">
+                            <div>
+                                <span class="font-black text-sm text-slate-900 block">Oggetto Normale</span>
+                                <span class="text-[11px] text-slate-500">Indovina 1 delle 5 parole</span>
+                            </div>
+                            <span class="font-black text-sm text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-xl shrink-0">+1 pt</span>
+                        </button>
+
+                        <button type="button" onclick="toggleOpponentChoice('forbidden')" id="opp-btn-forbidden" class="text-left p-3.5 rounded-2xl border-2 border-slate-200 hover:border-emerald-600 transition flex items-center justify-between">
+                            <div>
+                                <span class="font-black text-sm text-slate-900 block">Oggetto Proibito Indovinato</span>
+                                <span class="text-[11px] text-slate-500">Indovina parola proibita</span>
+                            </div>
+                            <span class="font-black text-sm text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-xl shrink-0">+2 pt</span>
+                        </button>
+
+                        <button type="button" onclick="toggleOpponentChoice('wrong')" id="opp-btn-wrong" class="text-left p-3.5 rounded-2xl border-2 border-slate-200 hover:border-red-500 transition flex items-center justify-between">
+                            <div>
+                                <span class="font-black text-sm text-slate-900 block">Oggetto Proibito Errato</span>
+                                <span class="text-[11px] text-slate-500">Proibito proposto sbagliato</span>
+                            </div>
+                            <span class="font-black text-sm text-red-600 bg-red-50 px-2.5 py-1 rounded-xl shrink-0">-2 pt</span>
+                        </button>
+                    </div>
+
+                    <!-- Conferma Round, Aggiorna Carta Punteggio e Gira la Ruota -->
+                    <button onclick="finalizeTurnAndRotateWheel()" class="w-full py-4 rounded-2xl bg-[#1e2024] hover:bg-black active:scale-[0.99] text-white font-black text-base shadow-lg transition flex items-center justify-center gap-2.5">
+                        <span>Registra Punti e Gira la Ruota</span>
+                        <svg class="w-5 h-5 text-[#6ec2c4]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    </button>
+                </div>
+            </section>
+
+            <!-- ===================================================================== -->
+            <!-- PASSO 5: CARTA PUNTEGGIO UFFICIALE (SEMPRE VISIBILE IN BASSO)          -->
+            <!-- ===================================================================== -->
+            <section class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-xl bg-[#e6f2f2] text-[#366f71] flex items-center justify-center font-black">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                        </div>
+                        <div>
+                            <h3 class="font-black text-sm text-slate-900 uppercase tracking-wider">Carta Punteggio</h3>
+                            <p class="text-[11px] text-slate-500">Obiettivo: <strong>20 punti o più</strong> (a parità di turni giocati)</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col items-end gap-1 shrink-0">
+                        <button id="btn-undo-turn" onclick="undoLastTurn()" class="hidden text-xs font-extrabold text-[#366f71] bg-[#e6f2f2] hover:bg-[#d5e9e9] px-2.5 py-1.5 rounded-xl transition whitespace-nowrap">
+                            ↶ Annulla turno
+                        </button>
+                        <button onclick="confirmNewGame()" class="text-xs font-bold text-slate-400 hover:text-red-600 px-2.5 py-1 rounded-xl transition whitespace-nowrap">
+                            Nuova Partita
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Box Totali delle 2 Squadre -->
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <!-- Squadra 0 -->
+                    <div id="scorecard-team-0" class="rounded-2xl p-3.5 border-2 border-[#4d9496] bg-[#e6f2f2]/40 transition">
+                        <div class="flex items-center justify-between">
+                            <span id="sc-name-0" class="font-black text-sm sm:text-base text-slate-900 truncate">Squadra A</span>
+                            <span id="sc-turns-0" class="text-[10px] font-bold text-slate-500 bg-white px-2 py-0.5 rounded-full whitespace-nowrap shrink-0">0 turni</span>
+                        </div>
+                        <div class="flex items-baseline justify-between mt-1.5">
+                            <span id="sc-total-0" class="text-3xl sm:text-4xl font-black text-[#366f71] tabular-nums">0</span>
+                            <span class="text-xs font-bold text-slate-400">/ 20 pt</span>
+                        </div>
+                        <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden mt-2">
+                            <div id="sc-bar-0" class="h-full bg-[#4d9496] transition-all duration-500 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Squadra 1 -->
+                    <div id="scorecard-team-1" class="rounded-2xl p-3.5 border-2 border-slate-200 bg-slate-50/70 transition">
+                        <div class="flex items-center justify-between">
+                            <span id="sc-name-1" class="font-black text-sm sm:text-base text-slate-900 truncate">Squadra B</span>
+                            <span id="sc-turns-1" class="text-[10px] font-bold text-slate-500 bg-white px-2 py-0.5 rounded-full whitespace-nowrap shrink-0">0 turni</span>
+                        </div>
+                        <div class="flex items-baseline justify-between mt-1.5">
+                            <span id="sc-total-1" class="text-3xl sm:text-4xl font-black text-slate-800 tabular-nums">0</span>
+                            <span class="text-xs font-bold text-slate-400">/ 20 pt</span>
+                        </div>
+                        <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden mt-2">
+                            <div id="sc-bar-1" class="h-full bg-slate-700 transition-all duration-500 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Storico Turni stile Foglio Carta Punteggio -->
+                <div id="score-history-container" class="hidden border-t border-slate-100 pt-3">
+                    <div class="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1.5">Cronologia Turni</div>
+                    <div id="score-history-list" class="max-h-32 overflow-y-auto space-y-1 text-xs">
+                        <!-- Righe cronologia generate da JS -->
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- ===================================================================== -->
+    <!-- MODALI (REGOLAMENTO COMPLETO, REGOLA ABILITÀ, SCHEMA RUOTA, VITTORIA)  -->
+    <!-- ===================================================================== -->
+
+    <!-- MODAL 1: REGOLAMENTO UFFICIALE COMPLETO -->
+    <div id="rules-modal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl max-h-[88vh] overflow-y-auto">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+                <div>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-[#4d9496]">Regole</span>
+                    <h3 class="text-xl font-black text-slate-900">Regolamento HINT FAKE</h3>
+                </div>
+                <button onclick="closeModal('rules-modal')" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <div class="space-y-4 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                <div class="bg-[#e6f2f2]/60 p-4 rounded-2xl border border-[#4d9496]/30">
+                    <h4 class="font-black text-[#366f71] uppercase text-xs mb-1">Regola Generale</h4>
+                    <p>Si può comunicare con la propria squadra per confermare o rifiutare le proposte. Potete comunicare numeri e simboli, ma <strong>non potete comunicare alcuna lettera</strong>. Se la squadra attiva viola il regolamento, non ottiene punti per l'oggetto indovinato (ma la squadra avversaria può comunque tentare di indovinarlo allo scadere del tempo).</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+                        <span class="font-black text-sky-700 uppercase text-xs block mb-1">Parlare</span>
+                        Non potete gesticolare in nessun modo o pronunciare gli oggetti. Non sono permesse traduzioni o rime.
+                    </div>
+                    <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+                        <span class="font-black text-emerald-700 uppercase text-xs block mb-1">Mimare</span>
+                        Non potete emettere alcun suono, ma potete usare tutto il corpo per mimare.
+                    </div>
+                    <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+                        <span class="font-black text-fuchsia-700 uppercase text-xs block mb-1">Canticchiare</span>
+                        Potete canticchiare, fischiettare ed emettere suoni senza senso come "la-di-da". Potete canticchiare le parole o gli strumenti musicali e anche canzoni non presenti sulla carta, se può essere d'aiuto. Non potete assolutamente parlare o gesticolare.
+                    </div>
+                    <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+                        <span class="font-black text-amber-700 uppercase text-xs block mb-1">Disegnare</span>
+                        Potete disegnare sul blocchetto. Non potete assolutamente emettere alcun suono o fare alcun gesto.
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                    <h4 class="font-black text-slate-900 uppercase text-xs mb-1.5">Calcolo dei Punti</h4>
+                    <ul class="space-y-1">
+                        <li>• <strong>Squadra Attiva:</strong> +1 punto per ogni oggetto indovinato; +1 punto bonus se la carta era in uno slot bonus (Nero o Blu); <strong>-2 punti</strong> se propone l'oggetto proibito.</li>
+                        <li>• <strong>Squadra Avversaria (a tempo scaduto):</strong> +1 punto se indovina un oggetto rimanente; per l'oggetto proibito <strong>+2 punti</strong> se lo indovina oppure <strong>-2 punti</strong> se lo sbaglia. Oggetto normale e proibito si possono tentare entrambi.</li>
+                    </ul>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-950">
+                    <h4 class="font-black uppercase text-xs mb-1">Chi è il Vincitore?</h4>
+                    Per vincere la partita, una squadra deve raggiungere <strong>20 punti o più</strong> dopo che entrambe le squadre hanno giocato lo stesso numero di turni. In caso di parità si effettua uno spareggio di un turno ciascuno ad oltranza.
+                </div>
+            </div>
+
+            <div class="mt-5 flex flex-col sm:flex-row gap-2">
+                <button onclick="playFartSound()" class="sm:w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold py-3.5 rounded-2xl text-sm transition">💨 Prova suono fine timer</button>
+                <button onclick="closeModal('rules-modal')" class="flex-1 bg-[#1e2024] text-white font-extrabold py-3.5 rounded-2xl text-sm">Ho capito</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: REGOLA RAPIDA ABILITÀ CORRENTE -->
+    <div id="ability-quick-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl">
+            <h3 id="quick-ability-title" class="text-xl font-black text-slate-900 mb-2">Regola Abilità</h3>
+            <p id="quick-ability-body" class="text-sm text-slate-600 leading-relaxed mb-4"></p>
+            <div class="p-3 rounded-2xl bg-slate-100 text-xs text-slate-600 mb-5">
+                <strong>Ricorda:</strong> Puoi confermare o rifiutare le proposte dei tuoi compagni e indicare numeri/simboli, ma mai lettere dell'alfabeto!
+            </div>
+            <button onclick="closeModal('ability-quick-modal')" class="w-full py-3 bg-[#4d9496] text-white font-extrabold rounded-2xl text-sm">Torna al Round</button>
+        </div>
+    </div>
+
+    <!-- MODAL 3: SCHEMA FUNZIONAMENTO RUOTA -->
+    <div id="wheel-help-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl">
+            <h3 class="text-lg font-black text-slate-900 mb-2">Come funziona la Ruota a 5 Slot</h3>
+            <div class="space-y-2.5 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                <p>1. All'inizio di ogni turno ci sono <strong>3 carte</strong> inserite in 3 dei 5 slot della ruota (gli altri 2 slot restano vuoti).</p>
+                <p>2. <strong>Slot Bonus Nero (+1):</strong> Se scegliete questa carta, ottenete 1 punto aggiuntivo.</p>
+                <p>3. <strong>Slot Bonus Blu (+1):</strong> Indica che <strong>DOVETE</strong> prendere questa carta se è il turno della vostra squadra e ottenete 1 punto aggiuntivo.</p>
+                <p>4. A fine turno la ruota gira di <strong>una tacca in senso orario</strong> (1/5 di giro) e una nuova carta entra nello spicchio con la freccia bianca, in alto.</p>
+                <p>5. Le carte stanno direttamente sulla ruota: toccane una per sceglierla. Con il tasto <strong>↻</strong> la cambi se l’avete già giocata.</p>
+            </div>
+            <button onclick="closeModal('wheel-help-modal')" class="mt-5 w-full py-3 bg-slate-900 text-white font-extrabold rounded-2xl text-sm">Chiudi</button>
+        </div>
+    </div>
+
+    <!-- MODAL 4: IMPORTA CARTE -->
+    <div id="import-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-lg font-black text-slate-900">Importa carte</h3>
+                <button onclick="closeModal('import-modal')" class="p-1.5 rounded-xl bg-slate-100 text-slate-500">✕</button>
+            </div>
+            <div class="bg-[#e6f2f2]/70 border border-[#4d9496]/30 rounded-2xl p-3.5 mb-4">
+                <div class="font-black text-xs text-[#366f71] uppercase tracking-wider mb-2">1 · Chiedi carte nuove a Claude</div>
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                    <label class="text-[11px] font-bold text-slate-600">Per chi
+                        <select id="req-audience" class="mt-1 w-full border border-slate-300 rounded-xl p-2 text-xs font-bold bg-white">
+                            <option value="bambini">Bambini</option>
+                            <option value="tutti">Tutti</option>
+                            <option value="adulti" selected>Adulti</option>
+                            <option value="hot">Adulti hot 🌶️</option>
+                        </select>
+                    </label>
+                    <label class="text-[11px] font-bold text-slate-600">Quante
+                        <select id="req-count" class="mt-1 w-full border border-slate-300 rounded-xl p-2 text-xs font-bold bg-white">
+                            <option>20</option>
+                            <option selected>40</option>
+                            <option>60</option>
+                        </select>
+                    </label>
+                </div>
+                <input id="req-themes" placeholder="Temi preferiti (facoltativo): es. sport, anni '90" class="w-full border border-slate-300 rounded-xl p-2 text-xs font-semibold bg-white mb-2">
+                <button type="button" onclick="copyRequestForClaude()" class="w-full py-2.5 bg-[#1e2024] hover:bg-black text-white font-black rounded-xl text-xs transition">📋 Copia richiesta per Claude</button>
+                <p class="text-[11px] text-slate-600 mt-2">Incollala in una chat con Claude, poi copia la sua risposta e incollala qui sotto.</p>
+                <textarea id="req-fallback" rows="4" readonly class="hidden mt-2 w-full border border-slate-300 rounded-xl p-2 text-[11px] font-mono bg-white"></textarea>
+            </div>
+            <div class="font-black text-xs text-[#366f71] uppercase tracking-wider mb-2">2 · Incolla le carte</div>
+            <p class="text-xs text-slate-600 mb-3">Incolla qui il testo con le carte nuove. Le carte restano salvate su questo dispositivo.</p>
+            <textarea id="import-text" rows="7" placeholder='[{"abilita":"Mimare","tema":"...","proibita":"...","oggetti":["...","...","...","...","..."],"pubblico":"tutti"}]' class="w-full border border-slate-300 rounded-xl p-3 text-xs font-mono focus:outline-none focus:border-[#4d9496]"></textarea>
+            <button onclick="importCardsFromText()" class="w-full mt-3 py-3.5 bg-[#4d9496] hover:bg-[#366f71] text-white font-black rounded-2xl text-sm shadow-md transition">Importa nel mazzo</button>
+            <p id="import-result" class="hidden mt-3 text-xs font-bold rounded-xl px-3 py-2.5"></p>
+
+            <details class="mt-4 text-xs text-slate-600">
+                <summary class="font-extrabold text-slate-700 cursor-pointer">Formato delle carte</summary>
+                <div class="mt-2 space-y-1.5 leading-relaxed">
+                    <p>Una lista JSON di carte. Ogni carta ha: <strong>abilita</strong> (Parlare, Mimare, Canticchiare o Disegnare), <strong>tema</strong>, <strong>proibita</strong>, <strong>oggetti</strong> (esattamente 5) e <strong>pubblico</strong>:</p>
+                    <p>• <strong>tutti</strong> = in entrambe le versioni<br>• <strong>bambini</strong> = solo versione Bambini<br>• <strong>adulti</strong> = solo versione Adulti<br>• <strong>hot</strong> = solo Adulti con carte hot attive</p>
+                    <p>Le carte doppie (stesso tema e stessa parola proibita) vengono saltate.</p>
+                </div>
+            </details>
+
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2 text-xs">
+                <span id="import-count" class="text-slate-500 font-bold">Nessuna carta importata</span>
+                <button onclick="deleteImportedCards()" class="font-extrabold text-red-600 hover:underline">Elimina importate</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 5: VITTORIA / SPAREGGIO -->
+    <div id="victory-modal" class="hidden fixed inset-0 bg-slate-900/75 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-7 shadow-2xl text-center animate-enter">
+            <div class="w-20 h-20 rounded-3xl bg-amber-100 text-amber-500 flex items-center justify-center mx-auto mb-4">
+                <svg class="w-11 h-11" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 1l2.928 6.472L20 8.236l-5 4.656L16.18 20 10 16.528 3.82 20 5 12.892 0 8.236l7.072-.764L10 1z" clip-rule="evenodd"/></svg>
+            </div>
+            <span class="text-xs font-black uppercase tracking-widest text-[#4d9496]">Fine Partita</span>
+            <h2 id="victory-title" class="text-3xl font-black text-slate-900 mt-1 mb-2">Squadra A Vince!</h2>
+            <p id="victory-subtitle" class="text-sm text-slate-500 mb-6">Traguardo dei 20 punti superato a parità di turni!</p>
+            <button onclick="resetToSetup()" class="w-full py-4 bg-[#4d9496] hover:bg-[#366f71] text-white font-black rounded-2xl shadow-lg transition">
+                Gioca una Nuova Partita
+            </button>
+            <button onclick="undoLastTurn()" class="w-full mt-2 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold rounded-2xl text-sm transition">
+                ↶ Punteggio sbagliato? Annulla l'ultimo turno
+            </button>
+        </div>
+    </div>
+
+    <!-- Parti comuni di Combriccola -->
+    <script src="../../shared/js/base.js"></script>
+    <script src="../../shared/js/migrazioni.js"></script>
+    <script src="../../shared/js/squadre.js"></script>
+    <script src="../../shared/js/timer.js"></script>
+    <script src="../../shared/js/suoni.js"></script>
+    <script src="../../shared/js/dialoghi.js"></script>
+    <script src="../../shared/js/partita.js"></script>
+    <script src="../../shared/js/importa.js"></script>
+    <!-- Carte e gioco -->
+    <script src="dati/carte.js"></script>
+    <script src="gioco.js"></script>
+</body>
+</html>
