@@ -19,3 +19,29 @@
   font-stretch: 75% 100%;
   src: url(font/bricolage-grotesque.woff2) format('woff2-variations'), url(font/bricolage-grotesque.woff2) format('woff2');
 }
+
+/* CineStar */
+@font-face {
+  font-family: 'Big Shoulders Display';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url(font/big-shoulders-display.woff2) format('woff2-variations'), url(font/big-shoulders-display.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'Instrument Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400 700;
+  src: url(font/instrument-sans.woff2) format('woff2-variations'), url(font/instrument-sans.woff2) format('woff2');
+}
+
+/* Hitstar */
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300 700;
+  src: url(font/space-grotesk.woff2) format('woff2-variations'), url(font/space-grotesk.woff2) format('woff2');
+}
