@@ -7,7 +7,7 @@ const { apri, ok, BASE, SHOTS } = require('./comune');
     await page.goto(BASE);
     await page.waitForLoadState('networkidle');
     ok(await page.isVisible('[data-gioco="hintfake"] .in-corso'), 'menù: "Partita in corso" su Cinquina (dopo migrazione)');
-    ok(!(await page.isVisible('[data-gioco="cinestar"] .in-corso')), 'menù: nessuna partita su CineStar');
+    ok(!(await page.isVisible('[data-gioco="cinestar"] .in-corso')), 'menù: nessuna partita su Pellicola');
     await page.screenshot({ path: SHOTS + 'menu-1.png', fullPage: true });
     await page.click('#apri-nomi');
     const campi = page.locator('#campi-nomi input');

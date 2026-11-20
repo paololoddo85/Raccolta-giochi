@@ -8,7 +8,7 @@ const { spawn } = require('child_process');
 const path = require('path');
 const { avviaServer, BASE } = require('./comune');
 
-const TUTTE = ['menu', 'cinquina', 'cinestar offline', 'cinestar online', 'giradischi', 'giradischi-offline', 'larghezze', 'pwa'];
+const TUTTE = ['menu', 'cinquina', 'pellicola offline', 'pellicola online', 'giradischi', 'giradischi-offline', 'larghezze', 'pwa'];
 
 function lancia(voce) {
   const [file, ...argomenti] = voce.split(' ');

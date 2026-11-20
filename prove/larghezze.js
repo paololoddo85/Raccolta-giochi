@@ -1,5 +1,5 @@
 const { apri, ok, BASE, SHOTS } = require('./comune');
-const fc = require('./finti-cinestar'), fh = require('./finti-giradischi');
+const fc = require('./finti-pellicola'), fh = require('./finti-giradischi');
 const risultati = [];
 async function controlla(page, nome) {
   for (const w of [320, 360]) {
@@ -20,12 +20,12 @@ async function controlla(page, nome) {
   await page.click('text=Gira e Avvia 90s'); await controlla(page, 'Cinquina timer');
   await page.click('text=Fine Tempo'); await controlla(page, 'Cinquina replica');
   await page.click('button[title="Importa nuove carte"]'); await controlla(page, 'Cinquina import');
-  // CineStar
-  await page.goto(BASE + 'giochi/cinestar/'); await controlla(page, 'CineStar preparazione');
+  // Pellicola
+  await page.goto(BASE + 'giochi/pellicola/'); await controlla(page, 'Pellicola preparazione');
   await page.selectOption('#target-cards-select', '12');
   await page.click('#start-game-btn'); await page.waitForFunction(() => gameState.currentMovie, null, { timeout: 30000 });
-  await controlla(page, 'CineStar turno');
-  await page.locator('#timeline-track button.slot').first().click(); await controlla(page, 'CineStar risultato');
+  await controlla(page, 'Pellicola turno');
+  await page.locator('#timeline-track button.slot').first().click(); await controlla(page, 'Pellicola risultato');
   // pellicola lunga: la pagina non deve allargarsi, scorre solo la pellicola
   for (let i = 0; i < 6; i++) {
     await page.click('#next-turn-btn');
@@ -36,7 +36,7 @@ async function controlla(page, nome) {
   }
   await page.click('#next-turn-btn');
   await page.waitForFunction(() => gameState.currentMovie && !gameState.isTurnResolved, null, { timeout: 30000 });
-  await controlla(page, `CineStar con ${await page.evaluate(() => gameState.players[0].timeline.length)} film in pellicola`);
+  await controlla(page, `Pellicola con ${await page.evaluate(() => gameState.players[0].timeline.length)} film in pellicola`);
   // Giradischi
   await page.goto(BASE + 'giochi/giradischi/'); await controlla(page, 'Giradischi preparazione');
   await page.click('#btn-start-game'); await page.waitForFunction(() => gameState.currentCard, null, { timeout: 90000 });
@@ -44,7 +44,7 @@ async function controlla(page, nome) {
   await page.locator('#timeline-container > button').first().click(); await page.click('#btn-confirm-placement'); await page.waitForTimeout(900);
   await controlla(page, 'Giradischi carta girata');
   await page.screenshot({ path: SHOTS + 'giradischi-girata-320.png', fullPage: true });
-  await page.click('text=Regole'); await controlla(page, 'Giradischi regolamento');
+  await page.click('header button[onclick="openRulesModal()"]'); await controlla(page, 'Giradischi regolamento');
   console.log(risultati.join('\n'));
   if (risultati.some(r => r.startsWith('✗'))) process.exitCode = 1;
   await browser.close();

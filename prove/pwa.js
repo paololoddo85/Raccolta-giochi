@@ -56,9 +56,9 @@ const versioneDi = (testo) => testo.match(/const VERSIONE = '([^']+)';/)[1];
 
     // 3. Senza connessione
     await context.setOffline(true);
-    const pagine = [['', '.pila'], ['giochi/cinquina/', '#setup-screen'], ['giochi/cinestar/', '#setup-screen'], ['giochi/giradischi/', '#setup-screen'],
+    const pagine = [['', '.pila'], ['giochi/cinquina/', '#setup-screen'], ['giochi/pellicola/', '#setup-screen'], ['giochi/giradischi/', '#setup-screen'],
       ['HINT_FAKE.html', '#setup-screen'], ['giochi/hint-fake/', '#setup-screen'], ['hitstar_il_gioco_della_musica.html', '#setup-screen'], ['giochi/hitstar/', '#setup-screen'],
-      ['cinestar_il_gioco_dei_film.html', '#setup-screen'], ['giochi/cinquina/?da=preferiti', '#setup-screen']];
+      ['cinestar_il_gioco_dei_film.html', '#setup-screen'], ['giochi/cinestar/', '#setup-screen'], ['giochi/cinquina/?da=preferiti', '#setup-screen']];
     for (const [url, sel] of pagine) {
       await page.goto(BASE + url);
       await page.waitForSelector(sel, { timeout: 10000 });
@@ -72,10 +72,10 @@ const versioneDi = (testo) => testo.match(/const VERSIONE = '([^']+)';/)[1];
     await page.click('text=Registra Punti e Gira la Ruota');
     await page.waitForFunction(() => state.totalTurnsPlayed === 1 && !state.animating);
     ok(true, 'offline: Cinquina si gioca');
-    await page.goto(BASE + 'giochi/cinestar/');
+    await page.goto(BASE + 'giochi/pellicola/');
     await page.click('#start-game-btn');
     await page.waitForFunction(() => gameState.currentMovie, null, { timeout: 30000 });
-    ok(true, 'offline: CineStar parte con i film inclusi');
+    ok(true, 'offline: Pellicola parte con i film inclusi');
     await page.goto(BASE + 'giochi/giradischi/');
     await page.click('#btn-start-game');
     await page.waitForSelector('.rg-toast-errore', { timeout: 20000 });
