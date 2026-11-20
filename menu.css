@@ -10,12 +10,12 @@
     --latte: #fff4e6;
     --latte-tenue: #c9b8cf;
 
-    --hint: #4d9496;
-    --hint-bordo: #2c5f61;
+    --cinquina: #4d9496;
+    --cinquina-bordo: #2c5f61;
     --cine: #e8b04b;
     --cine-bordo: #a3741f;
-    --hit: #ec4899;
-    --hit-bordo: #9d2766;
+    --giradischi: #ec4899;
+    --giradischi-bordo: #9d2766;
 
     /* parti comuni (finestre, notifiche) */
     --rg-accento: var(--cine);
@@ -142,9 +142,9 @@ button, input { font: inherit; color: inherit; }
 }
 .scatola:focus-visible { outline-color: var(--latte); }
 
-.scatola-hint { --faccia: var(--hint); --bordo: var(--hint-bordo); --su-faccia: #ffffff; }
+.scatola-cinquina { --faccia: var(--cinquina); --bordo: var(--cinquina-bordo); --su-faccia: #ffffff; }
 .scatola-cine { --faccia: var(--cine); --bordo: var(--cine-bordo); --su-faccia: #1a0f22; }
-.scatola-hit  { --faccia: var(--hit);  --bordo: var(--hit-bordo);  --su-faccia: #ffffff; }
+.scatola-giradischi { --faccia: var(--giradischi); --bordo: var(--giradischi-bordo);  --su-faccia: #ffffff; }
 
 .motivo {
     position: absolute; right: -14px; top: -14px;

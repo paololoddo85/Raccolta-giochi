@@ -121,7 +121,7 @@
         } catch (e) {}
     }
 
-    // Suono di peto sintetizzato (fine timer di HINT FAKE).
+    // Suono di peto sintetizzato (fine timer di Cinquina).
     // Una serie di "sbattimenti" irregolari a bassa frequenza (60-120 al secondo):
     // ogni sbattimento è un piccolo impulso smorzato, con ritmo e intensità che
     // variano a caso, un po' di rumore "umido" e uno scoppiettio finale.
@@ -192,7 +192,7 @@
         } catch (e) {}
     }
 
-    // Effetti brevi (usati da Hitstar)
+    // Effetti brevi (usati da Giradischi)
     function effetto(tipo) {
         const a = contesto();
         if (!a) return;

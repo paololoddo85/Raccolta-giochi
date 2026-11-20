@@ -1215,7 +1215,7 @@ function handleTimelinePlacement(slotIndex) {
   const prevMovie = slotIndex > 0 ? timeline[slotIndex - 1] : null;
   const nextMovie = slotIndex < timeline.length ? timeline[slotIndex] : null;
 
-  // Regola Hitster: anni uguali valgono sia prima che dopo
+  // Anni uguali valgono sia prima che dopo
   const isCorrect = (!prevMovie || movie.year >= prevMovie.year) && (!nextMovie || movie.year <= nextMovie.year);
 
   const canvas = document.getElementById('mystery-poster-canvas');

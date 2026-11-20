@@ -1,51 +1,51 @@
 /*
- * HINT FAKE - logica del gioco.
+ * Cinquina (prima "HINT FAKE") - logica del gioco.
  * Le parti comuni (memoria, squadre, timer, suoni, finestre, salvataggio, import)
  * arrivano da shared/js/ tramite l'oggetto globale RG.
  */
 /**
- * METADATI DELLE 4 ABILITÀ UFFICIALI (Parlare, Mimare, Canticchiare, Disegnare)
+ * LE 4 ABILITÀ (Parlare, Mimare, Canticchiare, Disegnare)
  */
 const ABILITIES = {
     Parlare: {
         label: 'PARLARE',
         pillColor: 'bg-sky-500 text-white',
         bannerColor: 'bg-sky-600',
-        rule: 'Non potete gesticolare in nessun modo o pronunciare gli oggetti. Non sono permesse traduzioni o rime.',
+        rule: 'Solo parole, mani ferme. Non si può dire l\'oggetto, né tradurlo in un\'altra lingua, né suggerirlo con una rima.',
         icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>`
     },
     Mimare: {
         label: 'MIMARE',
         pillColor: 'bg-emerald-500 text-white',
         bannerColor: 'bg-emerald-600',
-        rule: 'Non potete emettere alcun suono, ma potete usare tutto il corpo per mimare.',
+        rule: 'Muto come un pesce: si usa tutto il corpo, ma senza nessun suono.',
         icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
     },
     Canticchiare: {
         label: 'CANTICCHIARE',
         pillColor: 'bg-fuchsia-500 text-white',
         bannerColor: 'bg-fuchsia-600',
-        rule: 'Potete canticchiare, fischiettare ed emettere suoni senza senso come "la-di-da". Potete canticchiare le parole o gli strumenti musicali e canticchiare anche canzoni non presenti sulla carta, se può essere d\'aiuto. Non potete assolutamente parlare o gesticolare.',
+        rule: 'Solo suoni: canticchiare, fischiare, fare versi o "na-na-na", anche su canzoni che non c\'entrano con la carta, se aiutano. Niente parole e niente gesti.',
         icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg>`
     },
     Disegnare: {
         label: 'DISEGNARE',
         pillColor: 'bg-amber-500 text-slate-950',
         bannerColor: 'bg-amber-500',
-        rule: 'Potete disegnare sul blocchetto. Non potete assolutamente emettere alcun suono o fare alcun gesto.',
+        rule: 'Solo matita e foglio: niente parole, niente suoni e niente gesti.',
         icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>`
     }
 };
 
 /**
- * MAZZO DI CARTE: sta in dati/carte.js (window.HINTFAKE_CARTE)
+ * MAZZO DI CARTE: sta in dati/carte.js (window.CINQUINA_CARTE)
  * - base: carte con id numerico; quelle in soloAdultiBase solo per la versione Adulti
  * - extra: righe compatte [abilità, tema, proibita, 5 oggetti], id fissi b1… a1… h1…
  */
-const BASE_CARDS = window.HINTFAKE_CARTE.base.map(c => ({ ...c }));
-const BASE_ADULT_ONLY_IDS = new Set(window.HINTFAKE_CARTE.soloAdultiBase);
+const BASE_CARDS = window.CINQUINA_CARTE.base.map(c => ({ ...c }));
+const BASE_ADULT_ONLY_IDS = new Set(window.CINQUINA_CARTE.soloAdultiBase);
 BASE_CARDS.forEach(c => { c.pubblico = BASE_ADULT_ONLY_IDS.has(c.id) ? 'adulti' : 'tutti'; });
-const EXTRA_CARDS = window.HINTFAKE_CARTE.extra;
+const EXTRA_CARDS = window.CINQUINA_CARTE.extra;
 
 const PREFIX = { bambini: 'b', adulti: 'a', hot: 'h' };
 const BUILTIN_CARDS = [...BASE_CARDS];
@@ -348,7 +348,7 @@ function buildRequestForClaude() {
         .filter(c => (c.pubblico || 'tutti') === pubblico || pubblico === 'tutti' || (c.pubblico || 'tutti') === 'tutti')
         .map(c => c.tema);
     const uniqueThemes = [...new Set(existing)].join('; ');
-    return `Crea ${count} carte nuove per il mio gioco HINT FAKE (gioco a squadre in stile HINT: un giocatore fa indovinare 5 oggetti in 90 secondi senza dire la parola proibita).
+    return `Crea ${count} carte nuove per il mio gioco Cinquina (gioco a squadre: chi dà gli indizi fa indovinare alla sua squadra 5 oggetti in 90 secondi, parlando, mimando, canticchiando o disegnando, senza che venga detta la parola proibita).
 
 Pubblico: ${AUDIENCE_TEXT[pubblico]}.${themes ? `\nTemi preferiti: ${themes}.` : ''}
 
@@ -607,7 +607,7 @@ function enterStep1Wheel() {
 
     const hasObligatoryCard = state.wheelSlots[4] !== null;
     setStepHeader(1, hasObligatoryCard
-        ? 'Prendi la Carta Obbligatoria nello Slot 5 (+1 Blu)'
+        ? 'Prendi la carta obbligatoria nello spicchio blu (+1)'
         : 'Scegli una carta intorno alla ruota');
 
     document.getElementById('obligatory-banner').classList.toggle('hidden', !hasObligatoryCard);
@@ -620,11 +620,11 @@ function enterStep1Wheel() {
  */
 const WHEEL_RADIUS = 33; // distanza delle carte dal centro, in % della ruota
 const SLOT_INFO = [
-    { fill: '#334155', light: false, empty: 'Slot 1<br>Ingresso', tag: null },
-    { fill: '#e2e8f0', light: true,  empty: 'Slot 2', tag: null },
-    { fill: '#cbd5e1', light: true,  empty: 'Slot 3', tag: null },
-    { fill: '#1e2024', light: false, empty: 'Slot 4<br>+1', tag: { text: '+1 bonus', cls: 'bg-[#f5c84c] text-slate-900' } },
-    { fill: '#4696b8', light: false, empty: 'Slot 5<br>+1 obblig.', tag: { text: '+1 obbligatoria', cls: 'bg-[#8fd3f0] text-slate-900' } }
+    { fill: '#334155', light: false, empty: 'Spicchio 1<br>Ingresso', tag: null },
+    { fill: '#e2e8f0', light: true,  empty: 'Spicchio 2', tag: null },
+    { fill: '#cbd5e1', light: true,  empty: 'Spicchio 3', tag: null },
+    { fill: '#1e2024', light: false, empty: 'Spicchio 4<br>+1', tag: { text: '+1 bonus', cls: 'bg-[#f5c84c] text-slate-900' } },
+    { fill: '#4696b8', light: false, empty: 'Spicchio 5<br>+1 obblig.', tag: { text: '+1 obbligatoria', cls: 'bg-[#8fd3f0] text-slate-900' } }
 ];
 const SHORT_ABILITY = { Parlare: 'Parla', Mimare: 'Mima', Canticchiare: 'Canta', Disegnare: 'Disegna' };
 
@@ -755,7 +755,7 @@ function replaceSelectedCardInPrivacy() {
 function chooseCardFromWheel(slotIdx) {
     if (state.animating) return;
     if (state.wheelSlots[4] !== null && slotIdx !== 4) {
-        showToast("Devi scegliere la carta nello Slot 5 (+1 Obbligatorio)!");
+        showToast("Prima va presa la carta nello spicchio blu (+1)!");
         return;
     }
     const card = state.wheelSlots[slotIdx];
@@ -770,11 +770,11 @@ function chooseCardFromWheel(slotIdx) {
 
     const ab = ABILITIES[card.abilita];
     const slotNames = [
-        'Slot 1 • Iniziale (Senza bonus)',
-        'Slot 2 • Standard (Senza bonus)',
-        'Slot 3 • Standard (Senza bonus)',
-        'Slot 4 • Bonus Nero (+1 punto)',
-        'Slot 5 • Bonus Blu (+1 punto obbligatorio)'
+        'Spicchio d\'ingresso • senza bonus',
+        'Spicchio 2 • senza bonus',
+        'Spicchio 3 • senza bonus',
+        'Spicchio nero • +1 punto',
+        'Spicchio blu • +1 punto, obbligatorio'
     ];
 
     document.getElementById('privacy-slot-pill').textContent = slotNames[slotIdx];
@@ -803,7 +803,7 @@ function revealCardAndStartRound() {
     document.getElementById('play-ability-badge').innerHTML = `${ab.icon} <span>${ab.label}</span>`;
     document.getElementById('play-card-theme').textContent = card.tema;
     document.getElementById('play-slot-bonus-tag').classList.toggle('hidden', !hasBonus);
-    document.getElementById('bonus-active-pill').textContent = hasBonus ? 'Bonus Slot attivo: +1 pt extra' : 'Slot senza bonus (0 bonus)';
+    document.getElementById('bonus-active-pill').textContent = hasBonus ? 'Carta bonus: +1 pt extra' : 'Carta senza bonus';
 
     // Prepara modale regola abilità rapida
     document.getElementById('quick-ability-title').textContent = `Regola: ${ab.label}`;

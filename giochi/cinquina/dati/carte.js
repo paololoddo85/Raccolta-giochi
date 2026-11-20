@@ -1,5 +1,5 @@
 /*
- * HINT FAKE - mazzo di carte incluso nel gioco.
+ * Cinquina (prima "HINT FAKE") - mazzo di carte incluso nel gioco.
  *
  * ATTENZIONE: non riordinare né cancellare le righe di "extra".
  * L'id di ogni carta extra nasce dalla sua posizione (b1, b2… a1… h1…)
@@ -9,10 +9,9 @@
  * base: carte con id numerico. pubblico "adulti" se l'id è in soloAdultiBase, altrimenti "tutti".
  * extra: righe [abilità, tema, proibita, oggetto1..oggetto5] per pubblico bambini / adulti / hot.
  */
-window.HINTFAKE_CARTE = {
+window.CINQUINA_CARTE = {
             base: [
-            // Carta esatta dall'esempio nelle foto del regolamento
-            { id: 1, abilita: "Mimare", tema: "Cose che fanno rumore", proibita: "Cani", oggetti: ["Sveglia", "Bambini", "Trapano", "Razzo spaziale", "Gallo"] },
+            { id: 1, abilita: "Mimare", tema: "Appena svegli", proibita: "Sbadigliare", oggetti: ["Spegnere la sveglia", "Stiracchiarsi", "Lavarsi i denti", "Preparare il caffè", "Farsi la doccia"] },
 
             // PARLARE (23 carte)
             { id: 2, abilita: "Parlare", tema: "Film cult anni '80 e '90", proibita: "Titanic", oggetti: ["Ritorno al Futuro", "Jurassic Park", "Pulp Fiction", "Forrest Gump", "Matrix"] },
