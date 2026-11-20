@@ -161,7 +161,8 @@ invece la schermata iniziale con il riquadro "Partita in corso" (Riprendi / Scar
   (con gli indizi già pagati). "Annulla" torna a prima del piazzamento: dal risultato, nella premiazione o all'inizio
   del turno dopo, finché non si compra un indizio.
   Senza connessione Pellicola non parte e non riprende una partita: compare "Pellicola ha bisogno di internet"
-  e si resta nella preparazione, con la partita salvata.
+  e si resta nella preparazione, con la partita salvata. Se iTunes risponde ma senza film utili si gioca con i film
+  inclusi; se la connessione cade a partita iniziata si continua con i film inclusi (locandina "non trovata").
 - **Giradischi**: salva a ogni carta, scelta, sfida, gettone e conferma. "Annulla" torna a prima della conferma
   (anche il gettone bonus Pro incassato dopo si perde): dalla carta girata, nella vittoria o all'inizio del turno dopo,
   finché non si usano gettoni o sfide. L'audio non si salva mai: per riascoltare serve la connessione.

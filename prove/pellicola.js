@@ -55,6 +55,19 @@ const MODO = process.argv[2] || 'offline'; // offline | online
       await page.waitForSelector('.rg-toast-errore', { timeout: 30000 });
       ok(await page.isVisible('#setup-screen') && await page.isHidden('#game-screen'), 'offline: la partita salvata non riprende');
       ok(await page.evaluate(() => !!localStorage.getItem('rg-cinestar-partita')) && await page.isVisible('#resume-box [data-azione="riprendi"]:not([disabled])'), 'offline: la partita resta salvata e "Riprendi" torna attivo');
+      // mentre si prepara il mazzo Riprendi e Scarta sono bloccati (niente due preparazioni insieme)
+      await page.evaluate(() => document.querySelectorAll('.rg-toast').forEach(t => t.remove()));
+      ok(await page.evaluate(() => { document.getElementById('start-game-btn').click(); return [...document.querySelectorAll('#resume-box button')].every(b => b.disabled); }), 'durante la preparazione del mazzo Riprendi e Scarta sono bloccati');
+      await page.waitForSelector('.rg-toast-errore', { timeout: 30000 });
+      ok(await page.isVisible('#resume-box [data-azione="scarta"]:not([disabled])'), 'dopo l\'avviso Riprendi e Scarta tornano attivi');
+      // iTunes risponde ma senza film utili: la connessione c'è, si gioca con i film inclusi
+      await page.context().route(/itunes\.apple\.com\/search/, route => {
+        const cb = new URL(route.request().url()).searchParams.get('callback');
+        return route.fulfill({ status: 200, contentType: 'text/javascript', body: `${cb}({"resultCount":0,"results":[]});` });
+      });
+      await page.click('#start-game-btn');
+      await page.waitForSelector('#game-screen:not(.hidden)', { timeout: 30000 });
+      ok(await page.evaluate(() => gameState.pool.length > 0 && !gameState.pool.some(m => m._live)), 'iTunes risponde senza film utili: la partita parte con i film inclusi (non è "offline")');
       ok(errori.length === 0, 'nessun errore in console' + (errori.length ? ':\n' + errori.join('\n') : ''));
       return;
     }

@@ -114,7 +114,13 @@ function markMovieAsPlayed(movie) {
  * JSONP iTunes (search + lookup) senza blocchi CORS
  * ============================================================================
  */
-function jsonp(baseUrl, timeoutMs = 5500) {
+// Risultati della ricerca; [] anche se il servizio non risponde (vedi jsonpRisposta)
+async function jsonp(baseUrl, timeoutMs) {
+  return (await jsonpRisposta(baseUrl, timeoutMs)) || [];
+}
+
+// Risultati della ricerca, oppure null se il servizio non risponde (rete assente, errore o tempo scaduto)
+function jsonpRisposta(baseUrl, timeoutMs = 5500) {
   return new Promise((resolve) => {
     const callbackName = `__itunesCb_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
     const script = document.createElement('script');
@@ -127,7 +133,7 @@ function jsonp(baseUrl, timeoutMs = 5500) {
       if (script.parentNode) script.parentNode.removeChild(script);
       // La callback resta definita come no-op: una risposta tardiva non genera errori
       window[callbackName] = () => {};
-      resolve(Array.isArray(data?.results) ? data.results : []);
+      resolve(data == null ? null : (Array.isArray(data.results) ? data.results : []));
     };
 
     const timer = setTimeout(() => finish(null), timeoutMs);
@@ -138,8 +144,12 @@ function jsonp(baseUrl, timeoutMs = 5500) {
   });
 }
 
+function iTunesSearchUrl(term, country, media, entity, limit) {
+  return `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&country=${country}&media=${media}&entity=${entity}&limit=${limit}`;
+}
+
 function fetchITunesJsonp(term, country = 'us', media = 'movie', entity = 'movie', limit = 10) {
-  return jsonp(`https://itunes.apple.com/search?term=${encodeURIComponent(term)}&country=${country}&media=${media}&entity=${entity}&limit=${limit}`);
+  return jsonp(iTunesSearchUrl(term, country, media, entity, limit));
 }
 
 function fetchITunesLookup(id, country = 'it') {
@@ -150,18 +160,22 @@ function cleanITunesTitle(title) {
   return (title || '').replace(/\s*\(\d{4}\)\s*$/, '').trim();
 }
 
+// Film live da iTunes. reachable: almeno una ricerca ha avuto risposta (la connessione c'è).
 async function fetchLiveMoviesCatalog(eraFilter) {
   const pool = LIVE_MOVIE_QUERIES[eraFilter] || LIVE_MOVIE_QUERIES.all;
   const [minY, maxY] = ERA_RANGES[eraFilter] || ERA_RANGES.all;
   const selectedQueries = shuffleArray(pool).slice(0, 10);
   const liveMovies = [];
   const seenKeys = new Set();
+  let reachable = false;
 
   await Promise.all(selectedQueries.map(async (q) => {
     try {
       const isIt = eraFilter === 'italian' || ITALIAN_QUERY_RE.test(q);
       const country = isIt ? 'it' : 'us';
-      const results = await fetchITunesJsonp(q, country, 'movie', 'movie', 25);
+      const results = await jsonpRisposta(iTunesSearchUrl(q, country, 'movie', 'movie', 25));
+      if (!results) return;
+      reachable = true;
 
       results.forEach(item => {
         if (item.kind !== 'feature-movie' || !item.artworkUrl100 || !item.releaseDate || !item.trackName || !item.trackId) return;
@@ -195,7 +209,7 @@ async function fetchLiveMoviesCatalog(eraFilter) {
     } catch (e) {}
   }));
 
-  return liveMovies;
+  return { movies: liveMovies, reachable };
 }
 
 /**
@@ -800,12 +814,14 @@ function prefetchNextCard() {
  */
 // Catalogo della partita: film curati della categoria + film live da iTunes.
 // I film mai giocati finiscono in fondo all'array: pop() li pesca per primi.
-// Restituisce i film mai visti, oppure null se il catalogo online non risponde:
+// Restituisce i film mai visti, oppure null se il catalogo online non risponde affatto:
 // Pellicola non si gioca senza connessione (servono catalogo e locandine).
-async function buildPoolAndDeck(excludeKeys = new Set()) {
-  const liveMovies = await fetchLiveMoviesCatalog(gameState.eraFilter);
-  if (!liveMovies.length) return null;
-  const curatedMovies = MOVIES_DATABASE.filter(m => eraMatches(m, gameState.eraFilter));
+// Se iTunes risponde ma senza film utili si gioca con i film inclusi (le locandine arrivano online).
+async function buildPoolAndDeck(eraFilter, excludeKeys = new Set()) {
+  const { movies: liveMovies, reachable } = await fetchLiveMoviesCatalog(eraFilter);
+  if (!reachable) return null;
+  gameState.eraFilter = eraFilter;
+  const curatedMovies = MOVIES_DATABASE.filter(m => eraMatches(m, eraFilter));
 
   // I film curati hanno la precedenza sui doppioni live
   const mergedMap = new Map();
@@ -830,17 +846,25 @@ async function buildPoolAndDeck(excludeKeys = new Set()) {
   return unseen;
 }
 
+// Mentre si prepara il mazzo (nuova partita o ripresa) i pulsanti di avvio, Riprendi e Scarta
+// restano bloccati: due preparazioni insieme si sovrascriverebbero a vicenda.
+let preparingDeck = false;
+function setPreparingDeck(on) {
+  preparingDeck = on;
+  ['start-game-btn', 'play-again-btn'].forEach(id => { document.getElementById(id).disabled = on; });
+  document.querySelectorAll('#resume-box button').forEach(b => { b.disabled = on; });
+}
+
 async function startNewGame(triggerBtn) {
+  if (preparingDeck) return;
   const btn = triggerBtn instanceof HTMLElement ? triggerBtn : document.getElementById('start-game-btn');
   const originalLabel = btn.textContent;
-  const buttons = [document.getElementById('start-game-btn'), document.getElementById('play-again-btn')];
-  buttons.forEach(b => { b.disabled = true; });
+  setPreparingDeck(true);
   btn.textContent = 'Preparo il mazzo…';
 
   try {
     const nameInputs = document.querySelectorAll('.player-name-input');
-    gameState.eraFilter = document.getElementById('era-select').value;
-    const unseen = await buildPoolAndDeck();
+    const unseen = await buildPoolAndDeck(document.getElementById('era-select').value);
     if (!unseen) {
       showToast(OFFLINE_MESSAGE, 'error');
       return;
@@ -875,7 +899,6 @@ async function startNewGame(triggerBtn) {
     gameState.started = true;
     RG.squadre.salva(gameState.players.map(p => p.name), DEFAULT_NAMES);
 
-    const liveCount = gameState.pool.filter(m => m._live).length;
     showToast(`Mazzo pronto: ${gameState.pool.length} film, ${unseen.length} mai visti`, 'success');
 
     document.getElementById('setup-screen').classList.add('hidden');
@@ -885,7 +908,7 @@ async function startNewGame(triggerBtn) {
 
     startTurnForCurrentPlayer();
   } finally {
-    buttons.forEach(b => { b.disabled = false; });
+    setPreparingDeck(false);
     btn.textContent = originalLabel;
   }
 }
@@ -1462,19 +1485,23 @@ function renderResumeBox() {
 }
 
 async function resumeSavedGame() {
-  const g = SAVED_GAME.leggi();
+  if (preparingDeck) return;
+  let g = SAVED_GAME.leggi();
   if (!g) { renderResumeBox(); return; }
+  setPreparingDeck(true);
   const btn = document.querySelector('#resume-box [data-azione="riprendi"]');
-  if (btn) { btn.disabled = true; btn.textContent = 'Preparo il mazzo…'; }
+  if (btn) btn.textContent = 'Preparo il mazzo…';
 
   // Il mazzo si ricostruisce (il catalogo live va riscaricato) senza i film già in gioco.
   // Senza connessione la partita resta salvata e si resta nella preparazione.
   const exclude = new Set();
   g.players.forEach(p => p.timeline.forEach(m => exclude.add(movieKey(m))));
   if (g.turn && g.turn.movie) exclude.add(movieKey(g.turn.movie));
-  gameState.eraFilter = g.eraFilter;
-  if (!(await buildPoolAndDeck(exclude))) {
-    showToast(OFFLINE_MESSAGE, 'error');
+  const ready = await buildPoolAndDeck(g.eraFilter, exclude);
+  setPreparingDeck(false);
+  g = SAVED_GAME.leggi(); // nel frattempo la partita può essere stata azzerata dal menù
+  if (!ready || !g) {
+    if (!ready) showToast(OFFLINE_MESSAGE, 'error');
     renderResumeBox();
     return;
   }
