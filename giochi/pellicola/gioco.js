@@ -114,6 +114,7 @@ function markMovieAsPlayed(movie) {
  * JSONP iTunes (search + lookup) senza blocchi CORS
  * ============================================================================
  */
+// Risultati della ricerca, oppure null se il servizio non risponde (rete assente, errore o tempo scaduto)
 function jsonp(baseUrl, timeoutMs = 5500) {
   return new Promise((resolve) => {
     const callbackName = `__itunesCb_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
@@ -127,7 +128,7 @@ function jsonp(baseUrl, timeoutMs = 5500) {
       if (script.parentNode) script.parentNode.removeChild(script);
       // La callback resta definita come no-op: una risposta tardiva non genera errori
       window[callbackName] = () => {};
-      resolve(Array.isArray(data?.results) ? data.results : []);
+      resolve(data == null ? null : (Array.isArray(data.results) ? data.results : []));
     };
 
     const timer = setTimeout(() => finish(null), timeoutMs);
@@ -150,18 +151,24 @@ function cleanITunesTitle(title) {
   return (title || '').replace(/\s*\(\d{4}\)\s*$/, '').trim();
 }
 
+// Film live da iTunes. reachable: almeno una ricerca ha avuto risposta (la connessione c'è).
 async function fetchLiveMoviesCatalog(eraFilter) {
   const pool = LIVE_MOVIE_QUERIES[eraFilter] || LIVE_MOVIE_QUERIES.all;
   const [minY, maxY] = ERA_RANGES[eraFilter] || ERA_RANGES.all;
   const selectedQueries = shuffleArray(pool).slice(0, 10);
   const liveMovies = [];
   const seenKeys = new Set();
+  // Il telefono sa già di essere offline: inutile aspettare le ricerche
+  if (navigator.onLine === false) return { movies: liveMovies, reachable: false };
+  let reachable = false;
 
   await Promise.all(selectedQueries.map(async (q) => {
     try {
       const isIt = eraFilter === 'italian' || ITALIAN_QUERY_RE.test(q);
       const country = isIt ? 'it' : 'us';
       const results = await fetchITunesJsonp(q, country, 'movie', 'movie', 25);
+      if (!results) return;
+      reachable = true;
 
       results.forEach(item => {
         if (item.kind !== 'feature-movie' || !item.artworkUrl100 || !item.releaseDate || !item.trackName || !item.trackId) return;
@@ -195,7 +202,7 @@ async function fetchLiveMoviesCatalog(eraFilter) {
     } catch (e) {}
   }));
 
-  return liveMovies;
+  return { movies: liveMovies, reachable };
 }
 
 /**
@@ -344,7 +351,7 @@ async function doEnrichLiveMovie(movie) {
 
   // 1. Scheda dello store italiano: titolo, trama e genere in italiano
   if (movie._country !== 'it') {
-    const res = await fetchITunesLookup(movie._trackId, 'it');
+    const res = (await fetchITunesLookup(movie._trackId, 'it')) || [];
     const it = res.find(r => r.trackId === movie._trackId) || res[0];
     if (it) {
       if (it.trackName) { movie.itTitle = cleanITunesTitle(it.trackName); gotItalianTitle = true; }
@@ -455,7 +462,7 @@ async function fetchPosterFromITunes(movie) {
   for (const q of queries) {
     try {
       const results = await fetchITunesJsonp(q.term, q.country, 'movie', 'movie', 10);
-      if (!results.length) continue;
+      if (!results || !results.length) continue;
 
       const candidates = results
         .filter(item => item.kind === 'feature-movie' && item.artworkUrl100)
@@ -700,6 +707,8 @@ function showToast(message, type = 'info') {
   RG.toast(message, TOAST_TYPES[type] || 'info');
 }
 
+const OFFLINE_MESSAGE = 'Impossibile caricare i film: Pellicola ha bisogno di internet. Controlla la connessione e riprova.';
+
 // Nomi: "Chi gioca stasera" di Combriccola (primi 4 posti)
 const DEFAULT_NAMES = ['Cinefilo 1', 'Cinefilo 2', 'Cinefilo 3', 'Cinefilo 4'];
 
@@ -743,9 +752,9 @@ document.querySelectorAll('.count-btn').forEach(btn => {
  * MAZZO: costruzione, pesca, ricarica
  * ============================================================================
  */
-function moviesInPlayKeys() {
+function moviesInPlayKeys(players = gameState.players) {
   const keys = new Set();
-  gameState.players.forEach(p => p.timeline.forEach(m => keys.add(movieKey(m))));
+  players.forEach(p => p.timeline.forEach(m => keys.add(movieKey(m))));
   return keys;
 }
 
@@ -798,10 +807,13 @@ function prefetchNextCard() {
  */
 // Catalogo della partita: film curati della categoria + film live da iTunes.
 // I film mai giocati finiscono in fondo all'array: pop() li pesca per primi.
-// Restituisce i film mai visti.
-async function buildPoolAndDeck(excludeKeys = new Set()) {
-  const liveMovies = await fetchLiveMoviesCatalog(gameState.eraFilter);
-  const curatedMovies = MOVIES_DATABASE.filter(m => eraMatches(m, gameState.eraFilter));
+// Restituisce i film mai visti, oppure null se il catalogo online non risponde affatto:
+// Pellicola non si gioca senza connessione (servono catalogo e locandine).
+// Se iTunes risponde ma senza film utili si gioca con i film inclusi (le locandine arrivano online).
+async function buildPoolAndDeck(eraFilter, excludeKeys = new Set()) {
+  const { movies: liveMovies, reachable } = await fetchLiveMoviesCatalog(eraFilter);
+  if (!reachable) return null;
+  const curatedMovies = MOVIES_DATABASE.filter(m => eraMatches(m, eraFilter));
 
   // I film curati hanno la precedenza sui doppioni live
   const mergedMap = new Map();
@@ -826,21 +838,34 @@ async function buildPoolAndDeck(excludeKeys = new Set()) {
   return unseen;
 }
 
+// Mentre si prepara il mazzo (nuova partita o ripresa) i pulsanti di avvio, Riprendi e Scarta
+// restano bloccati: due preparazioni insieme si sovrascriverebbero a vicenda.
+let preparingDeck = false;
+function setPreparingDeck(on) {
+  preparingDeck = on;
+  ['start-game-btn', 'play-again-btn'].forEach(id => { document.getElementById(id).disabled = on; });
+  document.querySelectorAll('#resume-box button').forEach(b => { b.disabled = on; });
+}
+
 async function startNewGame(triggerBtn) {
+  if (preparingDeck) return;
   const btn = triggerBtn instanceof HTMLElement ? triggerBtn : document.getElementById('start-game-btn');
   const originalLabel = btn.textContent;
-  const buttons = [document.getElementById('start-game-btn'), document.getElementById('play-again-btn')];
-  buttons.forEach(b => { b.disabled = true; });
+  setPreparingDeck(true);
   btn.textContent = 'Preparo il mazzo…';
 
   try {
-    gameState.turnToken++;
     const nameInputs = document.querySelectorAll('.player-name-input');
+    const unseen = await buildPoolAndDeck(document.getElementById('era-select').value);
+    if (!unseen) {
+      showToast(OFFLINE_MESSAGE, 'error');
+      return;
+    }
+
+    gameState.turnToken++;
     gameState.eraFilter = document.getElementById('era-select').value;
     gameState.targetCards = parseInt(document.getElementById('target-cards-select').value, 10);
     gameState.players = [];
-
-    const unseen = await buildPoolAndDeck();
 
     // Carte iniziali: sempre dal catalogo curato (anno certo), preferendo quelle mai viste
     const pickStarter = () => {
@@ -867,7 +892,6 @@ async function startNewGame(triggerBtn) {
     gameState.started = true;
     RG.squadre.salva(gameState.players.map(p => p.name), DEFAULT_NAMES);
 
-    const liveCount = gameState.pool.filter(m => m._live).length;
     showToast(`Mazzo pronto: ${gameState.pool.length} film, ${unseen.length} mai visti`, 'success');
 
     document.getElementById('setup-screen').classList.add('hidden');
@@ -877,7 +901,7 @@ async function startNewGame(triggerBtn) {
 
     startTurnForCurrentPlayer();
   } finally {
-    buttons.forEach(b => { b.disabled = false; });
+    setPreparingDeck(false);
     btn.textContent = originalLabel;
   }
 }
@@ -1454,10 +1478,25 @@ function renderResumeBox() {
 }
 
 async function resumeSavedGame() {
-  const g = SAVED_GAME.leggi();
+  if (preparingDeck) return;
+  let g = SAVED_GAME.leggi();
   if (!g) { renderResumeBox(); return; }
+  setPreparingDeck(true);
   const btn = document.querySelector('#resume-box [data-azione="riprendi"]');
-  if (btn) { btn.disabled = true; btn.textContent = 'Preparo il mazzo…'; }
+  if (btn) btn.textContent = 'Preparo il mazzo…';
+
+  // Il mazzo si ricostruisce (il catalogo live va riscaricato) senza i film già in gioco.
+  // Senza connessione la partita resta salvata e si resta nella preparazione.
+  const exclude = moviesInPlayKeys(g.players);
+  if (g.turn && g.turn.movie) exclude.add(movieKey(g.turn.movie));
+  let ready;
+  try { ready = await buildPoolAndDeck(g.eraFilter, exclude); } finally { setPreparingDeck(false); }
+  g = SAVED_GAME.leggi(); // nel frattempo la partita può essere stata azzerata dal menù
+  if (!ready || !g) {
+    if (!ready) showToast(OFFLINE_MESSAGE, 'error');
+    renderResumeBox();
+    return;
+  }
 
   gameState.turnToken++;
   gameState.eraFilter = g.eraFilter;
@@ -1469,11 +1508,6 @@ async function resumeSavedGame() {
   gameState.currentMovie = null;
   gameState.isTurnResolved = false;
   gameState.started = true;
-
-  // Il mazzo si ricostruisce (il catalogo live va riscaricato) senza i film già in gioco
-  const exclude = moviesInPlayKeys();
-  if (g.turn && g.turn.movie) exclude.add(movieKey(g.turn.movie));
-  await buildPoolAndDeck(exclude);
 
   document.getElementById('setup-screen').classList.add('hidden');
   document.getElementById('victory-modal').classList.add('hidden');

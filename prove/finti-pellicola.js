@@ -12,10 +12,12 @@ function jsonp(route, data) {
   const cb = new URL(route.request().url()).searchParams.get('callback');
   return route.fulfill({ status: 200, contentType: 'text/javascript', body: `${cb}(${JSON.stringify(data)});` });
 }
-module.exports = { conteggio, async finti(context) {
+module.exports = { conteggio, jsonp, async finti(context) {
   await context.route(/itunes\.apple\.com\/(search|lookup)/, route => {
-    conteggio.itunes++;
     const u = new URL(route.request().url());
+    // ricerche di altri giochi (es. brani di Giradischi): passano alle loro risposte finte
+    if (u.pathname === '/search' && u.searchParams.get('media') !== 'movie') return route.fallback();
+    conteggio.itunes++;
     const term = (u.searchParams.get('term') || '').toLowerCase();
     // il catalogo live trova "Inception" cercando un regista; le ricerche di locandine per titolo non trovano nulla (si passa a Wikipedia)
     const results = [LIVE];

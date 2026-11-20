@@ -1,6 +1,7 @@
 const { apri, ok, BASE, SHOTS } = require('./comune');
+const { finti } = require('./finti-pellicola'); // Pellicola si gioca solo online: risposte finte
 (async () => {
-  const { browser, page, esterne, errori } = await apri();
+  const { browser, page, esterne, errori } = await apri({ finti });
     try {
     await page.goto(BASE + 'menu.css');
     await page.evaluate(() => { localStorage.clear(); localStorage.setItem('hintfake-partita-in-corso', JSON.stringify({ v: 1, savedAt: Date.now(), teams: [{name:'A',score:1,turnsPlayed:1},{name:'B',score:0,turnsPlayed:0}], wheelSlots: [null,null,null,null,null], activeTeamIdx: 1, totalTurnsPlayed: 1 })); });

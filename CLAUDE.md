@@ -13,6 +13,8 @@ Sito statico con giochi da festa da usare sul telefono (un telefono solo che pas
 - Il proprietario lavora da Claude Code sul web: niente installazioni locali, tutto passa da GitHub.
 - **Piccoli passi**, commit chiari in italiano. Alla fine di ogni fase apri una pull request verso `main`
   con una descrizione semplice di cosa cambia e cosa provare. **Non unire mai le pull request**: lo fa il proprietario.
+- Quando parli di una pull request (aperta, aggiornata, da controllare o da unire) scrivi **sempre il suo link**
+  completo, es. `https://github.com/paololoddo85/Raccolta-giochi/pull/8`.
 - **Prima di aprire ogni pull request** (richiesta del proprietario, vale in ogni sessione), sulle modifiche del ramo:
   1. `/code-review` — cerca errori; correggi quelli reali e aggiungi una prova che li copra;
   2. `/security-review` — soprattutto dove entra testo da fuori (import delle carte, nomi, risposte di iTunes ecc.);
@@ -160,6 +162,9 @@ invece la schermata iniziale con il riquadro "Partita in corso" (Riprendi / Scar
 - **Pellicola**: salva a ogni turno, indizio e piazzamento. Dopo un ricaricamento il film del turno resta lo stesso
   (con gli indizi già pagati). "Annulla" torna a prima del piazzamento: dal risultato, nella premiazione o all'inizio
   del turno dopo, finché non si compra un indizio.
+  Senza connessione Pellicola non parte e non riprende una partita: compare "Pellicola ha bisogno di internet"
+  e si resta nella preparazione, con la partita salvata. Se iTunes risponde ma senza film utili si gioca con i film
+  inclusi; se la connessione cade a partita iniziata si continua con i film inclusi (locandina "non trovata").
 - **Giradischi**: salva a ogni carta, scelta, sfida, gettone e conferma. "Annulla" torna a prima della conferma
   (anche il gettone bonus Pro incassato dopo si perde): dalla carta girata, nella vittoria o all'inizio del turno dopo,
   finché non si usano gettoni o sfide. L'audio non si salva mai: per riascoltare serve la connessione.
@@ -237,7 +242,7 @@ con uno schermo da 360×780, blocca le richieste verso internet e salva gli scre
 | `carte` | mazzo di Cinquina: abilità, 5 oggetti, parola proibita non ripetuta, temi senza doppioni |
 | `menu` | nomi condivisi, "Partita in corso", interruttore suoni |
 | `cinquina` | vecchi indirizzi, migrazione, partita completa, annulla, ripresa, timer, import, muto |
-| `pellicola offline` / `online` | partita completa, indizi, ripresa, annulla (3 casi); online con risposte finte |
+| `pellicola offline` / `online` | offline: avviso "serve internet", niente partita né ripresa; online (risposte finte): partita completa, indizi, ripresa, annulla (3 casi) |
 | `giradischi`, `giradischi-offline` | ascolto, sfida, gettoni, bonus Pro, annulla, ripresa, rete persa, avvio senza internet |
 | `larghezze` | nessuno scorrimento orizzontale in ogni schermata, a 320 e 360px (anche con pellicola lunga) |
 | `pwa` | elenco `FILE` completo, installabilità, pagine offline, avviso e "Controlla aggiornamenti" (su una copia del sito) |

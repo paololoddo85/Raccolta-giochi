@@ -1,10 +1,11 @@
 const { apri, ok, BASE, SHOTS } = require('./comune');
-const { finti, conteggio } = require('./finti-pellicola');
+const { finti, conteggio, jsonp } = require('./finti-pellicola');
 const MODO = process.argv[2] || 'offline'; // offline | online
 (async () => {
-  const { browser, page, esterne, errori } = await apri({ finti: MODO === 'online' ? finti : null });
+  const { browser, page, errori } = await apri({ finti: MODO === 'online' ? finti : null });
   const stato = () => page.evaluate(() => ({ p: gameState.players.map(p => ({ n: p.name, s: p.stars, t: p.timeline.length })), cur: gameState.currentPlayerIndex, film: gameState.currentMovie && gameState.currentMovie.itTitle, risolto: gameState.isTurnResolved, indizi: { ...gameState.unlockedClues } }));
   const filmPronto = () => page.waitForFunction(() => gameState.currentMovie && !gameState.isTurnResolved, null, { timeout: 30000 });
+  const togliToast = () => page.evaluate(() => document.querySelectorAll('.rg-toast').forEach(t => t.remove()));
   const pronto = async () => { if (await page.isVisible('#handoff-modal')) await page.click('#handoff-ready-btn'); };
   // slot giusto (o sbagliato) per il film attuale
   const slot = (giusto) => page.evaluate((giusto) => {
@@ -36,13 +37,45 @@ const MODO = process.argv[2] || 'offline'; // offline | online
     ok(nomi.join() === 'Paolo,Giulia', 'due giocatori proposti con i nomi di "Chi gioca stasera"');
     await page.selectOption('#target-cards-select', '5');
     await page.screenshot({ path: SHOTS + `pellicola-${MODO}-1-setup.png`, fullPage: true });
+
+    if (MODO === 'offline') {
+      // Pellicola non si gioca senza connessione: avviso e si resta nella preparazione
+      await page.click('#start-game-btn');
+      await page.waitForSelector('.rg-toast-errore', { timeout: 30000 });
+      ok((await page.textContent('.rg-toast-errore')).includes('internet'), 'offline: avviso "Pellicola ha bisogno di internet"');
+      ok(await page.isVisible('#setup-screen') && await page.isHidden('#game-screen') && !(await page.isDisabled('#start-game-btn')), 'offline: si resta nella preparazione, il pulsante torna attivo');
+      ok(await page.evaluate(() => localStorage.getItem('rg-cinestar-partita')) === null, 'offline: nessuna partita salvata');
+      await page.screenshot({ path: SHOTS + 'pellicola-offline-2-avviso.png', fullPage: true });
+      // una partita salvata non riprende offline e resta salvata
+      await page.evaluate(() => SAVED_GAME.salva({ targetCards: 5, eraFilter: 'all', currentPlayerIndex: 0, roundNumber: 2,
+        players: [{ name: 'Paolo', stars: 10, timeline: [MOVIES_DATABASE[0]] }, { name: 'Giulia', stars: 8, timeline: [MOVIES_DATABASE[1]] }], turn: null, lastTurnUndo: null }));
+      await page.reload();
+      await page.waitForSelector('#resume-box:not([hidden])');
+      await togliToast();
+      await page.click('#resume-box [data-azione="riprendi"]');
+      await page.waitForSelector('.rg-toast-errore', { timeout: 30000 });
+      ok(await page.isVisible('#setup-screen') && await page.isHidden('#game-screen'), 'offline: la partita salvata non riprende');
+      ok(await page.evaluate(() => !!localStorage.getItem('rg-cinestar-partita')) && await page.isVisible('#resume-box [data-azione="riprendi"]:not([disabled])'), 'offline: la partita resta salvata e "Riprendi" torna attivo');
+      // mentre si prepara il mazzo Riprendi e Scarta sono bloccati (niente due preparazioni insieme)
+      await togliToast();
+      ok(await page.evaluate(() => { document.getElementById('start-game-btn').click(); return [...document.querySelectorAll('#resume-box button')].every(b => b.disabled); }), 'durante la preparazione del mazzo Riprendi e Scarta sono bloccati');
+      await page.waitForSelector('.rg-toast-errore', { timeout: 30000 });
+      ok(await page.isVisible('#resume-box [data-azione="scarta"]:not([disabled])'), 'dopo l\'avviso Riprendi e Scarta tornano attivi');
+      // iTunes risponde ma senza film utili: la connessione c'è, si gioca con i film inclusi
+      await page.context().route(/itunes\.apple\.com\/search/, route => jsonp(route, { resultCount: 0, results: [] }));
+      await page.click('#start-game-btn');
+      await page.waitForSelector('#game-screen:not(.hidden)', { timeout: 30000 });
+      ok(await page.evaluate(() => gameState.pool.length > 0 && !gameState.pool.some(m => m._live)), 'iTunes risponde senza film utili: la partita parte con i film inclusi (non è "offline")');
+      ok(errori.length === 0, 'nessun errore in console' + (errori.length ? ':\n' + errori.join('\n') : ''));
+      return;
+    }
+
     await page.click('#start-game-btn');
     await page.waitForSelector('#game-screen:not(.hidden)', { timeout: 30000 });
-    if (MODO === 'online') ok(await page.evaluate(() => gameState.pool.some(m => m._live)), 'online: catalogo live aggiunto al mazzo (iTunes finto)');
+    ok(await page.evaluate(() => gameState.pool.some(m => m._live)), 'online: catalogo live aggiunto al mazzo (iTunes finto)');
     await pronto(); await filmPronto();
-    if (MODO === 'online') await page.waitForSelector('#mystery-poster-canvas:not(.hidden), #mystery-poster-css-wrapper:not(.hidden)', { timeout: 20000 });
-    else await page.waitForSelector('#poster-fallback-card:not(.hidden)', { timeout: 20000 });
-    ok(true, MODO === 'online' ? 'locandina pixelata mostrata' : 'offline: nessuna locandina, compare la "Pellicola misteriosa"');
+    await page.waitForSelector('#mystery-poster-canvas:not(.hidden), #mystery-poster-css-wrapper:not(.hidden)', { timeout: 20000 });
+    ok(true, 'locandina pixelata mostrata');
     await page.screenshot({ path: SHOTS + `pellicola-${MODO}-2-turno.png`, fullPage: true });
 
     // indizio + ricarica a metà turno
@@ -121,8 +154,7 @@ const MODO = process.argv[2] || 'offline'; // offline | online
     await page.click('.rg-indietro');
     await page.waitForURL(BASE);
     ok(true, 'il tasto ← torna a Combriccola');
-    if (MODO === 'online') console.log('  richieste finte servite:', JSON.stringify(conteggio));
-    else ok(true, `offline: ${esterne.length} richieste esterne bloccate (catalogo e locandine), il gioco prosegue con i film inclusi`);
+    console.log('  richieste finte servite:', JSON.stringify(conteggio));
     ok(errori.length === 0, 'nessun errore in console' + (errori.length ? ':\n' + errori.join('\n') : ''));
   } catch (e) {
     console.log(e.message); console.log('errori:', errori); await page.screenshot({ path: SHOTS + `pellicola-${MODO}-errore.png`, fullPage: true }); process.exitCode = 1;
