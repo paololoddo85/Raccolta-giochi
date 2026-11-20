@@ -620,10 +620,10 @@ function enterStep1Wheel() {
  */
 const WHEEL_RADIUS = 33; // distanza delle carte dal centro, in % della ruota
 const SLOT_INFO = [
-    { fill: '#334155', light: false, empty: 'Spicchio 1<br>Ingresso', tag: null },
-    { fill: '#e2e8f0', light: true,  empty: 'Spicchio 2', tag: null },
-    { fill: '#cbd5e1', light: true,  empty: 'Spicchio 3', tag: null },
-    { fill: '#1e2024', light: false, empty: 'Spicchio 4<br>+1', tag: { text: '+1 bonus', cls: 'bg-[#f5c84c] text-slate-900' } },
+    { fill: '#2A3552', light: false, empty: 'Spicchio 1<br>Ingresso', tag: null },
+    { fill: '#1D2742', light: false, empty: 'Spicchio 2', tag: null },
+    { fill: '#243150', light: false, empty: 'Spicchio 3', tag: null },
+    { fill: '#05080F', light: false, empty: 'Spicchio 4<br>+1', tag: { text: '+1 bonus', cls: 'bg-[#f5c84c] text-slate-900' } },
     { fill: '#4696b8', light: false, empty: 'Spicchio 5<br>+1 obblig.', tag: { text: '+1 obbligatoria', cls: 'bg-[#8fd3f0] text-slate-900' } }
 ];
 const SHORT_ABILITY = { Parlare: 'Parla', Mimare: 'Mima', Canticchiare: 'Canta', Disegnare: 'Disegna' };
@@ -639,16 +639,16 @@ function polar(angleDeg, r) {
 
 function buildWheelBackground() {
     const svg = document.getElementById('wheel-bg');
-    let html = '<circle cx="50" cy="50" r="49.5" fill="#ffffff"/>';
+    let html = '<circle cx="50" cy="50" r="49.5" fill="#2A3552"/>';
     SLOT_INFO.forEach((info, i) => {
         const a0 = slotAngle(i) - 36, a1 = slotAngle(i) + 36;
         const p0 = polar(a0, 48), p1 = polar(a1, 48);
-        html += `<path d="M50 50 L${p0.x.toFixed(2)} ${p0.y.toFixed(2)} A48 48 0 0 1 ${p1.x.toFixed(2)} ${p1.y.toFixed(2)} Z" fill="${info.fill}" stroke="#ffffff" stroke-width="1"/>`;
+        html += `<path d="M50 50 L${p0.x.toFixed(2)} ${p0.y.toFixed(2)} A48 48 0 0 1 ${p1.x.toFixed(2)} ${p1.y.toFixed(2)} Z" fill="${info.fill}" stroke="#0A1020" stroke-width="1"/>`;
     });
     // Freccia di ingresso sullo slot 1
     html += '<polygon points="46.5,0.8 53.5,0.8 50,4.6" fill="#ffffff"/>';
     // Mozzo centrale con freccia oraria
-    html += '<circle cx="50" cy="50" r="9" fill="#4d9496" stroke="#ffffff" stroke-width="1.2"/>';
+    html += '<circle cx="50" cy="50" r="9" fill="#4d9496" stroke="#0A1020" stroke-width="1.2"/>';
     html += '<path d="M46 48.3 A4.6 4.6 0 1 1 53.4 52.4" fill="none" stroke="#ffffff" stroke-width="1.3" stroke-linecap="round"/>';
     html += '<polygon points="55.2,50.6 52.1,53.8 55.6,54.1" fill="#ffffff"/>';
     svg.innerHTML = html;

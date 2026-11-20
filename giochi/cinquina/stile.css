@@ -8,9 +8,6 @@
     --cinquina-red: #dc2626;
 }
 body {
-    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-    background-color: #f3f4f2;
-    color: #1e2024;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
 }
@@ -90,17 +87,180 @@ body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
 
-/* Colori delle parti comuni di Combriccola (finestre, notifiche, riquadro "Partita in corso") */
-:root {
-    --rg-accento: #4d9496;
-    --rg-accento-scuro: #366f71;
-    --rg-accento-chiaro: #6ec2c4;
-    --rg-forte: #1e2024;
-    --rg-toast-fondo: #1e2024;
-    --rg-font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-}
-
 /* Tasto suoni: l'icona cambia quando i suoni sono spenti */
 .pulsante-suoni #icon-sound-off { display: none; }
 .pulsante-suoni.is-muto #icon-sound-on { display: none; }
 .pulsante-suoni.is-muto #icon-sound-off { display: block; }
+
+/* =========================================================
+   STILE "NOTTE" (shared/stile/notte.css) SOPRA LE CLASSI TAILWIND
+   Il gioco è scritto con le classi chiare di Tailwind: qui sotto ognuna viene
+   portata sul fondo blu notte comune a Combriccola. Le regole fuori da @layer
+   vincono sulle utilità di Tailwind, quindi l'HTML del gioco non cambia.
+   Se aggiungi una classe di colore nuova, aggiungi qui la sua versione scura.
+   ========================================================= */
+:root {
+    --accento: #4D9496;
+    --accento-chiaro: #7FC7C9;
+    --su-accento: var(--notte);
+    --accento-luce: rgba(77, 148, 150, 0.10);
+}
+body { background: var(--notte); color: var(--luce); font-family: var(--testo); }
+main, header { position: relative; z-index: 1; }
+
+/* Intestazione come quella di Pellicola: scura, con una linea sotto */
+body > header { color: var(--luce) !important; background: rgba(10, 16, 32, 0.92) !important; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-bottom: 1px solid var(--filo); box-shadow: none; }
+body > header h1 { font-family: var(--display); font-weight: 900; font-size: 26px; text-transform: uppercase; letter-spacing: .01em; color: var(--accento-chiaro); line-height: 1; }
+body > header .rounded-2xl.bg-\[\#1e2024\] { background: var(--accento); color: var(--su-accento); border: 0; font-family: var(--display); font-size: 22px; }
+#header-deck-info { color: var(--fumo); }
+
+/* Titoli e numeri grandi da cartellone */
+main h2, main h3, .rg-finestra-titolo, #victory-modal h2, #rules-modal h3 { font-family: var(--display); font-weight: 800; text-transform: uppercase; letter-spacing: .01em; }
+#setup-screen h2 { font-size: 40px; line-height: .95; color: var(--accento-chiaro); }
+#timer-clock, [id^="sc-total-"], #active-round-score-preview, #step4-active-score-badge, #turn-badge-avatar { font-family: var(--display); font-weight: 900; }
+#timer-clock { font-size: 56px; line-height: 1; }
+
+/* Campi */
+input[type="text"], textarea, select { background: var(--notte) !important; color: var(--luce); border-color: var(--filo) !important; border-radius: var(--r-piccolo) !important; }
+input::placeholder, textarea::placeholder { color: #5C6680; }
+
+/* Carte: dorso e fronte */
+.card-back-black { background: var(--velluto); border: 1px solid var(--filo); box-shadow: none; }
+.card-front-white { background: var(--platea); border-color: var(--filo) !important; box-shadow: none; }
+
+/* Pulsante principale del passo 4: nel colore del gioco, come i pulsanti di Pellicola */
+button[onclick="finalizeTurnAndRotateWheel()"] { background: var(--accento) !important; color: var(--su-accento) !important; }
+button[onclick="finalizeTurnAndRotateWheel()"] svg { color: var(--su-accento) !important; }
+
+/* Le finestre del gioco su fondo scuro */
+[id$="-modal"] > div { border: 1px solid var(--filo); }
+
+/* Barra del timer e barre dei punti su fondo scuro */
+#timer-bar { border-radius: 999px; }
+.bg-white { background-color: var(--platea); }
+.hover\:bg-white:hover { background-color: var(--platea); }
+.bg-white\/25 { background-color: transparent; border: 1px solid var(--filo); }
+.hover\:bg-white\/25:hover { background-color: transparent; border: 1px solid var(--filo); }
+.bg-white\/20 { background-color: transparent; border: 1px solid var(--filo); }
+.hover\:bg-white\/20:hover { background-color: transparent; border: 1px solid var(--filo); }
+.bg-white\/15 { background-color: transparent; border: 1px solid var(--filo); }
+.hover\:bg-white\/15:hover { background-color: transparent; border: 1px solid var(--filo); }
+.bg-white\/30 { background-color: transparent; border: 1px solid var(--filo); }
+.hover\:bg-white\/30:hover { background-color: transparent; border: 1px solid var(--filo); }
+.bg-slate-50 { background-color: var(--velluto); }
+.hover\:bg-slate-50:hover { background-color: var(--velluto); }
+.bg-slate-100 { background-color: var(--velluto); }
+.hover\:bg-slate-100:hover { background-color: var(--velluto); }
+.bg-slate-200 { background-color: var(--velluto); }
+.hover\:bg-slate-200:hover { background-color: var(--velluto); }
+.bg-\[\#f3f4f2\] { background-color: var(--velluto); }
+.hover\:bg-\[\#f3f4f2\]:hover { background-color: var(--velluto); }
+.bg-slate-50\/70 { background-color: var(--velluto); }
+.hover\:bg-slate-50\/70:hover { background-color: var(--velluto); }
+.bg-\[\#d5e9e9\] { background-color: var(--velluto); }
+.hover\:bg-\[\#d5e9e9\]:hover { background-color: var(--velluto); }
+.bg-\[\#1e2024\] { background-color: var(--velluto); color: var(--luce); }
+.hover\:bg-\[\#1e2024\]:hover { background-color: var(--velluto); color: var(--luce); }
+.bg-black { background-color: var(--velluto); color: var(--luce); }
+.hover\:bg-black:hover { background-color: var(--velluto); color: var(--luce); }
+.bg-slate-900 { background-color: var(--velluto); color: var(--luce); }
+.hover\:bg-slate-900:hover { background-color: var(--velluto); color: var(--luce); }
+.bg-\[\#e6f2f2\] { background-color: rgba(77, 148, 150, 0.14); }
+.hover\:bg-\[\#e6f2f2\]:hover { background-color: rgba(77, 148, 150, 0.14); }
+.bg-\[\#e6f2f2\]\/70 { background-color: rgba(77, 148, 150, 0.14); }
+.hover\:bg-\[\#e6f2f2\]\/70:hover { background-color: rgba(77, 148, 150, 0.14); }
+.bg-\[\#e6f2f2\]\/60 { background-color: rgba(77, 148, 150, 0.14); }
+.hover\:bg-\[\#e6f2f2\]\/60:hover { background-color: rgba(77, 148, 150, 0.14); }
+.bg-\[\#e6f2f2\]\/40 { background-color: rgba(77, 148, 150, 0.14); }
+.hover\:bg-\[\#e6f2f2\]\/40:hover { background-color: rgba(77, 148, 150, 0.14); }
+.bg-\[\#4d9496\] { background-color: var(--accento); color: var(--su-accento); }
+.hover\:bg-\[\#4d9496\]:hover { background-color: var(--accento); color: var(--su-accento); }
+.bg-\[\#366f71\] { background-color: var(--accento); color: var(--su-accento); }
+.hover\:bg-\[\#366f71\]:hover { background-color: var(--accento); color: var(--su-accento); }
+.bg-red-50 { background-color: rgba(229, 83, 75, 0.12); }
+.hover\:bg-red-50:hover { background-color: rgba(229, 83, 75, 0.12); }
+.bg-red-100 { background-color: rgba(229, 83, 75, 0.12); }
+.hover\:bg-red-100:hover { background-color: rgba(229, 83, 75, 0.12); }
+.bg-red-50\/70 { background-color: rgba(229, 83, 75, 0.12); }
+.hover\:bg-red-50\/70:hover { background-color: rgba(229, 83, 75, 0.12); }
+.bg-rose-50 { background-color: rgba(229, 83, 75, 0.12); }
+.hover\:bg-rose-50:hover { background-color: rgba(229, 83, 75, 0.12); }
+.bg-emerald-50 { background-color: rgba(79, 191, 139, 0.12); }
+.hover\:bg-emerald-50:hover { background-color: rgba(79, 191, 139, 0.12); }
+.bg-emerald-50\/70 { background-color: rgba(79, 191, 139, 0.12); }
+.hover\:bg-emerald-50\/70:hover { background-color: rgba(79, 191, 139, 0.12); }
+.bg-emerald-100 { background-color: rgba(79, 191, 139, 0.12); }
+.hover\:bg-emerald-100:hover { background-color: rgba(79, 191, 139, 0.12); }
+.bg-amber-50 { background-color: rgba(232, 176, 75, 0.14); }
+.hover\:bg-amber-50:hover { background-color: rgba(232, 176, 75, 0.14); }
+.bg-amber-100 { background-color: rgba(232, 176, 75, 0.14); }
+.hover\:bg-amber-100:hover { background-color: rgba(232, 176, 75, 0.14); }
+.bg-amber-200 { background-color: rgba(232, 176, 75, 0.14); }
+.hover\:bg-amber-200:hover { background-color: rgba(232, 176, 75, 0.14); }
+.text-slate-900 { color: var(--luce); }
+.text-slate-950 { color: var(--luce); }
+.text-slate-800 { color: var(--luce); }
+.text-\[\#1e2024\] { color: var(--luce); }
+.text-slate-700 { color: var(--luce-tenue); }
+.text-slate-600 { color: var(--luce-tenue); }
+.text-slate-500 { color: var(--fumo); }
+.text-slate-400 { color: var(--fumo); }
+.text-\[\#366f71\] { color: var(--accento-chiaro); }
+.text-\[\#4d9496\] { color: var(--accento-chiaro); }
+.text-\[\#2b6b87\] { color: var(--accento-chiaro); }
+.text-red-900 { color: #F2948E; }
+.text-red-700 { color: #F2948E; }
+.text-red-600 { color: #F2948E; }
+.text-rose-900 { color: #F2948E; }
+.text-rose-800\/80 { color: #F2948E; }
+.text-emerald-950 { color: #7FD9AE; }
+.text-emerald-800 { color: #7FD9AE; }
+.text-emerald-700 { color: #7FD9AE; }
+.text-emerald-600 { color: #7FD9AE; }
+.text-amber-950 { color: #F0CF8C; }
+.text-amber-900 { color: #F0CF8C; }
+.text-amber-800 { color: #F0CF8C; }
+.text-amber-700 { color: #F0CF8C; }
+.text-amber-600 { color: #F0CF8C; }
+.text-amber-500 { color: #F0CF8C; }
+.text-sky-700 { filter: brightness(1.6); }
+.text-fuchsia-700 { filter: brightness(1.6); }
+.border-slate-100 { border-color: var(--filo); }
+.hover\:border-slate-100:hover { border-color: var(--filo); }
+.border-slate-200 { border-color: var(--filo); }
+.hover\:border-slate-200:hover { border-color: var(--filo); }
+.border-slate-300 { border-color: var(--filo); }
+.hover\:border-slate-300:hover { border-color: var(--filo); }
+.border-slate-200\/80 { border-color: var(--filo); }
+.hover\:border-slate-200\/80:hover { border-color: var(--filo); }
+.border-white\/15 { border-color: var(--filo); }
+.hover\:border-white\/15:hover { border-color: var(--filo); }
+.border-\[\#4d9496\] { border-color: var(--accento); }
+.hover\:border-\[\#4d9496\]:hover { border-color: var(--accento); }
+.border-\[\#4d9496\]\/30 { border-color: var(--accento); }
+.hover\:border-\[\#4d9496\]\/30:hover { border-color: var(--accento); }
+.border-\[\#4d9496\]\/40 { border-color: var(--accento); }
+.hover\:border-\[\#4d9496\]\/40:hover { border-color: var(--accento); }
+.border-red-200 { border-color: rgba(229, 83, 75, 0.45); }
+.hover\:border-red-200:hover { border-color: rgba(229, 83, 75, 0.45); }
+.border-rose-200 { border-color: rgba(229, 83, 75, 0.45); }
+.hover\:border-rose-200:hover { border-color: rgba(229, 83, 75, 0.45); }
+.border-emerald-200 { border-color: rgba(79, 191, 139, 0.45); }
+.hover\:border-emerald-200:hover { border-color: rgba(79, 191, 139, 0.45); }
+.border-amber-200 { border-color: rgba(232, 176, 75, 0.45); }
+.hover\:border-amber-200:hover { border-color: rgba(232, 176, 75, 0.45); }
+.shadow-sm { box-shadow: none; }
+.shadow-md { box-shadow: none; }
+.shadow-lg { box-shadow: none; }
+.shadow-xl { box-shadow: none; }
+.shadow-2xl { box-shadow: none; }
+.shadow-inner { box-shadow: none; }
+.rounded-3xl { border-radius: var(--r-medio); }
+.rounded-2xl { border-radius: 10px; }
+
+/* Intestazione su telefoni stretti: il sottotitolo si accorcia, il quadratino "5" si nasconde */
+body > header .min-w-0 > div:last-child { min-width: 0; }
+#header-deck-info { overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 399px) {
+    body > header .rounded-2xl.bg-\[\#1e2024\] { display: none; }
+}
