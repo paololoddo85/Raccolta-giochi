@@ -58,8 +58,11 @@
             .trim();
     }
 
+    // Tra un artista e l'altro: "feat.", "x", "e", "ed", "&", virgola, "/" ("Max Pezzali / 883")
+    const SEPARA_ARTISTI = /\s+(?:ft\.?|feat\.?|featuring|x|e|ed|and)\s+|&|,|\//i;
+
     function artistaPrincipale(testo) {
-        return normalizza(String(testo || '').split(/\s+(?:ft\.?|feat\.?|featuring|x|e|ed|and)\s+|&|,/i)[0]);
+        return normalizza(String(testo || '').split(SEPARA_ARTISTI)[0]);
     }
 
     function chiave(brano) {
@@ -201,11 +204,16 @@
 
     const RICERCA_ITALIANA = /ital|sanremo|tormentoni|vasco|battisti|mina|celentano|pausini|ramazzotti|jovanotti|883|dalla|ligabue|maneskin|mahmood|d'avena|zecchino|vanni|bambini|disney/i;
 
-    // "@nome" nelle ricerche = ricerca per artista: si tiene il brano solo se il suo artista principale
-    // si chiama esattamente così ("@gaia" tiene Gaia, non Gaia Noise; "@salmo" non tiene i salmi)
+    // "@nome" nelle ricerche = ricerca per artista: si tiene il brano solo se uno dei suoi artisti si chiama
+    // esattamente così ("@gaia" tiene Gaia e "Marco Mengoni & Gaia", non "Gaia Noise"; "@salmo" non tiene i salmi).
+    // "@guè|guè pequeno": si cerca il primo nome, valgono tutti.
+    const nomiCercati = ricerca => ricerca.slice(1).split('|');
     function artistaGiusto(ricerca, nomeArtista) {
-        return !ricerca.startsWith('@') || artistaPrincipale(nomeArtista) === normalizza(ricerca.slice(1));
+        if (!ricerca.startsWith('@')) return true;
+        const nomi = nomiCercati(ricerca).map(normalizza);
+        return String(nomeArtista || '').split(SEPARA_ARTISTI).some(credito => nomi.includes(normalizza(credito)));
     }
+    const testoRicerca = ricerca => (ricerca.startsWith('@') ? nomiCercati(ricerca)[0] : ricerca);
 
     // Brani del catalogo iTunes per la categoria scelta, oppure null se iTunes non risponde
     async function scaricaCatalogo(categoria) {
@@ -221,7 +229,7 @@
 
         await Promise.all(ricerche.map(async (q) => {
             const italiana = ['italiane', 'italiane-moderne', 'rap', 'bambini'].includes(categoria) || RICERCA_ITALIANA.test(q);
-            const risultati = await cercaItunes(q.replace(/^@/, ''), italiana ? 'IT' : 'US', 25);
+            const risultati = await cercaItunes(testoRicerca(q), italiana ? 'IT' : 'US', 25);
             if (!risultati) return;
             raggiunto = true;
             risultati.forEach(r => {

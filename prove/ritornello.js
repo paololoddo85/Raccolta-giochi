@@ -225,11 +225,21 @@ const MODO = process.argv[2] || 'online'; // online | offline
     await page.click('#inizia'); await fase('consegna');
     await page.evaluate(() => { RG.mescola = window.__mescola; });
     ok(await page.evaluate(() => !RITORNELLO.artistaGiusto('@gaia', 'Gaia Noise') && !RITORNELLO.artistaGiusto('@salmo', 'Coro Polifonico') &&
-      RITORNELLO.artistaGiusto('@gaia', 'Gaia') && RITORNELLO.artistaGiusto('@gaia', 'Gaia & Sfera Ebbasta') && RITORNELLO.artistaGiusto('@maneskin', 'Måneskin') &&
-      RITORNELLO.artistaGiusto('sanremo 2025', 'Gaia Noise')), 'ricerche per artista ("@gaia"): solo quell\'artista, non "Gaia Noise"; le ricerche generiche non filtrano');
+      RITORNELLO.artistaGiusto('@gaia', 'Gaia') && RITORNELLO.artistaGiusto('@elodie', 'Marco Mengoni & Elodie') && RITORNELLO.artistaGiusto('@maneskin', 'Måneskin') &&
+      RITORNELLO.artistaGiusto('@guè|guè pequeno', 'Guè Pequeno') && RITORNELLO.artistaGiusto('@883|max pezzali', 'Max Pezzali / 883') &&
+      RITORNELLO.artistaGiusto('sanremo 2025', 'Gaia Noise')), 'ricerche per artista: quell\'artista anche in coppia o con l\'altro nome, non "Gaia Noise"; le ricerche generiche non filtrano');
     const italiane = await page.evaluate(() => [RITORNELLO.stato.brano, ...RITORNELLO.mazzo()]);
     ok(italiane.some(b => b.gruppo === 'rap'), 'i brani rap restano anche in "Solo italiane"');
     ok(italiane.filter(b => b.titolo === 'Lamborghini').length === 1, 'stesso brano con l\'artista scritto in modo diverso ("Guè Pequeno"/"Guè"): esce una volta sola');
+    await page.click('#esci');
+    // percorso completo: la ricerca "@gaia" arriva a iTunes come "gaia" e tiene solo Gaia
+    await page.selectOption('#scelta-brani', 'italiane-moderne');
+    await page.evaluate(() => { window.__mescola = RG.mescola; RG.mescola = a => [...a].sort((x, y) => (y === '@gaia') - (x === '@gaia')); });
+    await page.click('#inizia'); await fase('consegna');
+    await page.evaluate(() => { RG.mescola = window.__mescola; });
+    const conGaia = await page.evaluate(() => [RITORNELLO.stato.brano, ...RITORNELLO.mazzo()].map(b => b.artista));
+    ok(rete.termini.includes('gaia') && conGaia.includes('Gaia') && conGaia.includes('Marco Mengoni & Gaia') && !conGaia.includes('Gaia Noise'),
+      'ricerca "@gaia" fino al mazzo: entrano Gaia e "Marco Mengoni & Gaia", "Gaia Noise" no');
     await page.click('#esci');
     ok(await page.evaluate(() => document.documentElement.scrollWidth) <= 360, 'nessuno scorrimento orizzontale');
     const y = new Date().getFullYear();

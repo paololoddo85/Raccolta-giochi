@@ -5,8 +5,9 @@
  *
  * ricerche: ricerche iTunes per categoria (le stesse chiavi del menù "Brani" del gioco).
  *           Solo successi famosi, facili da riconoscere canticchiati.
- *           "@nome" = ricerca per ARTISTA: si tengono solo i brani il cui artista principale si chiama
+ *           "@nome" = ricerca per ARTISTA: si tengono solo i brani in cui uno degli artisti si chiama
  *           esattamente così (cercando "gaia" iTunes trova anche "Gaia Noise", cercando "salmo" i salmi).
+ *           "@nome1|nome2": si cerca nome1, valgono tutti i nomi (es. "@guè|guè pequeno").
  * ricercheConAnno: ricerche con "{anno}", ripetute dal gioco per gli ultimi 3 anni (a gennaio e febbraio
  *           si parte dall'anno prima)
  *           (le categorie "ultimi 10 anni" restano aggiornate da sole, anno dopo anno).
@@ -25,7 +26,7 @@ window.RITORNELLO_RICERCHE = {
         italiane: [
             "grandi successi italiani", "vincitori sanremo", "tormentoni estivi italiani",
             "pop italiano anni 80", "pop italiano anni 90", "hit italiane 2010", "hit italiane 2020",
-            "@lucio battisti", "@vasco rossi", "@883", "@jovanotti", "@laura pausini", "@eros ramazzotti",
+            "@lucio battisti", "@vasco rossi", "@883|max pezzali", "@jovanotti", "@laura pausini", "@eros ramazzotti",
             "@adriano celentano", "@mina", "@lucio dalla", "@ligabue", "@maneskin", "@mahmood"
         ],
         'italiane-moderne': [
@@ -35,7 +36,7 @@ window.RITORNELLO_RICERCHE = {
         // rap: dal catalogo entrano solo i brani di genere hip-hop/rap (vedi scaricaCatalogo)
         rap: [
             "rap italiano", "trap italiana", "hit rap italiano", "@sfera ebbasta", "@lazza", "@geolier",
-            "@salmo", "@marracash", "@guè", "@ghali", "@tony effe", "@capo plaza", "@anna", "@ernia",
+            "@salmo", "@marracash", "@guè|guè pequeno", "@ghali", "@tony effe", "@capo plaza", "@anna pepe|anna", "@ernia",
             "@shiva", "@tedua", "@kid yugi", "@artie 5ive"
         ],
         internazionali: [
@@ -49,7 +50,7 @@ window.RITORNELLO_RICERCHE = {
         ],
         '9000': [
             "90s number one hits", "90s eurodance hits", "90s pop hits", "2000s number one hits",
-            "2000s pop hits", "@883", "@laura pausini", "@spice girls", "@britney spears", "@backstreet boys"
+            "2000s pop hits", "@883|max pezzali", "@laura pausini", "@spice girls", "@britney spears", "@backstreet boys"
         ],
         recenti: [
             "2010s top hits", "2015 top hits", "2018 top hits", "2020 top hits", "2022 top hits",
