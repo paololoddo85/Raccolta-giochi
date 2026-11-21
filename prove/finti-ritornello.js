@@ -13,13 +13,13 @@ const COVER = fs.readFileSync(__dirname + '/risorse/copertina.jpg');
 const CORS = { 'access-control-allow-origin': '*' };
 // i brani inclusi del gioco, per rispondere alle ricerche delle loro anteprime
 const RISERVA = require('vm').runInNewContext(fs.readFileSync(__dirname + '/../giochi/ritornello/dati/brani.js', 'utf8') + ';window.RITORNELLO_BRANI', { window: {} });
-const stato = { rete: true, richieste: { catalogo: 0, anteprima: 0, audio: 0 } };
+const stato = { rete: true, richieste: { catalogo: 0, anteprima: 0, audio: 0 }, termini: [] };
 const brano = (id, titolo, artista, anno, extra = {}) => ({ wrapperType: 'track', kind: 'song', trackId: id, trackName: titolo, artistName: artista,
   collectionName: titolo, releaseDate: `${anno}-05-01T07:00:00Z`, previewUrl: `https://audio-ssl.itunes.apple.com/finto/${id}.m4a`,
   artworkUrl100: `https://is1-ssl.mzstatic.com/finto/${id}/100x100bb.jpg`, ...extra });
 const CATALOGO = [];
 // i brani pari sono di genere hip-hop/rap, i dispari pop (la categoria rap prende solo i primi)
-for (let i = 0; i < 40; i++) CATALOGO.push(brano(5000 + i, `Brano Online ${i + 1}`, `Artista ${i % 7}`, 1970 + i, { primaryGenreName: i % 2 ? 'Hip-Hop/Rap' : 'Pop' }));
+for (let i = 0; i < 40; i++) CATALOGO.push(brano(5000 + i, `Brano Online ${i + 1}`, `Artista ${i % 7}`, 1970 + Math.round(i * 56 / 39), { primaryGenreName: i % 2 ? 'Hip-Hop/Rap' : 'Pop' }));
 // da scartare: versione live, compilation, karaoke, anteprima non https; e una ristampa (anno vero 1975)
 CATALOGO.push(brano(6001, 'Canzone (Live)', 'Gruppo', 1990), brano(6002, 'Altra canzone', 'Gruppo', 1990, { collectionName: 'Greatest Hits' }),
   brano(6003, 'Karaoke', 'Karaoke Band', 2000), brano(6004, 'Senza https', 'Gruppo', 2000, { previewUrl: 'javascript:alert(1)' }),
@@ -44,6 +44,7 @@ module.exports = { stato, CATALOGO, async finti(context) {
       return jsonp(route, { results: r ? [brano(7000 + RISERVA.indexOf(r), r[0], r[1], r[2])] : [] });
     }
     stato.richieste.catalogo++;
+    stato.termini.push(u.searchParams.get('term') || '');
     return jsonp(route, { resultCount: CATALOGO.length, results: CATALOGO });
   });
   await context.route(/audio-ssl\.itunes\.apple\.com/, route => {

@@ -186,6 +186,9 @@ invece la schermata iniziale con il riquadro "Partita in corso" (Riprendi / Scar
   **Funziona anche offline** con i brani inclusi (niente `data-solo-online`): con internet arrivano anche brani da iTunes
   e allo svelamento si ascolta l'anteprima (per i brani inclusi viene cercata su iTunes al momento). Gli indirizzi
   di anteprime e copertine sono accettati solo se `https://`.
+  Categorie "Italiane moderne" e "Rap italiano moderno" = **ultimi 10 anni** dalla data di oggi (anno in corso e i 9
+  prima, `ANNO_MODERNO` in `gioco.js`); le ricerche iTunes con `{anno}` (`ricercheConAnno`) si ripetono per gli ultimi
+  3 anni. Il rap ha gruppo `rap` (conta anche tra le italiane) e dal catalogo prende solo il genere hip-hop/rap.
 
 ## Come aggiungere un nuovo gioco
 

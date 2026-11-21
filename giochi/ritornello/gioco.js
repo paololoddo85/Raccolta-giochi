@@ -101,11 +101,15 @@
     /* ================= BRANI INCLUSI E CATEGORIE ================= */
     const RISERVA = window.RITORNELLO_BRANI.map(([titolo, artista, anno, gruppo]) => ({ titolo, artista, anno, gruppo }));
 
+    // "Ultimi 10 anni": l'anno in corso e i 9 prima (nel 2026: dal 2017), calcolato sulla data di oggi
+    const ANNO_CORRENTE = new Date().getFullYear();
+    const ANNO_MODERNO = ANNO_CORRENTE - 9;
+
     const CATEGORIE = {
         tutto: () => true,
         italiane: b => b.gruppo === 'it' || b.gruppo === 'rap',
-        'italiane-moderne': b => (b.gruppo === 'it' || b.gruppo === 'rap') && b.anno >= 2000,
-        rap: b => b.gruppo === 'rap' && b.anno >= 2000,
+        'italiane-moderne': b => (b.gruppo === 'it' || b.gruppo === 'rap') && b.anno >= ANNO_MODERNO,
+        rap: b => b.gruppo === 'rap' && b.anno >= ANNO_MODERNO,
         internazionali: b => b.gruppo === 'int',
         classici: b => b.gruppo !== 'bimbi' && b.anno <= 1989,
         '9000': b => b.gruppo !== 'bimbi' && b.anno >= 1990 && b.anno <= 2009,
@@ -194,7 +198,11 @@
     // Brani del catalogo iTunes per la categoria scelta, oppure null se iTunes non risponde
     async function scaricaCatalogo(categoria) {
         if (navigator.onLine === false) return null; // il telefono sa già di essere offline
-        const ricerche = RG.mescola(haChiave(DATI.ricerche, categoria) ? DATI.ricerche[categoria] : DATI.ricerche.tutto).slice(0, 6);
+        const fisse = haChiave(DATI.ricerche, categoria) ? DATI.ricerche[categoria] : DATI.ricerche.tutto;
+        // ricerche con l'anno, per gli ultimi 3 anni ("sanremo 2026", "sanremo 2025"…)
+        const conAnno = (haChiave(DATI.ricercheConAnno, categoria) ? DATI.ricercheConAnno[categoria] : [])
+            .flatMap(q => [0, 1, 2].map(n => q.replace('{anno}', ANNO_CORRENTE - n)));
+        const ricerche = RG.mescola([...fisse, ...conAnno]).slice(0, 6);
         const trovati = new Map();
         const annoMinimo = new Map(); // tra tutte le versioni restituite: le ristampe hanno anni successivi
         let raggiunto = false;

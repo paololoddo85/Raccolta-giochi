@@ -197,6 +197,15 @@ window.RITORNELLO_BRANI = [
     ["30°C", "Anna", 2024, "rap"],
     ["Miu Miu", "Tony Effe", 2024, "rap"],
     ["Damme 'na mano", "Tony Effe", 2025, "rap"],
+    ["Fenomeno", "Fabri Fibra", 2017, "rap"],
+    ["Calipso", "Charlie Charles, Sfera Ebbasta, Mahmood e Fabri Fibra", 2019, "rap"],
+    ["Margarita", "Marracash ed Elodie", 2019, "rap"],
+    ["Blun7 a swishland", "tha Supreme", 2019, "rap"],
+    ["Auto blu", "Shiva", 2020, "rap"],
+    ["Baby", "Sfera Ebbasta e J Balvin", 2020, "rap"],
+    ["Cookies N' Cream", "Guè, Anna e Sfera Ebbasta", 2023, "rap"],
+    ["Taxi sulla luna", "Tony Effe ed Emma", 2024, "rap"],
+    ["Sesso e samba", "Tony Effe e Gaia", 2024, "rap"],
 
     // ---------- Internazionali ----------
     ["Jailhouse Rock", "Elvis Presley", 1957, "int"],
