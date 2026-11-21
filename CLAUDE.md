@@ -188,9 +188,13 @@ invece la schermata iniziale con il riquadro "Partita in corso" (Riprendi / Scar
   di anteprime e copertine sono accettati solo se `https://`.
   Categorie "Italiane moderne" e "Rap italiano moderno" = **ultimi 10 anni** dalla data di oggi (anno in corso e i 9
   prima, `ANNO_MODERNO` in `gioco.js`); le ricerche iTunes con `{anno}` (`ricercheConAnno`) si ripetono per gli ultimi
-  3 anni. Il rap ha gruppo `rap` (conta anche tra le italiane) e dal catalogo prende solo il genere hip-hop/rap.
+  3 anni. Il rap ha gruppo `rap` e dal catalogo prende solo il genere hip-hop/rap; conta in "Solo italiane" ma
+  **non** in "Italiane moderne" (lì il genere hip-hop/rap del catalogo viene scartato).
+  In `dati/ricerche.js` le ricerche per artista si scrivono `"@nome"`: si tengono solo i brani in cui uno degli artisti
+  si chiama esattamente così (cercando solo "gaia" iTunes trova anche artisti stranieri come "Gaia Noise").
+  Più nomi per lo stesso artista: `"@guè|guè pequeno"` (si cerca il primo, valgono tutti).
   **Ogni anno** i brani inclusi più vecchi escono da queste due categorie: per giocarle bene offline aggiungi in
-  `dati/brani.js` successi italiani e rap usciti di recente (nel 2026: 70 italiani recenti, di cui 29 rap).
+  `dati/brani.js` successi italiani e rap usciti di recente (nel 2026: 34 italiani recenti senza rap, 36 rap).
 
 ## Come aggiungere un nuovo gioco
 

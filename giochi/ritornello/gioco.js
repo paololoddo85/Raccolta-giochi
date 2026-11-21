@@ -58,8 +58,11 @@
             .trim();
     }
 
+    // Tra un artista e l'altro: "feat.", "x", "e", "ed", "&", virgola, "/" ("Max Pezzali / 883")
+    const SEPARA_ARTISTI = /\s+(?:ft\.?|feat\.?|featuring|x|e|ed|and)\s+|&|,|\//i;
+
     function artistaPrincipale(testo) {
-        return normalizza(String(testo || '').split(/\s+(?:ft\.?|feat\.?|featuring|x|e|ed|and)\s+|&|,/i)[0]);
+        return normalizza(String(testo || '').split(SEPARA_ARTISTI)[0]);
     }
 
     function chiave(brano) {
@@ -114,7 +117,7 @@
     const CATEGORIE = {
         tutto: () => true,
         italiane: b => b.gruppo === 'it' || b.gruppo === 'rap',
-        'italiane-moderne': b => (b.gruppo === 'it' || b.gruppo === 'rap') && b.anno >= ANNO_MODERNO,
+        'italiane-moderne': b => b.gruppo === 'it' && b.anno >= ANNO_MODERNO, // senza rap: il rap ha la sua categoria
         rap: b => b.gruppo === 'rap' && b.anno >= ANNO_MODERNO,
         internazionali: b => b.gruppo === 'int',
         classici: b => b.gruppo !== 'bimbi' && b.anno <= 1989,
@@ -201,6 +204,17 @@
 
     const RICERCA_ITALIANA = /ital|sanremo|tormentoni|vasco|battisti|mina|celentano|pausini|ramazzotti|jovanotti|883|dalla|ligabue|maneskin|mahmood|d'avena|zecchino|vanni|bambini|disney/i;
 
+    // "@nome" nelle ricerche = ricerca per artista: si tiene il brano solo se uno dei suoi artisti si chiama
+    // esattamente così ("@gaia" tiene Gaia e "Marco Mengoni & Gaia", non "Gaia Noise"; "@salmo" non tiene i salmi).
+    // "@guè|guè pequeno": si cerca il primo nome, valgono tutti.
+    const nomiCercati = ricerca => ricerca.slice(1).split('|');
+    function artistaGiusto(ricerca, nomeArtista) {
+        if (!ricerca.startsWith('@')) return true;
+        const nomi = nomiCercati(ricerca).map(normalizza);
+        return String(nomeArtista || '').split(SEPARA_ARTISTI).some(credito => nomi.includes(normalizza(credito)));
+    }
+    const testoRicerca = ricerca => (ricerca.startsWith('@') ? nomiCercati(ricerca)[0] : ricerca);
+
     // Brani del catalogo iTunes per la categoria scelta, oppure null se iTunes non risponde
     async function scaricaCatalogo(categoria) {
         if (navigator.onLine === false) return null; // il telefono sa già di essere offline
@@ -215,7 +229,7 @@
 
         await Promise.all(ricerche.map(async (q) => {
             const italiana = ['italiane', 'italiane-moderne', 'rap', 'bambini'].includes(categoria) || RICERCA_ITALIANA.test(q);
-            const risultati = await cercaItunes(q, italiana ? 'IT' : 'US', 25);
+            const risultati = await cercaItunes(testoRicerca(q), italiana ? 'IT' : 'US', 25);
             if (!risultati) return;
             raggiunto = true;
             risultati.forEach(r => {
@@ -224,9 +238,12 @@
                 const k = chiave(b);
                 const anno = parseInt(String(r.releaseDate || '').slice(0, 4), 10);
                 if (anno && (!annoMinimo.has(k) || anno < annoMinimo.get(k))) annoMinimo.set(k, anno);
-                if (!braniOriginale(r) || trovati.has(k)) return;
-                // nel rap le ricerche per nome trovano anche altro (salmi, canzoni pop): solo genere hip-hop/rap
-                if (categoria === 'rap' && !/hip.?hop|rap/i.test(r.primaryGenreName || '')) return;
+                if (!braniOriginale(r) || trovati.has(k) || !artistaGiusto(q, r.artistName)) return;
+                // nel rap le ricerche per nome trovano anche altro (salmi, canzoni pop): solo genere hip-hop/rap;
+                // nelle italiane moderne, al contrario, il rap non entra (ha la sua categoria)
+                const genereRap = /hip.?hop|rap/i.test(r.primaryGenreName || '');
+                if (categoria === 'rap' && !genereRap) return;
+                if (categoria === 'italiane-moderne' && genereRap) return;
                 trovati.set(k, pulisciBrano({
                     ...b,
                     anno,
@@ -283,6 +300,11 @@
 
     /* ================= MAZZO ================= */
     // I brani mai cantati finiscono in fondo all'elenco: pop() li pesca per primi
+    // Stesso brano anche se l'artista è scritto in un altro modo ("Guè Pequeno" / "Guè", "ed" / "&")
+    function stessoBrano(a, b) {
+        return normalizza(a.titolo) === normalizza(b.titolo) && artistiSimili(artistaPrincipale(a.artista), artistaPrincipale(b.artista));
+    }
+
     function preparaMazzo() {
         const filtro = filtroCategoria();
         const esclusi = new Set(stato.usati);
@@ -290,12 +312,11 @@
         const perChiave = new Map();
         RISERVA.filter(filtro).forEach(b => perChiave.set(chiave(b), { ...b }));
         const inclusi = [...perChiave.values()];
+        // nelle italiane moderne niente rap, nemmeno se iTunes lo classifica come pop
+        const rapInclusi = stato.categoria === 'italiane-moderne' ? RISERVA.filter(r => r.gruppo === 'rap') : [];
         catalogoLive.forEach(b => {
-            // stesso brano anche se l'artista è scritto in un altro modo ("Guè Pequeno" / "Guè")
-            const titolo = normalizza(b.titolo);
-            const artista = artistaPrincipale(b.artista);
-            const incluso = perChiave.get(chiave(b)) ||
-                inclusi.find(i => normalizza(i.titolo) === titolo && artistiSimili(artistaPrincipale(i.artista), artista));
+            if (rapInclusi.some(r => stessoBrano(r, b))) return;
+            const incluso = perChiave.get(chiave(b)) || inclusi.find(i => stessoBrano(i, b));
             if (!incluso) perChiave.set(chiave(b), { ...b });
             else if (!incluso.anteprima) Object.assign(incluso, { anteprima: b.anteprima, copertina: b.copertina });
         });
@@ -985,5 +1006,5 @@
     if (SALVATAGGIO.leggi() && RG.partita.ricaricata()) riprendi();
 
     // Per le prove automatiche
-    window.RITORNELLO = { stato, mazzo: () => mazzo, timer: () => timer, SALVATAGGIO, inclusi: c => RISERVA.filter(CATEGORIE[c]).length };
+    window.RITORNELLO = { stato, mazzo: () => mazzo, timer: () => timer, SALVATAGGIO, inclusi: c => RISERVA.filter(CATEGORIE[c]).length, artistaGiusto };
 })();

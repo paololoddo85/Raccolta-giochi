@@ -5,7 +5,8 @@
  * il gioco cerca online la loro anteprima.
  *
  * Ogni riga: [titolo, artista, anno, gruppo]
- *   gruppo: "it" (italiani), "rap" (rap italiano: conta anche come italiano), "int" (internazionali),
+ *   gruppo: "it" (italiani), "rap" (rap italiano e brani di rapper: conta in "Solo italiane", non
+ *           in "Italiane moderne"), "int" (internazionali),
  *           "bimbi" (cartoni, Disney, Zecchino d'Oro)
  * L'anno è quello di uscita del brano (o dell'album che lo contiene): si vede con l'aiuto "anno".
  *
@@ -148,12 +149,12 @@ window.RITORNELLO_BRANI = [
     ["Pensare male", "The Kolors ed Elodie", 2021, "it"],
     ["Vent'anni", "Måneskin", 2020, "it"],
     ["Bellissima", "Annalisa", 2022, "it"],
-    ["Dove si balla", "Dargen D'Amico", 2022, "it"],
+    ["Dove si balla", "Dargen D'Amico", 2022, "rap"],
     ["Sesso occasionale", "Tananai", 2022, "it"],
     ["Mon amour", "Annalisa", 2023, "it"],
     ["Cenere", "Lazza", 2023, "rap"],
     ["Tango", "Tananai", 2023, "it"],
-    ["Supereroi", "Mr. Rain", 2023, "it"],
+    ["Supereroi", "Mr. Rain", 2023, "rap"],
     ["Italodisco", "The Kolors", 2023, "it"],
     ["La noia", "Angelina Mango", 2024, "it"],
     ["Sinceramente", "Annalisa", 2024, "it"],
@@ -161,7 +162,7 @@ window.RITORNELLO_BRANI = [
     ["Un ragazzo una ragazza", "The Kolors", 2024, "it"],
     ["Balorda nostalgia", "Olly", 2025, "it"],
 
-    // ---------- Rap italiano (contano anche come italiani; i brani più pop restano "it") ----------
+    // ---------- Rap italiano (contano in "Solo italiane", non in "Italiane moderne") ----------
     ["Dentro alla scatola", "Mondo Marcio", 2006, "rap"],
     ["Applausi per Fibra", "Fabri Fibra", 2006, "rap"],
     ["Badabum Cha Cha", "Marracash", 2008, "rap"],
@@ -178,19 +179,19 @@ window.RITORNELLO_BRANI = [
     ["Bottiglie privè", "Sfera Ebbasta", 2017, "rap"],
     ["Lamborghini", "Guè e Sfera Ebbasta", 2017, "rap"],
     ["Pamplona", "Fabri Fibra e Thegiornalisti", 2017, "rap"],
-    ["La musica non c'è", "Coez", 2017, "it"],
+    ["La musica non c'è", "Coez", 2017, "rap"],
     ["Rockstar", "Sfera Ebbasta", 2018, "rap"],
     ["Tran Tran", "Sfera Ebbasta", 2018, "rap"],
     ["Cara Italia", "Ghali", 2018, "rap"],
     ["Tesla", "Capo Plaza", 2018, "rap"],
     ["90min", "Salmo", 2018, "rap"],
     ["Lunedì", "Salmo", 2018, "rap"],
-    ["D'estate non vale", "Fred De Palma e Ana Mena", 2018, "it"],
+    ["D'estate non vale", "Fred De Palma e Ana Mena", 2018, "rap"],
     ["Good Times", "Ghali", 2019, "rap"],
     ["Superclassico", "Ernia", 2020, "rap"],
-    ["A un passo dalla luna", "Rocco Hunt e Ana Mena", 2020, "it"],
-    ["Voce", "Madame", 2021, "it"],
-    ["Insuperabile", "Rkomi", 2022, "it"],
+    ["A un passo dalla luna", "Rocco Hunt e Ana Mena", 2020, "rap"],
+    ["Voce", "Madame", 2021, "rap"],
+    ["Insuperabile", "Rkomi", 2022, "rap"],
     ["Chiagne", "Geolier", 2023, "rap"],
     ["Casa mia", "Ghali", 2024, "rap"],
     ["100 messaggi", "Lazza", 2024, "rap"],
