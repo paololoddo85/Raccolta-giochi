@@ -24,6 +24,8 @@ const MODO = process.argv[2] || 'online'; // online | offline
     ok(nomi.join() === 'Paolo,Giulia,Marco', 'tre squadre proposte con i nomi di "Chi gioca stasera"');
     await page.click('.count-btn[data-count="2"]');
     await page.selectOption('#scelta-traguardo', '10');
+    // offline si prova la categoria "Italiane moderne" (dal 2000)
+    if (MODO === 'offline') await page.selectOption('#scelta-brani', 'italiane-moderne');
     await page.screenshot({ path: SHOTS + `ritornello-${MODO}-1-preparazione.png`, fullPage: true });
     await page.click('#inizia');
     await fase('consegna');
@@ -32,7 +34,8 @@ const MODO = process.argv[2] || 'online'; // online | offline
     if (MODO === 'offline') {
       await page.waitForSelector('.rg-toast-avviso');
       ok((await page.textContent('.rg-toast-avviso')).includes('brani inclusi'), 'offline: avviso "si gioca con i brani inclusi" e la partita parte lo stesso');
-      ok(s0.squadre.length === 2 && await page.evaluate(() => RITORNELLO.mazzo().length) > 100, 'offline: mazzo con i brani inclusi');
+      ok(s0.squadre.length === 2 && await page.evaluate(() => RITORNELLO.mazzo().length) > 50, 'offline: mazzo con i brani inclusi');
+      ok(await page.evaluate(() => [RITORNELLO.stato.brano, ...RITORNELLO.mazzo()].every(b => b.gruppo === 'it' && b.anno >= 2000)), '"Italiane moderne": solo brani italiani dal 2000 in poi');
       await page.click('#mostra-brano'); await fase('segreto');
       ok(await page.isDisabled('#ripassa') && (await page.textContent('#ripasso-nota')).includes('Senza connessione'), 'offline: niente ripasso in cuffia, con la spiegazione');
       await page.click('#via'); await fase('canta'); await page.click('#indovinato'); await fase('svela');
@@ -48,7 +51,7 @@ const MODO = process.argv[2] || 'online'; // online | offline
     // Catalogo online: i brani da scartare non entrano nel mazzo
     const mazzo = await page.evaluate(() => RITORNELLO.mazzo().map(b => b.titolo + '|' + b.anno + '|' + b.anteprima));
     ok(mazzo.some(b => b.startsWith('Brano Online')), 'online: i brani del catalogo iTunes entrano nel mazzo');
-    ok(!mazzo.some(b => /Live|Altra canzone|Karaoke|Senza https/.test(b)), 'versioni live, compilation, karaoke e anteprime non https scartate');
+    ok(!mazzo.some(b => ['Canzone (Live)|', 'Altra canzone|', 'Karaoke|2000|', 'Senza https|'].some(p => b.startsWith(p))), 'versioni live, compilation, karaoke e anteprime non https scartate');
     ok(mazzo.some(b => b.startsWith('Ristampa|1975|')), 'ristampa: si usa l\'anno della versione più vecchia');
     ok(s0.squadre.map(s => s.nome).join() === 'Paolo,Giulia' && s0.traguardo === 10, 'partita a 2 squadre, traguardo 10');
 

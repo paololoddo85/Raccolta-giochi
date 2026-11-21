@@ -23,6 +23,12 @@ window.RITORNELLO_RICERCHE = {
             "lucio battisti", "vasco rossi", "883", "jovanotti", "laura pausini", "eros ramazzotti",
             "adriano celentano", "mina", "lucio dalla", "ligabue", "maneskin", "mahmood"
         ],
+        'italiane-moderne': [
+            "hit italiane 2000", "hit italiane 2010", "hit italiane 2020", "tormentoni estivi italiani",
+            "sanremo 2023", "sanremo 2024", "sanremo 2025", "sanremo 2026",
+            "annalisa", "elodie", "marco mengoni", "mahmood", "maneskin", "tananai", "the kolors",
+            "ultimo", "tiziano ferro", "cesare cremonini", "negramaro", "boomdabash"
+        ],
         internazionali: [
             "top hits 1970s", "80s number one hits", "90s pop hits", "2000s pop hits",
             "2010s pop hits", "2020s pop hits", "queen", "abba", "michael jackson", "madonna",

@@ -104,6 +104,7 @@
     const CATEGORIE = {
         tutto: () => true,
         italiane: b => b.gruppo === 'it',
+        'italiane-moderne': b => b.gruppo === 'it' && b.anno >= 2000,
         internazionali: b => b.gruppo === 'int',
         classici: b => b.gruppo !== 'bimbi' && b.anno <= 1989,
         '9000': b => b.gruppo !== 'bimbi' && b.anno >= 1990 && b.anno <= 2009,
@@ -196,7 +197,7 @@
         let raggiunto = false;
 
         await Promise.all(ricerche.map(async (q) => {
-            const italiana = categoria === 'italiane' || categoria === 'bambini' || RICERCA_ITALIANA.test(q);
+            const italiana = ['italiane', 'italiane-moderne', 'bambini'].includes(categoria) || RICERCA_ITALIANA.test(q);
             const risultati = await cercaItunes(q, italiana ? 'IT' : 'US', 25);
             if (!risultati) return;
             raggiunto = true;
