@@ -68,7 +68,7 @@ shared/
   vendor/confetti.js               canvas-confetti (coriandoli di Giradischi), licenza ISC
 giochi/<nome>/
   index.html  gioco.js  stile.css  dati/…
-giochi/cinquina/dati/carte.js      le 304 carte di Cinquina (prima "HINT FAKE")
+giochi/cinquina/dati/carte.js      le 313 carte di Cinquina (prima "HINT FAKE")
 giochi/pellicola/dati/film.js      88 film inclusi, titoli alternativi, ricerche del catalogo online (prima "CineStar")
 giochi/giradischi/dati/ricerche.js ricerche iTunes e parole che scartano raccolte/remaster/live (prima "Hitstar")
 giochi/giradischi/icone.js         icone Font Awesome incluse (SVG), licenza CC BY 4.0
