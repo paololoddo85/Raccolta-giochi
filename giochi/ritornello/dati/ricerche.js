@@ -28,7 +28,7 @@ window.RITORNELLO_RICERCHE = {
         ],
         'italiane-moderne': [
             "annalisa", "elodie", "marco mengoni", "mahmood", "maneskin", "tananai", "the kolors",
-            "ultimo", "angelina mango", "olly", "boomdabash", "blanco", "rose villain", "gaia"
+            "ultimo", "angelina mango", "olly", "boomdabash", "blanco", "gaia", "elisa", "giorgia"
         ],
         // rap: dal catalogo entrano solo i brani di genere hip-hop/rap (vedi scaricaCatalogo)
         rap: [

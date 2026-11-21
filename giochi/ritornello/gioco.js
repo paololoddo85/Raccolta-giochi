@@ -286,6 +286,11 @@
 
     /* ================= MAZZO ================= */
     // I brani mai cantati finiscono in fondo all'elenco: pop() li pesca per primi
+    // Stesso brano anche se l'artista è scritto in un altro modo ("Guè Pequeno" / "Guè", "ed" / "&")
+    function stessoBrano(a, b) {
+        return normalizza(a.titolo) === normalizza(b.titolo) && artistiSimili(artistaPrincipale(a.artista), artistaPrincipale(b.artista));
+    }
+
     function preparaMazzo() {
         const filtro = filtroCategoria();
         const esclusi = new Set(stato.usati);
@@ -293,12 +298,11 @@
         const perChiave = new Map();
         RISERVA.filter(filtro).forEach(b => perChiave.set(chiave(b), { ...b }));
         const inclusi = [...perChiave.values()];
+        // nelle italiane moderne niente rap, nemmeno se iTunes lo classifica come pop
+        const rapInclusi = stato.categoria === 'italiane-moderne' ? RISERVA.filter(r => r.gruppo === 'rap') : [];
         catalogoLive.forEach(b => {
-            // stesso brano anche se l'artista è scritto in un altro modo ("Guè Pequeno" / "Guè")
-            const titolo = normalizza(b.titolo);
-            const artista = artistaPrincipale(b.artista);
-            const incluso = perChiave.get(chiave(b)) ||
-                inclusi.find(i => normalizza(i.titolo) === titolo && artistiSimili(artistaPrincipale(i.artista), artista));
+            if (rapInclusi.some(r => stessoBrano(r, b))) return;
+            const incluso = perChiave.get(chiave(b)) || inclusi.find(i => stessoBrano(i, b));
             if (!incluso) perChiave.set(chiave(b), { ...b });
             else if (!incluso.anteprima) Object.assign(incluso, { anteprima: b.anteprima, copertina: b.copertina });
         });

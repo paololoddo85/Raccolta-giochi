@@ -27,6 +27,8 @@ CATALOGO.push(brano(6001, 'Canzone (Live)', 'Gruppo', 1990), brano(6002, 'Altra 
   brano(6007, '<img src=x onerror=alert(1)>', 'Hacker', 2001));
 // lo stesso brano incluso "Pensare male" (The Kolors ed Elodie), scritto come su iTunes
 CATALOGO.push(brano(6100, 'Pensare male', 'The Kolors & Elodie', 2021));
+// un brano rap incluso che iTunes classifica come pop: non deve entrare nelle italiane moderne
+CATALOGO.push(brano(6102, 'Sesso e samba', 'Tony Effe & Gaia', new Date().getFullYear() - 2, { primaryGenreName: 'Pop' }));
 // "Lamborghini" scritto come su iTunes dal 2021 ("Guè"); il brano incluso ha "Guè e Sfera Ebbasta"
 CATALOGO.push(brano(6101, 'Lamborghini', 'Guè Pequeno', 2017, { primaryGenreName: 'Hip-Hop/Rap' }));
 function jsonp(route, data) {

@@ -202,9 +202,10 @@ const MODO = process.argv[2] || 'online'; // online | offline
     await page.click('#inizia'); await fase('consegna');
     await page.evaluate(() => { RG.mescola = window.__mescola; });
     const moderne = await page.evaluate(() => [RITORNELLO.stato.brano, ...RITORNELLO.mazzo()]);
-    const popAttesi = CATALOGO.filter(b => b.trackName.startsWith('Brano Online') && b.primaryGenreName !== 'Hip-Hop/Rap' && Number(b.releaseDate.slice(0, 4)) >= new Date().getFullYear() - 9).length;
+    const popAttesi = CATALOGO.filter(b => b.trackName.startsWith('Brano Online') && !/hip.?hop|rap/i.test(b.primaryGenreName || '') && Number(b.releaseDate.slice(0, 4)) >= new Date().getFullYear() - 9).length;
     ok(moderne.filter(b => b.titolo.startsWith('Brano Online')).length === popAttesi && moderne.every(b => b.gruppo === 'it' && b.anno >= new Date().getFullYear() - 9),
       `"Italiane moderne" online: dal catalogo tutti e soli i ${popAttesi} brani non rap degli ultimi 10 anni; nessun brano rap incluso`);
+    ok(!moderne.some(b => b.titolo === 'Sesso e samba'), '"Italiane moderne": un brano rap che iTunes classifica come pop resta fuori');
     ok(!moderne.some(b => b.titolo === 'Pensare male' && b.artista !== 'The Kolors ed Elodie'), 'artisti con "ed": il brano incluso e quello di iTunes sono lo stesso, non esce due volte');
     await page.click('#esci');
 
