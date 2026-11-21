@@ -42,7 +42,9 @@
         finita: false
     };
     let mazzo = [];
+    let pescatiNelTurno = []; // brani pescati nel turno in corso (anche quello cambiato)
     let catalogoLive = [];
+    let partitaN = 0; // cambia a ogni partita iniziata o ripresa: i cataloghi arrivati in ritardo si scartano
     let timer = null;
 
     /* ================= TESTI E CHIAVI ================= */
@@ -290,6 +292,7 @@
         const brano = mazzo.pop() || { ...RISERVA[0] };
         stato.usati.push(chiave(brano));
         segnaCantato(brano);
+        pescatiNelTurno.push(brano);
         return brano;
     }
 
@@ -357,6 +360,7 @@
 
     function inizioTurno() {
         fermaAudio();
+        pescatiNelTurno = [];
         stato.brano = pescaBrano();
         stato.cambiato = false;
         stato.aiuti = { anno: false, lettera: false };
@@ -546,6 +550,7 @@
             return;
         }
         if (timer) timer.ferma();
+        stato.svelaMotivo = 'parola';
         fotografaTurno();
         stato.esito = { tipo: 'parola' };
         RG.suoni.effetto('errore');
@@ -715,8 +720,9 @@
 
     function applicaAnnulla(u) {
         fermaAudio();
-        // il brano già pescato per il turno dopo torna nel mazzo
-        if (stato.fase !== 'svela' && stato.brano && chiave(stato.brano) !== chiave(u.brano)) mazzo.push(stato.brano);
+        // i brani già pescati per il turno dopo tornano nel mazzo (l'ultimo in cima)
+        if (stato.fase !== 'svela') pescatiNelTurno.filter(b => chiave(b) !== chiave(u.brano)).forEach(b => mazzo.push(b));
+        pescatiNelTurno = [];
         Object.assign(stato, {
             squadre: u.squadre, turnoDi: u.turnoDi, giro: u.giro, brano: u.brano, aiuti: u.aiuti,
             cambiato: u.cambiato, usati: u.usati, svelaMotivo: u.svelaMotivo || 'indovinato',
@@ -760,7 +766,7 @@
     function pulisciEsito(e, squadre) {
         if (!e || !['titolo', 'artista', 'niente', 'parola'].includes(e.tipo)) return null;
         const out = { tipo: e.tipo };
-        if (e.tipo === 'niente' && 'ladro' in e) out.ladro = Number.isInteger(e.ladro) && e.ladro < squadre ? e.ladro : null;
+        if (e.tipo === 'niente' && 'ladro' in e) out.ladro = Number.isInteger(e.ladro) && e.ladro >= 0 && e.ladro < squadre ? e.ladro : null;
         return out;
     }
 
@@ -792,6 +798,7 @@
     }
 
     function riprendi() {
+        if (inPreparazione) return; // una partita nuova si sta preparando: non si sovrascrivono a vicenda
         const g = SALVATAGGIO.leggi();
         if (!g) { disegnaRiquadro(); return; }
         const squadre = pulisciSquadre(g.squadre);
@@ -814,7 +821,10 @@
         });
         stato.rimasti = Math.min(stato.secondi, Math.max(0, Math.round(Number(g.rimasti) || 0)));
         catalogoLive = [];
+        pescatiNelTurno = [];
+        const questa = ++partitaN;
         preparaMazzo();
+        riportaNelModulo();
         mostraGioco();
         RG.toast(`Partita ripresa: tocca a ${squadraDiTurno().nome}`, 'successo');
 
@@ -827,7 +837,7 @@
 
         // Il catalogo online si riscarica in sottofondo e si aggiunge al mazzo
         scaricaCatalogo(stato.categoria).then(live => {
-            if (!live || !stato.avviata) return;
+            if (!live || !stato.avviata || questa !== partitaN) return;
             catalogoLive = live;
             preparaMazzo();
         });
@@ -861,6 +871,15 @@
 
     document.querySelectorAll('.count-btn').forEach(b => b.addEventListener('click', () => scegliNumero(Number(b.dataset.count))));
 
+    // Le impostazioni della partita ripresa tornano nel modulo: "Gioca ancora" ripete la stessa partita
+    function riportaNelModulo() {
+        scegliNumero(stato.squadre.length);
+        document.querySelectorAll('.nome-squadra').forEach((i, n) => { i.value = stato.squadre[n].nome; });
+        $('scelta-brani').value = stato.categoria;
+        $('scelta-traguardo').value = String(stato.traguardo);
+        $('scelta-tempo').value = String(stato.secondi);
+    }
+
     function mostraGioco() {
         $('preparazione').classList.add('hidden');
         $('gioco').classList.remove('hidden');
@@ -877,18 +896,27 @@
         window.scrollTo({ top: 0 });
     }
 
+    // Mentre si prepara il mazzo, avvio, Riprendi e Scarta restano bloccati
     let inPreparazione = false;
+    function bloccaAvvio(si) {
+        inPreparazione = si;
+        ['inizia', 'ancora'].forEach(id => { $(id).disabled = si; });
+        document.querySelectorAll('#resume-box button').forEach(b => { b.disabled = si; });
+    }
+
     async function nuovaPartita(pulsante) {
         if (inPreparazione) return;
-        inPreparazione = true;
+        bloccaAvvio(true);
         const etichetta = pulsante.textContent;
-        pulsante.disabled = true;
         pulsante.textContent = 'Preparo i brani…';
         try {
-            // Le impostazioni si leggono dalla preparazione (anche per "Gioca ancora": restano quelle)
+            // Le impostazioni si leggono dal modulo di preparazione (anche per "Gioca ancora":
+            // dopo una ripresa il modulo riporta quelle della partita ripresa)
             const nomi = [...document.querySelectorAll('.nome-squadra')].map((i, n) => i.value.trim() || NOMI_PREDEFINITI[n]);
             const categoria = $('scelta-brani').value;
+            const questa = ++partitaN;
             const live = await scaricaCatalogo(categoria);
+            if (questa !== partitaN) return;
             if (timer) timer.ferma();
             fermaAudio();
             Object.assign(stato, {
@@ -899,6 +927,7 @@
                 categoria, fase: null, brano: null, esito: null, annulla: null, usati: [],
                 avviata: true, finita: false
             });
+            pescatiNelTurno = [];
             RG.squadre.salva(nomi, NOMI_PREDEFINITI);
             catalogoLive = live || [];
             preparaMazzo();
@@ -908,8 +937,7 @@
             mostraGioco();
             inizioTurno();
         } finally {
-            inPreparazione = false;
-            pulsante.disabled = false;
+            bloccaAvvio(false);
             pulsante.textContent = etichetta;
         }
     }

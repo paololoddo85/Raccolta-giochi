@@ -111,8 +111,12 @@ const MODO = process.argv[2] || 'online'; // online | offline
     // turno di Giulia; annulla dall'inizio del turno dopo
     await page.click('#prossimo'); await fase('consegna');
     ok((await page.textContent('#consegna-squadra')) === 'Giulia' && await page.isVisible('#fase-consegna .annulla-turno'), 'tocca a Giulia, e si può ancora annullare il turno di Paolo');
+    const primoGiulia = (await st()).brano.titolo;
+    await page.click('#mostra-brano'); await page.click('#cambia-brano');
     const branoGiulia = (await st()).brano.titolo;
-    await page.click('#fase-consegna .annulla-turno'); await si();
+    await page.click('#fase-segreto .annulla-turno'); await si();
+    const cima = await page.evaluate(() => RITORNELLO.mazzo().slice(-2).map(b => b.titolo));
+    ok(cima.join() === [primoGiulia, branoGiulia].join(), 'annullando dopo "cambia brano" tornano nel mazzo entrambi i brani pescati');
     ok((await st()).turnoDi === 0 && (await st()).squadre[0].punti === 1, 'annulla dal turno dopo: si torna ai punti di Paolo');
     await page.click('[data-esito="artista"]');
     ok((await st()).squadre[0].punti === 2, 'solo l\'artista: +1');
@@ -125,6 +129,9 @@ const MODO = process.argv[2] || 'online'; // online | offline
     await page.click('#parola'); await si();
     await fase('svela');
     ok((await page.textContent('#esito-testo')).includes('perde il turno') && (await st()).squadre[1].punti === 0, 'ha detto una parola: turno perso, nessun punto né furto');
+    await page.click('#blocco-esito .annulla-turno'); await si();
+    ok((await page.textContent('#svela-motivo')).includes('Turno perso') && await page.isVisible('#blocco-punti'), 'annullando il turno perso resta il motivo "Turno perso"');
+    await page.click('[data-esito="niente"]'); await page.click('[data-ladro=""]');
     await page.click('#prossimo');
 
     // dal menù: "Partita in corso" e ripresa
@@ -137,6 +144,7 @@ const MODO = process.argv[2] || 'online'; // online | offline
     await page.click('#resume-box [data-azione="riprendi"]');
     await fase('consegna');
     ok((await st()).squadre[0].punti === 2 && (await st()).turnoDi === 0, 'partita ripresa con i punteggi giusti');
+    ok(await page.inputValue('#scelta-traguardo') === '10' && (await page.locator('.nome-squadra').evaluateAll(els => els.map(e => e.value))).join() === 'Paolo,Giulia', 'dopo la ripresa il modulo ha le impostazioni della partita ("Gioca ancora" la ripete)');
 
     // fino alla vittoria (traguardo 10)
     for (let i = 0; i < 10 && !(await page.isVisible('#vittoria')); i++) {
@@ -163,9 +171,23 @@ const MODO = process.argv[2] || 'online'; // online | offline
     await page.reload(); await fase('segreto');
     ok(await page.evaluate(() => { const b = RITORNELLO.stato.brano; return b.anteprima === '' && b.copertina === '' && b.anno === null; }) && await page.textContent('#segreto-titolo') === '<b>x</b>', 'salvataggio manomesso: indirizzi non https scartati, titolo come testo');
 
+    // salvataggio con un furto impossibile (squadra -1): niente errori
+    await page.evaluate(() => {
+      RITORNELLO.stato.avviata = false;
+      const g = JSON.parse(localStorage.getItem('rg-ritornello-partita'));
+      g.fase = 'svela'; g.esito = { tipo: 'niente', ladro: -1 };
+      localStorage.setItem('rg-ritornello-partita', JSON.stringify(g));
+    });
+    await page.reload(); await fase('svela');
+    ok((await page.textContent('#esito-testo')).includes('Nessuno ha indovinato'), 'salvataggio con un ladro inesistente: "nessuno", senza errori');
+
     // ← Menu e scarta
     await page.click('#esci');
     ok(await page.isVisible('#resume-box'), '"← Menu" torna alla preparazione con la partita salvata');
+    await togliToast();
+    ok(await page.evaluate(() => { document.getElementById('inizia').click(); return [...document.querySelectorAll('#resume-box button')].every(b => b.disabled); }), 'mentre si prepara una partita nuova Riprendi e Scarta sono bloccati');
+    await fase('consegna');
+    await page.click('#esci');
     await page.click('#resume-box [data-azione="scarta"]'); await si();
     ok(await page.isHidden('#resume-box'), 'scarta partita (con conferma in app)');
     ok(await page.evaluate(() => document.documentElement.scrollWidth) <= 360, 'nessuno scorrimento orizzontale');
