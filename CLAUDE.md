@@ -72,7 +72,7 @@ giochi/cinquina/dati/carte.js      le 304 carte di Cinquina (prima "HINT FAKE")
 giochi/pellicola/dati/film.js      88 film inclusi, titoli alternativi, ricerche del catalogo online (prima "CineStar")
 giochi/giradischi/dati/ricerche.js ricerche iTunes e parole che scartano raccolte/remaster/live (prima "Hitstar")
 giochi/giradischi/icone.js         icone Font Awesome incluse (SVG), licenza CC BY 4.0
-giochi/ritornello/dati/brani.js    brani inclusi da canticchiare [titolo, artista, anno, gruppo it/int/bimbi]
+giochi/ritornello/dati/brani.js    brani inclusi da canticchiare [titolo, artista, anno, gruppo it/rap/int/bimbi]
 giochi/ritornello/dati/ricerche.js ricerche iTunes per categoria e parole che scartano raccolte/live/remix
 prove/                             prove automatiche (Playwright): `node prove/esegui.js` — non fanno parte del sito
 ```
@@ -186,6 +186,11 @@ invece la schermata iniziale con il riquadro "Partita in corso" (Riprendi / Scar
   **Funziona anche offline** con i brani inclusi (niente `data-solo-online`): con internet arrivano anche brani da iTunes
   e allo svelamento si ascolta l'anteprima (per i brani inclusi viene cercata su iTunes al momento). Gli indirizzi
   di anteprime e copertine sono accettati solo se `https://`.
+  Categorie "Italiane moderne" e "Rap italiano moderno" = **ultimi 10 anni** dalla data di oggi (anno in corso e i 9
+  prima, `ANNO_MODERNO` in `gioco.js`); le ricerche iTunes con `{anno}` (`ricercheConAnno`) si ripetono per gli ultimi
+  3 anni. Il rap ha gruppo `rap` (conta anche tra le italiane) e dal catalogo prende solo il genere hip-hop/rap.
+  **Ogni anno** i brani inclusi più vecchi escono da queste due categorie: per giocarle bene offline aggiungi in
+  `dati/brani.js` successi italiani e rap usciti di recente (nel 2026: 70 italiani recenti, di cui 29 rap).
 
 ## Come aggiungere un nuovo gioco
 

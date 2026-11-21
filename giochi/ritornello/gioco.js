@@ -59,7 +59,7 @@
     }
 
     function artistaPrincipale(testo) {
-        return normalizza(String(testo || '').split(/\s+(?:ft\.?|feat\.?|featuring|x|e|and)\s+|&|,/i)[0]);
+        return normalizza(String(testo || '').split(/\s+(?:ft\.?|feat\.?|featuring|x|e|ed|and)\s+|&|,/i)[0]);
     }
 
     function chiave(brano) {
@@ -87,7 +87,7 @@
             titolo: b.titolo.slice(0, 160),
             artista: b.artista.slice(0, 160),
             anno,
-            gruppo: ['it', 'int', 'bimbi'].includes(b.gruppo) ? b.gruppo : 'int',
+            gruppo: ['it', 'rap', 'int', 'bimbi'].includes(b.gruppo) ? b.gruppo : 'int',
             anteprima: urlSicuro(b.anteprima),
             copertina: urlSicuro(b.copertina)
         };
@@ -101,16 +101,30 @@
     /* ================= BRANI INCLUSI E CATEGORIE ================= */
     const RISERVA = window.RITORNELLO_BRANI.map(([titolo, artista, anno, gruppo]) => ({ titolo, artista, anno, gruppo }));
 
+    // "Ultimi 10 anni": l'anno in corso e i 9 prima (nel 2026: dal 2017), calcolato sulla data di oggi
+    const ANNO_CORRENTE = new Date().getFullYear();
+    const ANNO_MODERNO = ANNO_CORRENTE - 9;
+    // Ultimi 3 anni per le ricerche con l'anno; a gennaio e febbraio (prima di Sanremo) l'anno nuovo
+    // non ha ancora successi: si parte da quello prima
+    const anniRicerca = () => {
+        const da = new Date().getMonth() >= 2 ? 0 : 1;
+        return [da, da + 1, da + 2].map(n => ANNO_CORRENTE - n);
+    };
+
     const CATEGORIE = {
         tutto: () => true,
-        italiane: b => b.gruppo === 'it',
+        italiane: b => b.gruppo === 'it' || b.gruppo === 'rap',
+        'italiane-moderne': b => (b.gruppo === 'it' || b.gruppo === 'rap') && b.anno >= ANNO_MODERNO,
+        rap: b => b.gruppo === 'rap' && b.anno >= ANNO_MODERNO,
         internazionali: b => b.gruppo === 'int',
         classici: b => b.gruppo !== 'bimbi' && b.anno <= 1989,
         '9000': b => b.gruppo !== 'bimbi' && b.anno >= 1990 && b.anno <= 2009,
         recenti: b => b.gruppo !== 'bimbi' && b.anno >= 2010,
         bambini: b => b.gruppo === 'bimbi'
     };
-    const filtroCategoria = () => CATEGORIE[stato.categoria] || CATEGORIE.tutto;
+    // Solo le chiavi scritte qui (non "constructor", "toString"… ereditati da Object): arrivano anche da salvataggi
+    const haChiave = (tabella, chiaveCercata) => typeof chiaveCercata === 'string' && Object.prototype.hasOwnProperty.call(tabella, chiaveCercata);
+    const filtroCategoria = () => (haChiave(CATEGORIE, stato.categoria) ? CATEGORIE[stato.categoria] : CATEGORIE.tutto);
 
     // rg-ritornello-brani-cantati: brani usciti nelle partite precedenti (escono per ultimi)
     function storico() {
@@ -182,7 +196,7 @@
         const etichette = etichetteVersione(r.trackName);
         if (etichette && VERSIONI_VIETATE.test(etichette)) return false;
         const anno = parseInt(r.releaseDate.slice(0, 4), 10);
-        return anno >= 1940 && anno <= 2030;
+        return anno >= 1940 && anno <= ANNO_CORRENTE + 1;
     }
 
     const RICERCA_ITALIANA = /ital|sanremo|tormentoni|vasco|battisti|mina|celentano|pausini|ramazzotti|jovanotti|883|dalla|ligabue|maneskin|mahmood|d'avena|zecchino|vanni|bambini|disney/i;
@@ -190,13 +204,17 @@
     // Brani del catalogo iTunes per la categoria scelta, oppure null se iTunes non risponde
     async function scaricaCatalogo(categoria) {
         if (navigator.onLine === false) return null; // il telefono sa già di essere offline
-        const ricerche = RG.mescola(DATI.ricerche[categoria] || DATI.ricerche.tutto).slice(0, 6);
+        const fisse = haChiave(DATI.ricerche, categoria) ? DATI.ricerche[categoria] : DATI.ricerche.tutto;
+        // ricerche con l'anno, per gli ultimi 3 anni ("sanremo 2026", "sanremo 2025"…)
+        const conAnno = (haChiave(DATI.ricercheConAnno, categoria) ? DATI.ricercheConAnno[categoria] : [])
+            .flatMap(q => anniRicerca().map(anno => q.replace('{anno}', anno)));
+        const ricerche = RG.mescola([...fisse, ...conAnno]).slice(0, 6);
         const trovati = new Map();
         const annoMinimo = new Map(); // tra tutte le versioni restituite: le ristampe hanno anni successivi
         let raggiunto = false;
 
         await Promise.all(ricerche.map(async (q) => {
-            const italiana = categoria === 'italiane' || categoria === 'bambini' || RICERCA_ITALIANA.test(q);
+            const italiana = ['italiane', 'italiane-moderne', 'rap', 'bambini'].includes(categoria) || RICERCA_ITALIANA.test(q);
             const risultati = await cercaItunes(q, italiana ? 'IT' : 'US', 25);
             if (!risultati) return;
             raggiunto = true;
@@ -207,10 +225,12 @@
                 const anno = parseInt(String(r.releaseDate || '').slice(0, 4), 10);
                 if (anno && (!annoMinimo.has(k) || anno < annoMinimo.get(k))) annoMinimo.set(k, anno);
                 if (!braniOriginale(r) || trovati.has(k)) return;
+                // nel rap le ricerche per nome trovano anche altro (salmi, canzoni pop): solo genere hip-hop/rap
+                if (categoria === 'rap' && !/hip.?hop|rap/i.test(r.primaryGenreName || '')) return;
                 trovati.set(k, pulisciBrano({
                     ...b,
                     anno,
-                    gruppo: categoria === 'bambini' ? 'bimbi' : (italiana ? 'it' : 'int'),
+                    gruppo: categoria === 'bambini' ? 'bimbi' : categoria === 'rap' ? 'rap' : (italiana ? 'it' : 'int'),
                     anteprima: r.previewUrl,
                     copertina: copertinaGrande(r.artworkUrl100)
                 }));
@@ -269,10 +289,14 @@
         if (stato.brano) esclusi.add(chiave(stato.brano));
         const perChiave = new Map();
         RISERVA.filter(filtro).forEach(b => perChiave.set(chiave(b), { ...b }));
+        const inclusi = [...perChiave.values()];
         catalogoLive.forEach(b => {
-            const k = chiave(b);
-            const incluso = perChiave.get(k);
-            if (!incluso) perChiave.set(k, { ...b });
+            // stesso brano anche se l'artista è scritto in un altro modo ("Guè Pequeno" / "Guè")
+            const titolo = normalizza(b.titolo);
+            const artista = artistaPrincipale(b.artista);
+            const incluso = perChiave.get(chiave(b)) ||
+                inclusi.find(i => normalizza(i.titolo) === titolo && artistiSimili(artistaPrincipale(i.artista), artista));
+            if (!incluso) perChiave.set(chiave(b), { ...b });
             else if (!incluso.anteprima) Object.assign(incluso, { anteprima: b.anteprima, copertina: b.copertina });
         });
         const visti = storico();
@@ -289,7 +313,7 @@
             preparaMazzo();
             RG.toast('Brani finiti: si ricomincia dal mazzo intero.', 'info');
         }
-        const brano = mazzo.pop() || { ...RISERVA[0] };
+        const brano = mazzo.pop() || { ...(RISERVA.find(filtroCategoria()) || RISERVA[0]) };
         stato.usati.push(chiave(brano));
         segnaCantato(brano);
         pescatiNelTurno.push(brano);
@@ -778,7 +802,7 @@
             squadre: pulisciSquadre(u.squadre), turnoDi: u.turnoDi, giro: Math.max(1, Number(u.giro) || 1), brano,
             aiuti: pulisciAiuti(u.aiuti), cambiato: !!u.cambiato,
             usati: pulisciUsati(u.usati),
-            svelaMotivo: u.svelaMotivo in MOTIVI ? u.svelaMotivo : 'indovinato'
+            svelaMotivo: haChiave(MOTIVI, u.svelaMotivo) ? u.svelaMotivo : 'indovinato'
         };
     }
 
@@ -807,12 +831,12 @@
             giro: Math.max(1, Number(g.giro) || 1),
             traguardo: numero(g.traguardo, [10, 15, 20], 15),
             secondi: numero(g.secondi, [30, 45, 60], 45),
-            categoria: g.categoria in CATEGORIE ? g.categoria : 'tutto',
+            categoria: haChiave(CATEGORIE, g.categoria) ? g.categoria : 'tutto',
             brano: pulisciBrano(g.brano),
             cambiato: !!g.cambiato,
             aiuti: pulisciAiuti(g.aiuti),
             esito: pulisciEsito(g.esito, squadre.length),
-            svelaMotivo: g.svelaMotivo in MOTIVI ? g.svelaMotivo : null,
+            svelaMotivo: haChiave(MOTIVI, g.svelaMotivo) ? g.svelaMotivo : null,
             annulla: pulisciAnnulla(g.annulla),
             usati: pulisciUsati(g.usati),
             avviata: true,
@@ -961,5 +985,5 @@
     if (SALVATAGGIO.leggi() && RG.partita.ricaricata()) riprendi();
 
     // Per le prove automatiche
-    window.RITORNELLO = { stato, mazzo: () => mazzo, timer: () => timer, SALVATAGGIO };
+    window.RITORNELLO = { stato, mazzo: () => mazzo, timer: () => timer, SALVATAGGIO, inclusi: c => RISERVA.filter(CATEGORIE[c]).length };
 })();

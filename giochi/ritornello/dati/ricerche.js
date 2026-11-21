@@ -5,6 +5,9 @@
  *
  * ricerche: ricerche iTunes per categoria (le stesse chiavi del menù "Brani" del gioco).
  *           Solo successi famosi, facili da riconoscere canticchiati.
+ * ricercheConAnno: ricerche con "{anno}", ripetute dal gioco per gli ultimi 3 anni (a gennaio e febbraio
+ *           si parte dall'anno prima)
+ *           (le categorie "ultimi 10 anni" restano aggiornate da sole, anno dopo anno).
  * paroleAlbumVietate: parole intere che, nel titolo dell'ALBUM, indicano raccolte,
  *           compilation o versioni non originali.
  * paroleVersioneVietate: parole che, tra parentesi o dopo " - " nel titolo del BRANO,
@@ -22,6 +25,16 @@ window.RITORNELLO_RICERCHE = {
             "pop italiano anni 80", "pop italiano anni 90", "hit italiane 2010", "hit italiane 2020",
             "lucio battisti", "vasco rossi", "883", "jovanotti", "laura pausini", "eros ramazzotti",
             "adriano celentano", "mina", "lucio dalla", "ligabue", "maneskin", "mahmood"
+        ],
+        'italiane-moderne': [
+            "annalisa", "elodie", "marco mengoni", "mahmood", "maneskin", "tananai", "the kolors",
+            "ultimo", "angelina mango", "olly", "boomdabash", "blanco", "rose villain", "gaia"
+        ],
+        // rap: dal catalogo entrano solo i brani di genere hip-hop/rap (vedi scaricaCatalogo)
+        rap: [
+            "rap italiano", "trap italiana", "hit rap italiano", "sfera ebbasta", "lazza", "geolier",
+            "salmo lebon", "marracash", "guè", "ghali", "tony effe", "capo plaza", "anna pepe", "ernia",
+            "shiva", "tedua", "kid yugi", "artie 5ive"
         ],
         internazionali: [
             "top hits 1970s", "80s number one hits", "90s pop hits", "2000s pop hits",
@@ -44,6 +57,11 @@ window.RITORNELLO_RICERCHE = {
             "sigle cartoni animati", "cristina d'avena", "zecchino d'oro", "canzoni disney italiano",
             "giorgio vanni", "canzoni per bambini"
         ]
+    },
+
+    ricercheConAnno: {
+        'italiane-moderne': ["sanremo {anno}", "tormentoni estate {anno}", "successi italiani {anno}"],
+        rap: ["rap italiano {anno}", "trap italiana {anno}"]
     },
 
     paroleAlbumVietate: [
