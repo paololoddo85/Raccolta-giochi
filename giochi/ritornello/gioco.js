@@ -201,6 +201,12 @@
 
     const RICERCA_ITALIANA = /ital|sanremo|tormentoni|vasco|battisti|mina|celentano|pausini|ramazzotti|jovanotti|883|dalla|ligabue|maneskin|mahmood|d'avena|zecchino|vanni|bambini|disney/i;
 
+    // "@nome" nelle ricerche = ricerca per artista: si tiene il brano solo se il suo artista principale
+    // si chiama esattamente così ("@gaia" tiene Gaia, non Gaia Noise; "@salmo" non tiene i salmi)
+    function artistaGiusto(ricerca, nomeArtista) {
+        return !ricerca.startsWith('@') || artistaPrincipale(nomeArtista) === normalizza(ricerca.slice(1));
+    }
+
     // Brani del catalogo iTunes per la categoria scelta, oppure null se iTunes non risponde
     async function scaricaCatalogo(categoria) {
         if (navigator.onLine === false) return null; // il telefono sa già di essere offline
@@ -215,7 +221,7 @@
 
         await Promise.all(ricerche.map(async (q) => {
             const italiana = ['italiane', 'italiane-moderne', 'rap', 'bambini'].includes(categoria) || RICERCA_ITALIANA.test(q);
-            const risultati = await cercaItunes(q, italiana ? 'IT' : 'US', 25);
+            const risultati = await cercaItunes(q.replace(/^@/, ''), italiana ? 'IT' : 'US', 25);
             if (!risultati) return;
             raggiunto = true;
             risultati.forEach(r => {
@@ -224,7 +230,7 @@
                 const k = chiave(b);
                 const anno = parseInt(String(r.releaseDate || '').slice(0, 4), 10);
                 if (anno && (!annoMinimo.has(k) || anno < annoMinimo.get(k))) annoMinimo.set(k, anno);
-                if (!braniOriginale(r) || trovati.has(k)) return;
+                if (!braniOriginale(r) || trovati.has(k) || !artistaGiusto(q, r.artistName)) return;
                 // nel rap le ricerche per nome trovano anche altro (salmi, canzoni pop): solo genere hip-hop/rap;
                 // nelle italiane moderne, al contrario, il rap non entra (ha la sua categoria)
                 const genereRap = /hip.?hop|rap/i.test(r.primaryGenreName || '');
@@ -992,5 +998,5 @@
     if (SALVATAGGIO.leggi() && RG.partita.ricaricata()) riprendi();
 
     // Per le prove automatiche
-    window.RITORNELLO = { stato, mazzo: () => mazzo, timer: () => timer, SALVATAGGIO, inclusi: c => RISERVA.filter(CATEGORIE[c]).length };
+    window.RITORNELLO = { stato, mazzo: () => mazzo, timer: () => timer, SALVATAGGIO, inclusi: c => RISERVA.filter(CATEGORIE[c]).length, artistaGiusto };
 })();

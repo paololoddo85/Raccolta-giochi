@@ -5,6 +5,8 @@
  *
  * ricerche: ricerche iTunes per categoria (le stesse chiavi del menù "Brani" del gioco).
  *           Solo successi famosi, facili da riconoscere canticchiati.
+ *           "@nome" = ricerca per ARTISTA: si tengono solo i brani il cui artista principale si chiama
+ *           esattamente così (cercando "gaia" iTunes trova anche "Gaia Noise", cercando "salmo" i salmi).
  * ricercheConAnno: ricerche con "{anno}", ripetute dal gioco per gli ultimi 3 anni (a gennaio e febbraio
  *           si parte dall'anno prima)
  *           (le categorie "ultimi 10 anni" restano aggiornate da sole, anno dopo anno).
@@ -18,44 +20,44 @@ window.RITORNELLO_RICERCHE = {
         tutto: [
             "top hits 1970s", "top hits 1980s", "80s number one hits", "top hits 1990s",
             "top hits 2000s", "top hits 2010s", "top hits 2020s", "grandi successi italiani",
-            "vincitori sanremo", "tormentoni estivi", "canzoni da cantare", "queen", "abba", "vasco rossi"
+            "vincitori sanremo", "tormentoni estivi", "canzoni da cantare", "@queen", "@abba", "@vasco rossi"
         ],
         italiane: [
             "grandi successi italiani", "vincitori sanremo", "tormentoni estivi italiani",
             "pop italiano anni 80", "pop italiano anni 90", "hit italiane 2010", "hit italiane 2020",
-            "lucio battisti", "vasco rossi", "883", "jovanotti", "laura pausini", "eros ramazzotti",
-            "adriano celentano", "mina", "lucio dalla", "ligabue", "maneskin", "mahmood"
+            "@lucio battisti", "@vasco rossi", "@883", "@jovanotti", "@laura pausini", "@eros ramazzotti",
+            "@adriano celentano", "@mina", "@lucio dalla", "@ligabue", "@maneskin", "@mahmood"
         ],
         'italiane-moderne': [
-            "annalisa", "elodie", "marco mengoni", "mahmood", "maneskin", "tananai", "the kolors",
-            "ultimo", "angelina mango", "olly", "boomdabash", "blanco", "gaia", "elisa", "giorgia"
+            "@annalisa", "@elodie", "@marco mengoni", "@mahmood", "@maneskin", "@tananai", "@the kolors",
+            "@ultimo", "@angelina mango", "@olly", "@boomdabash", "@blanco", "@gaia", "@elisa", "@giorgia"
         ],
         // rap: dal catalogo entrano solo i brani di genere hip-hop/rap (vedi scaricaCatalogo)
         rap: [
-            "rap italiano", "trap italiana", "hit rap italiano", "sfera ebbasta", "lazza", "geolier",
-            "salmo lebon", "marracash", "guè", "ghali", "tony effe", "capo plaza", "anna pepe", "ernia",
-            "shiva", "tedua", "kid yugi", "artie 5ive"
+            "rap italiano", "trap italiana", "hit rap italiano", "@sfera ebbasta", "@lazza", "@geolier",
+            "@salmo", "@marracash", "@guè", "@ghali", "@tony effe", "@capo plaza", "@anna", "@ernia",
+            "@shiva", "@tedua", "@kid yugi", "@artie 5ive"
         ],
         internazionali: [
             "top hits 1970s", "80s number one hits", "90s pop hits", "2000s pop hits",
-            "2010s pop hits", "2020s pop hits", "queen", "abba", "michael jackson", "madonna",
-            "the beatles", "bee gees", "dua lipa", "ed sheeran", "adele", "shakira"
+            "2010s pop hits", "2020s pop hits", "@queen", "@abba", "@michael jackson", "@madonna",
+            "@the beatles", "@bee gees", "@dua lipa", "@ed sheeran", "@adele", "@shakira"
         ],
         classici: [
             "60s number one hits", "70s number one hits", "70s disco hits", "80s number one hits",
-            "80s pop hits", "queen", "abba", "the beatles", "michael jackson", "lucio battisti", "mina"
+            "80s pop hits", "@queen", "@abba", "@the beatles", "@michael jackson", "@lucio battisti", "@mina"
         ],
         '9000': [
             "90s number one hits", "90s eurodance hits", "90s pop hits", "2000s number one hits",
-            "2000s pop hits", "883", "laura pausini", "spice girls", "britney spears", "backstreet boys"
+            "2000s pop hits", "@883", "@laura pausini", "@spice girls", "@britney spears", "@backstreet boys"
         ],
         recenti: [
             "2010s top hits", "2015 top hits", "2018 top hits", "2020 top hits", "2022 top hits",
-            "2024 top hits", "2025 top hits", "tormentoni estivi", "dua lipa", "the weeknd", "mahmood"
+            "2024 top hits", "2025 top hits", "tormentoni estivi", "@dua lipa", "@the weeknd", "@mahmood"
         ],
         bambini: [
-            "sigle cartoni animati", "cristina d'avena", "zecchino d'oro", "canzoni disney italiano",
-            "giorgio vanni", "canzoni per bambini"
+            "sigle cartoni animati", "@cristina d'avena", "zecchino d'oro", "canzoni disney italiano",
+            "@giorgio vanni", "canzoni per bambini"
         ]
     },
 

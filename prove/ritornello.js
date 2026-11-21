@@ -197,8 +197,8 @@ const MODO = process.argv[2] || 'online'; // online | offline
 
     // "Italiane moderne" online: dal catalogo solo brani degli ultimi 10 anni, trattati come italiani
     await page.selectOption('#scelta-brani', 'italiane-moderne');
-    // mescolamento fisso (al contrario): escono di sicuro le ricerche con l'anno, che stanno in fondo
-    await page.evaluate(() => { window.__mescola = RG.mescola; RG.mescola = a => [...a].reverse(); });
+    // mescolamento fisso: prima le ricerche generiche (con l'anno comprese), che le risposte finte riempiono di brani
+    await page.evaluate(() => { window.__mescola = RG.mescola; RG.mescola = a => [...a].sort((x, y) => String(x).startsWith('@') - String(y).startsWith('@')); });
     await page.click('#inizia'); await fase('consegna');
     await page.evaluate(() => { RG.mescola = window.__mescola; });
     const moderne = await page.evaluate(() => [RITORNELLO.stato.brano, ...RITORNELLO.mazzo()]);
@@ -211,7 +211,9 @@ const MODO = process.argv[2] || 'online'; // online | offline
 
     // "Rap italiano moderno": solo rap degli ultimi 10 anni, inclusi e dal catalogo; il rap conta anche tra le italiane
     await page.selectOption('#scelta-brani', 'rap');
+    await page.evaluate(() => { window.__mescola = RG.mescola; RG.mescola = a => [...a].sort((x, y) => String(x).startsWith('@') - String(y).startsWith('@')); });
     await page.click('#inizia'); await fase('consegna');
+    await page.evaluate(() => { RG.mescola = window.__mescola; });
     const rapAttesi = CATALOGO.filter(b => b.trackName.startsWith('Brano Online') && b.primaryGenreName === 'Hip-Hop/Rap' && Number(b.releaseDate.slice(0, 4)) >= new Date().getFullYear() - 9).length;
     const rap = await page.evaluate(() => [RITORNELLO.stato.brano, ...RITORNELLO.mazzo()]);
     ok(rap.every(b => b.gruppo === 'rap' && b.anno >= new Date().getFullYear() - 9) && rap.some(b => !b.titolo.startsWith('Brano Online')) &&
@@ -219,7 +221,12 @@ const MODO = process.argv[2] || 'online'; // online | offline
       `"Rap italiano moderno": brani rap inclusi e dal catalogo (tutti e soli i ${rapAttesi} di genere hip-hop/rap degli ultimi 10 anni)`);
     await page.click('#esci');
     await page.selectOption('#scelta-brani', 'italiane');
+    await page.evaluate(() => { window.__mescola = RG.mescola; RG.mescola = a => [...a].sort((x, y) => String(x).startsWith('@') - String(y).startsWith('@')); });
     await page.click('#inizia'); await fase('consegna');
+    await page.evaluate(() => { RG.mescola = window.__mescola; });
+    ok(await page.evaluate(() => !RITORNELLO.artistaGiusto('@gaia', 'Gaia Noise') && !RITORNELLO.artistaGiusto('@salmo', 'Coro Polifonico') &&
+      RITORNELLO.artistaGiusto('@gaia', 'Gaia') && RITORNELLO.artistaGiusto('@gaia', 'Gaia & Sfera Ebbasta') && RITORNELLO.artistaGiusto('@maneskin', 'Måneskin') &&
+      RITORNELLO.artistaGiusto('sanremo 2025', 'Gaia Noise')), 'ricerche per artista ("@gaia"): solo quell\'artista, non "Gaia Noise"; le ricerche generiche non filtrano');
     const italiane = await page.evaluate(() => [RITORNELLO.stato.brano, ...RITORNELLO.mazzo()]);
     ok(italiane.some(b => b.gruppo === 'rap'), 'i brani rap restano anche in "Solo italiane"');
     ok(italiane.filter(b => b.titolo === 'Lamborghini').length === 1, 'stesso brano con l\'artista scritto in modo diverso ("Guè Pequeno"/"Guè"): esce una volta sola');
@@ -227,7 +234,7 @@ const MODO = process.argv[2] || 'online'; // online | offline
     ok(await page.evaluate(() => document.documentElement.scrollWidth) <= 360, 'nessuno scorrimento orizzontale');
     const y = new Date().getFullYear();
     const conAnno = rete.termini.filter(t => /^(sanremo|tormentoni estate|successi italiani|rap italiano|trap italiana) /.test(t));
-    ok(conAnno.length > 0 && !rete.termini.some(t => t.includes('{anno}')) && conAnno.every(t => [y, y - 1, y - 2, y - 3].includes(Number(t.split(' ').pop()))),
+    ok(conAnno.length > 0 && !rete.termini.some(t => t.includes('{anno}') || t.startsWith('@')) && conAnno.every(t => [y, y - 1, y - 2, y - 3].includes(Number(t.split(' ').pop()))),
       `ricerche con l'anno solo per gli ultimi anni (${conAnno.join(', ')})`);
     console.log('  richieste finte servite:', JSON.stringify(rete.richieste));
     ok(errori.length === 0, 'nessun errore in console' + (errori.length ? ':\n' + errori.join('\n') : ''));
