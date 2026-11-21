@@ -11,6 +11,8 @@ function creaWav(secondi = 3, freq = 523, campioni = 8000) {
 const WAV = creaWav();
 const COVER = fs.readFileSync(__dirname + '/risorse/copertina.jpg');
 const CORS = { 'access-control-allow-origin': '*' };
+// i brani inclusi del gioco, per rispondere alle ricerche delle loro anteprime
+const RISERVA = require('vm').runInNewContext(fs.readFileSync(__dirname + '/../giochi/ritornello/dati/brani.js', 'utf8') + ';window.RITORNELLO_BRANI', { window: {} });
 const stato = { rete: true, richieste: { catalogo: 0, anteprima: 0, audio: 0 } };
 const brano = (id, titolo, artista, anno, extra = {}) => ({ wrapperType: 'track', kind: 'song', trackId: id, trackName: titolo, artistName: artista,
   collectionName: titolo, releaseDate: `${anno}-05-01T07:00:00Z`, previewUrl: `https://audio-ssl.itunes.apple.com/finto/${id}.m4a`,
@@ -33,7 +35,6 @@ module.exports = { stato, CATALOGO, async finti(context) {
     if (u.searchParams.get('limit') === '10') { // anteprima di un brano incluso: si risponde con lo stesso titolo
       stato.richieste.anteprima++;
       const term = u.searchParams.get('term') || '';
-      const RISERVA = require('vm').runInNewContext(fs.readFileSync(__dirname + '/../giochi/ritornello/dati/brani.js', 'utf8') + ';window.RITORNELLO_BRANI', { window: {} });
       const r = RISERVA.find(([t, a]) => term === `${t} ${a.replace(/\(.*?\)/g, '')}`);
       return jsonp(route, { results: r ? [brano(7000 + RISERVA.indexOf(r), r[0], r[1], r[2])] : [] });
     }

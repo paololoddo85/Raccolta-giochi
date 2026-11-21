@@ -447,7 +447,6 @@
             },
             allaFine: tempoScaduto
         });
-        timer.totale = stato.secondi;
         timer.rimasti = stato.rimasti;
     }
 
@@ -736,12 +735,12 @@
     }
 
     /* ================= SALVATAGGIO E RIPRESA ================= */
-    const SALVATAGGIO = RG.partita.crea('ritornello', {
-        versione: 1,
-        valida: d => Array.isArray(d.squadre) && d.squadre.length >= 2 && d.squadre.length <= 4 &&
-            d.squadre.every(s => s && typeof s.nome === 'string' && Number.isFinite(s.punti)) &&
-            Number.isInteger(d.turnoDi) && d.turnoDi >= 0 && d.turnoDi < d.squadre.length
-    });
+    // Squadre e squadra di turno leggibili (salvataggio e fotografia per "annulla")
+    const squadreValide = d => Array.isArray(d.squadre) && d.squadre.length >= 2 && d.squadre.length <= 4 &&
+        d.squadre.every(s => s && typeof s.nome === 'string' && Number.isFinite(s.punti)) &&
+        Number.isInteger(d.turnoDi) && d.turnoDi >= 0 && d.turnoDi < d.squadre.length;
+
+    const SALVATAGGIO = RG.partita.crea('ritornello', { versione: 1, valida: squadreValide });
 
     function salva() {
         if (!stato.avviata || stato.finita) return;
@@ -759,6 +758,8 @@
         return lista.map(s => ({ nome: String(s.nome).slice(0, 24), punti: Math.max(0, Math.round(s.punti)) }));
     }
 
+    const pulisciUsati = u => (Array.isArray(u) ? u.filter(k => typeof k === 'string').slice(-1000) : []);
+
     function pulisciAiuti(a) {
         return { anno: !!(a && a.anno), lettera: !!(a && a.lettera) };
     }
@@ -771,14 +772,12 @@
     }
 
     function pulisciAnnulla(u) {
-        if (!u || !Array.isArray(u.squadre) || u.squadre.length < 2) return null;
-        const brano = pulisciBrano(u.brano);
-        if (!brano || !Number.isInteger(u.turnoDi) || u.turnoDi < 0 || u.turnoDi >= u.squadre.length) return null;
-        if (!u.squadre.every(s => s && typeof s.nome === 'string' && Number.isFinite(s.punti))) return null;
+        const brano = u && squadreValide(u) ? pulisciBrano(u.brano) : null;
+        if (!brano) return null;
         return {
             squadre: pulisciSquadre(u.squadre), turnoDi: u.turnoDi, giro: Math.max(1, Number(u.giro) || 1), brano,
             aiuti: pulisciAiuti(u.aiuti), cambiato: !!u.cambiato,
-            usati: Array.isArray(u.usati) ? u.usati.filter(k => typeof k === 'string').slice(-1000) : [],
+            usati: pulisciUsati(u.usati),
             svelaMotivo: u.svelaMotivo in MOTIVI ? u.svelaMotivo : 'indovinato'
         };
     }
@@ -815,7 +814,7 @@
             esito: pulisciEsito(g.esito, squadre.length),
             svelaMotivo: g.svelaMotivo in MOTIVI ? g.svelaMotivo : null,
             annulla: pulisciAnnulla(g.annulla),
-            usati: Array.isArray(g.usati) ? g.usati.filter(k => typeof k === 'string').slice(-1000) : [],
+            usati: pulisciUsati(g.usati),
             avviata: true,
             finita: false
         });
