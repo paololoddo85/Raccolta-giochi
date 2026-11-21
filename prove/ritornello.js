@@ -35,7 +35,7 @@ const MODO = process.argv[2] || 'online'; // online | offline
       await page.waitForSelector('.rg-toast-avviso');
       ok((await page.textContent('.rg-toast-avviso')).includes('brani inclusi'), 'offline: avviso "si gioca con i brani inclusi" e la partita parte lo stesso');
       ok(s0.squadre.length === 2 && await page.evaluate(() => RITORNELLO.mazzo().length + 1 === RITORNELLO.inclusi('italiane-moderne') && RITORNELLO.mazzo().length > 10), 'offline: mazzo con tutti i brani inclusi della categoria');
-      ok(await page.evaluate(() => [RITORNELLO.stato.brano, ...RITORNELLO.mazzo()].every(b => ['it', 'rap'].includes(b.gruppo) && b.anno >= new Date().getFullYear() - 9)), '"Italiane moderne": solo brani italiani degli ultimi 10 anni');
+      ok(await page.evaluate(() => [RITORNELLO.stato.brano, ...RITORNELLO.mazzo()].every(b => b.gruppo === 'it' && b.anno >= new Date().getFullYear() - 9)), '"Italiane moderne": solo brani italiani degli ultimi 10 anni, senza rap');
       await page.click('#mostra-brano'); await fase('segreto');
       ok(await page.isDisabled('#ripassa') && (await page.textContent('#ripasso-nota')).includes('Senza connessione'), 'offline: niente ripasso in cuffia, con la spiegazione');
       await page.click('#via'); await fase('canta'); await page.click('#indovinato'); await fase('svela');
@@ -202,7 +202,9 @@ const MODO = process.argv[2] || 'online'; // online | offline
     await page.click('#inizia'); await fase('consegna');
     await page.evaluate(() => { RG.mescola = window.__mescola; });
     const moderne = await page.evaluate(() => [RITORNELLO.stato.brano, ...RITORNELLO.mazzo()]);
-    ok(moderne.some(b => b.titolo.startsWith('Brano Online')) && moderne.every(b => ['it', 'rap'].includes(b.gruppo) && b.anno >= new Date().getFullYear() - 9), '"Italiane moderne" online: brani del catalogo solo degli ultimi 10 anni, come italiani');
+    const popAttesi = CATALOGO.filter(b => b.trackName.startsWith('Brano Online') && b.primaryGenreName !== 'Hip-Hop/Rap' && Number(b.releaseDate.slice(0, 4)) >= new Date().getFullYear() - 9).length;
+    ok(moderne.filter(b => b.titolo.startsWith('Brano Online')).length === popAttesi && moderne.every(b => b.gruppo === 'it' && b.anno >= new Date().getFullYear() - 9),
+      `"Italiane moderne" online: dal catalogo tutti e soli i ${popAttesi} brani non rap degli ultimi 10 anni; nessun brano rap incluso`);
     ok(!moderne.some(b => b.titolo === 'Pensare male' && b.artista !== 'The Kolors ed Elodie'), 'artisti con "ed": il brano incluso e quello di iTunes sono lo stesso, non esce due volte');
     await page.click('#esci');
 

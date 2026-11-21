@@ -114,7 +114,7 @@
     const CATEGORIE = {
         tutto: () => true,
         italiane: b => b.gruppo === 'it' || b.gruppo === 'rap',
-        'italiane-moderne': b => (b.gruppo === 'it' || b.gruppo === 'rap') && b.anno >= ANNO_MODERNO,
+        'italiane-moderne': b => b.gruppo === 'it' && b.anno >= ANNO_MODERNO, // senza rap: il rap ha la sua categoria
         rap: b => b.gruppo === 'rap' && b.anno >= ANNO_MODERNO,
         internazionali: b => b.gruppo === 'int',
         classici: b => b.gruppo !== 'bimbi' && b.anno <= 1989,
@@ -225,8 +225,11 @@
                 const anno = parseInt(String(r.releaseDate || '').slice(0, 4), 10);
                 if (anno && (!annoMinimo.has(k) || anno < annoMinimo.get(k))) annoMinimo.set(k, anno);
                 if (!braniOriginale(r) || trovati.has(k)) return;
-                // nel rap le ricerche per nome trovano anche altro (salmi, canzoni pop): solo genere hip-hop/rap
-                if (categoria === 'rap' && !/hip.?hop|rap/i.test(r.primaryGenreName || '')) return;
+                // nel rap le ricerche per nome trovano anche altro (salmi, canzoni pop): solo genere hip-hop/rap;
+                // nelle italiane moderne, al contrario, il rap non entra (ha la sua categoria)
+                const genereRap = /hip.?hop|rap/i.test(r.primaryGenreName || '');
+                if (categoria === 'rap' && !genereRap) return;
+                if (categoria === 'italiane-moderne' && genereRap) return;
                 trovati.set(k, pulisciBrano({
                     ...b,
                     anno,
