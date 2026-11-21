@@ -187,18 +187,6 @@ const MODO = process.argv[2] || 'online'; // online | offline
 
     // ← Menu e scarta
     await page.click('#esci');
-
-    // "Rap italiano moderno": solo rap dal 2000, inclusi e dal catalogo; il rap conta anche tra le italiane
-    await page.selectOption('#scelta-brani', 'rap');
-    await page.click('#inizia'); await fase('consegna');
-    const rap = await page.evaluate(() => [RITORNELLO.stato.brano, ...RITORNELLO.mazzo()]);
-    ok(rap.every(b => b.gruppo === 'rap' && b.anno >= 2000) && rap.some(b => b.titolo === 'Cenere') && rap.some(b => b.titolo.startsWith('Brano Online')) && rap.length > 40,
-      '"Rap italiano moderno": brani rap inclusi e dal catalogo, solo dal 2000');
-    await page.click('#esci');
-    await page.selectOption('#scelta-brani', 'italiane');
-    await page.click('#inizia'); await fase('consegna');
-    ok(await page.evaluate(() => [RITORNELLO.stato.brano, ...RITORNELLO.mazzo()].some(b => b.titolo === 'Rockstar')), 'i brani rap restano anche in "Solo italiane"');
-    await page.click('#esci');
     ok(await page.isVisible('#resume-box'), '"← Menu" torna alla preparazione con la partita salvata');
     await togliToast();
     ok(await page.evaluate(() => { document.getElementById('inizia').click(); return [...document.querySelectorAll('#resume-box button')].every(b => b.disabled); }), 'mentre si prepara una partita nuova Riprendi e Scarta sono bloccati');
@@ -213,6 +201,20 @@ const MODO = process.argv[2] || 'online'; // online | offline
     const moderne = await page.evaluate(() => [RITORNELLO.stato.brano, ...RITORNELLO.mazzo()]);
     ok(moderne.some(b => b.titolo.startsWith('Brano Online')) && moderne.every(b => ['it', 'rap'].includes(b.gruppo) && b.anno >= 2000), '"Italiane moderne" online: brani del catalogo solo dal 2000, come italiani');
     ok(!moderne.some(b => b.titolo === 'Pensare male' && b.artista !== 'The Kolors ed Elodie'), 'artisti con "ed": il brano incluso e quello di iTunes sono lo stesso, non esce due volte');
+    await page.click('#esci');
+
+    // "Rap italiano moderno": solo rap dal 2000, inclusi e dal catalogo; il rap conta anche tra le italiane
+    await page.selectOption('#scelta-brani', 'rap');
+    await page.click('#inizia'); await fase('consegna');
+    const rap = await page.evaluate(() => [RITORNELLO.stato.brano, ...RITORNELLO.mazzo()]);
+    ok(rap.every(b => b.gruppo === 'rap' && b.anno >= 2000) && rap.some(b => b.titolo === 'Cenere') && rap.some(b => b.titolo.startsWith('Brano Online')) && rap.length > 40 &&
+      rap.filter(b => b.titolo.startsWith('Brano Online')).every(b => Number(b.titolo.split(' ').pop()) % 2 === 0) &&
+      rap.filter(b => b.titolo === 'Lamborghini').length === 1,
+      '"Rap italiano moderno": brani rap inclusi e dal catalogo (solo genere hip-hop/rap), dal 2000, senza doppioni');
+    await page.click('#esci');
+    await page.selectOption('#scelta-brani', 'italiane');
+    await page.click('#inizia'); await fase('consegna');
+    ok(await page.evaluate(() => [RITORNELLO.stato.brano, ...RITORNELLO.mazzo()].some(b => b.titolo === 'Rockstar')), 'i brani rap restano anche in "Solo italiane"');
     await page.click('#esci');
     ok(await page.evaluate(() => document.documentElement.scrollWidth) <= 360, 'nessuno scorrimento orizzontale');
     console.log('  richieste finte servite:', JSON.stringify(rete.richieste));

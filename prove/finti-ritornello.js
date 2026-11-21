@@ -18,7 +18,8 @@ const brano = (id, titolo, artista, anno, extra = {}) => ({ wrapperType: 'track'
   collectionName: titolo, releaseDate: `${anno}-05-01T07:00:00Z`, previewUrl: `https://audio-ssl.itunes.apple.com/finto/${id}.m4a`,
   artworkUrl100: `https://is1-ssl.mzstatic.com/finto/${id}/100x100bb.jpg`, ...extra });
 const CATALOGO = [];
-for (let i = 0; i < 40; i++) CATALOGO.push(brano(5000 + i, `Brano Online ${i + 1}`, `Artista ${i % 7}`, 1970 + i));
+// i brani pari sono di genere hip-hop/rap, i dispari pop (la categoria rap prende solo i primi)
+for (let i = 0; i < 40; i++) CATALOGO.push(brano(5000 + i, `Brano Online ${i + 1}`, `Artista ${i % 7}`, 1970 + i, { primaryGenreName: i % 2 ? 'Hip-Hop/Rap' : 'Pop' }));
 // da scartare: versione live, compilation, karaoke, anteprima non https; e una ristampa (anno vero 1975)
 CATALOGO.push(brano(6001, 'Canzone (Live)', 'Gruppo', 1990), brano(6002, 'Altra canzone', 'Gruppo', 1990, { collectionName: 'Greatest Hits' }),
   brano(6003, 'Karaoke', 'Karaoke Band', 2000), brano(6004, 'Senza https', 'Gruppo', 2000, { previewUrl: 'javascript:alert(1)' }),
@@ -26,6 +27,8 @@ CATALOGO.push(brano(6001, 'Canzone (Live)', 'Gruppo', 1990), brano(6002, 'Altra 
   brano(6007, '<img src=x onerror=alert(1)>', 'Hacker', 2001));
 // lo stesso brano incluso "Pensare male" (The Kolors ed Elodie), scritto come su iTunes
 CATALOGO.push(brano(6100, 'Pensare male', 'The Kolors & Elodie', 2021));
+// "Lamborghini" scritto come su iTunes dal 2021 ("Guè"); il brano incluso ha "Guè e Sfera Ebbasta"
+CATALOGO.push(brano(6101, 'Lamborghini', 'Guè Pequeno', 2017, { primaryGenreName: 'Hip-Hop/Rap' }));
 function jsonp(route, data) {
   const cb = new URL(route.request().url()).searchParams.get('callback');
   return route.fulfill({ status: 200, contentType: 'text/javascript', body: `${cb}(${JSON.stringify(data)});` });

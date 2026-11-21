@@ -211,6 +211,8 @@
                 const anno = parseInt(String(r.releaseDate || '').slice(0, 4), 10);
                 if (anno && (!annoMinimo.has(k) || anno < annoMinimo.get(k))) annoMinimo.set(k, anno);
                 if (!braniOriginale(r) || trovati.has(k)) return;
+                // nel rap le ricerche per nome trovano anche altro (salmi, canzoni pop): solo genere hip-hop/rap
+                if (categoria === 'rap' && !/hip.?hop|rap/i.test(r.primaryGenreName || '')) return;
                 trovati.set(k, pulisciBrano({
                     ...b,
                     anno,
@@ -273,10 +275,14 @@
         if (stato.brano) esclusi.add(chiave(stato.brano));
         const perChiave = new Map();
         RISERVA.filter(filtro).forEach(b => perChiave.set(chiave(b), { ...b }));
+        const inclusi = [...perChiave.values()];
         catalogoLive.forEach(b => {
-            const k = chiave(b);
-            const incluso = perChiave.get(k);
-            if (!incluso) perChiave.set(k, { ...b });
+            // stesso brano anche se l'artista è scritto in un altro modo ("Guè Pequeno" / "Guè")
+            const titolo = normalizza(b.titolo);
+            const artista = artistaPrincipale(b.artista);
+            const incluso = perChiave.get(chiave(b)) ||
+                inclusi.find(i => normalizza(i.titolo) === titolo && artistiSimili(artistaPrincipale(i.artista), artista));
+            if (!incluso) perChiave.set(chiave(b), { ...b });
             else if (!incluso.anteprima) Object.assign(incluso, { anteprima: b.anteprima, copertina: b.copertina });
         });
         const visti = storico();
@@ -293,7 +299,7 @@
             preparaMazzo();
             RG.toast('Brani finiti: si ricomincia dal mazzo intero.', 'info');
         }
-        const brano = mazzo.pop() || { ...RISERVA[0] };
+        const brano = mazzo.pop() || { ...(RISERVA.find(filtroCategoria()) || RISERVA[0]) };
         stato.usati.push(chiave(brano));
         segnaCantato(brano);
         pescatiNelTurno.push(brano);

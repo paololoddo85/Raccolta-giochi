@@ -29,10 +29,11 @@ window.RITORNELLO_RICERCHE = {
             "annalisa", "elodie", "marco mengoni", "mahmood", "maneskin", "tananai", "the kolors",
             "ultimo", "tiziano ferro", "cesare cremonini", "negramaro", "boomdabash"
         ],
+        // rap: dal catalogo entrano solo i brani di genere hip-hop/rap (vedi scaricaCatalogo)
         rap: [
             "rap italiano", "trap italiana", "hit rap italiano", "sfera ebbasta", "lazza", "geolier",
-            "salmo", "marracash", "gue pequeno", "fabri fibra", "ghali", "anna pepe", "tony effe",
-            "capo plaza", "emis killa", "fedez", "rocco hunt", "ernia", "caparezza", "madame"
+            "salmo lebon", "marracash", "guè", "fabri fibra", "ghali", "tony effe",
+            "capo plaza", "emis killa", "fedez", "rocco hunt", "ernia", "caparezza"
         ],
         internazionali: [
             "top hits 1970s", "80s number one hits", "90s pop hits", "2000s pop hits",
