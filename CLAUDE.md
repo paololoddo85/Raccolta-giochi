@@ -162,15 +162,16 @@ invece la schermata iniziale con il riquadro "Partita in corso" (Riprendi / Scar
 - **Pellicola**: salva a ogni turno, indizio e piazzamento. Dopo un ricaricamento il film del turno resta lo stesso
   (con gli indizi già pagati). "Annulla" torna a prima del piazzamento: dal risultato, nella premiazione o all'inizio
   del turno dopo, finché non si compra un indizio.
-  Pellicola è "solo online": se il telefono è offline, toccando la sua scatola nel menù compare subito
-  "Pellicola ha bisogno di internet" e non si entra (scatole con `data-solo-online`, in `menu.js`).
+  Pellicola è "solo online" (come Giradischi): se il telefono è offline, toccando la sua scatola nel menù compare
+  subito "Pellicola ha bisogno di internet" e non si entra (scatole con `data-solo-online`, in `menu.js`).
   Se si arriva al gioco lo stesso (scorciatoia, rete che non risponde) non parte e non riprende una partita:
   compare l'avviso e si resta nella preparazione, con la partita salvata. Se iTunes risponde ma senza film utili si gioca con i film
   inclusi; se la connessione cade a partita iniziata si continua con i film inclusi (locandina "non trovata").
 - **Giradischi**: salva a ogni carta, scelta, sfida, gettone e conferma. "Annulla" torna a prima della conferma
   (anche il gettone bonus Pro incassato dopo si perde): dalla carta girata, nella vittoria o all'inizio del turno dopo,
   finché non si usano gettoni o sfide. L'audio non si salva mai: per riascoltare serve la connessione.
-  Se la connessione cade, la partita non finisce: compare "Riprova".
+  Se la connessione cade, la partita non finisce: compare "Riprova". Come Pellicola è "solo online": offline,
+  toccando la sua scatola nel menù compare "Giradischi ha bisogno di internet" e non si entra.
 
 ## Come aggiungere un nuovo gioco
 
@@ -247,7 +248,7 @@ con uno schermo da 360×780, blocca le richieste verso internet e salva gli scre
 | `pellicola offline` / `online` | offline: avviso "serve internet", niente partita né ripresa; online (risposte finte): partita completa, indizi, ripresa, annulla (3 casi) |
 | `giradischi`, `giradischi-offline` | ascolto, sfida, gettoni, bonus Pro, annulla, ripresa, rete persa, avvio senza internet |
 | `larghezze` | nessuno scorrimento orizzontale in ogni schermata, a 320 e 360px (anche con pellicola lunga) |
-| `pwa` | elenco `FILE` completo, installabilità, pagine offline, avviso "Pellicola ha bisogno di internet" dal menù, avviso e "Controlla aggiornamenti" (su una copia del sito) |
+| `pwa` | elenco `FILE` completo, installabilità, pagine offline, avviso "ha bisogno di internet" dal menù per Pellicola e Giradischi, avviso e "Controlla aggiornamenti" (su una copia del sito) |
 
 - iTunes, MusicBrainz, Wikidata e Wikipedia non sono raggiungibili dall'ambiente cloud: le prove usano le risposte finte
   di `prove/finti-pellicola.js` e `prove/finti-giradischi.js` (`context.route`).
