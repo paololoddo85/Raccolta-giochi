@@ -32,7 +32,7 @@ Sito statico con giochi da festa da usare sul telefono (un telefono solo che pas
   il sito vive in una sottocartella e deve funzionare anche in locale.
 - **Niente CDN a runtime**: stili, font e librerie stanno nel sito, così funziona offline.
   Le uniche richieste esterne ammesse sono i contenuti online dei giochi
-  (catalogo e locandine di Pellicola, catalogo e audio di Giradischi).
+  (catalogo e locandine di Pellicola, catalogo e audio di Giradischi e Ritornello).
 - **Mai `confirm()`, `alert()` o `prompt()`** del browser: usa `RG.conferma()` e `RG.toast()`.
 - **Mobile-first**, schermi da 360px in su; nessuno scorrimento orizzontale della pagina.
 - Carte e contenuti dei giochi stanno in **file dati separati** (`dati/*.js`), non nel codice.
@@ -72,6 +72,8 @@ giochi/cinquina/dati/carte.js      le 304 carte di Cinquina (prima "HINT FAKE")
 giochi/pellicola/dati/film.js      88 film inclusi, titoli alternativi, ricerche del catalogo online (prima "CineStar")
 giochi/giradischi/dati/ricerche.js ricerche iTunes e parole che scartano raccolte/remaster/live (prima "Hitstar")
 giochi/giradischi/icone.js         icone Font Awesome incluse (SVG), licenza CC BY 4.0
+giochi/ritornello/dati/brani.js    brani inclusi da canticchiare [titolo, artista, anno, gruppo it/int/bimbi]
+giochi/ritornello/dati/ricerche.js ricerche iTunes per categoria e parole che scartano raccolte/live/remix
 prove/                             prove automatiche (Playwright): `node prove/esegui.js` — non fanno parte del sito
 ```
 
@@ -90,6 +92,7 @@ sfumature, ombre minime. Ogni pagina sceglie solo il suo colore guida in `stile.
 | Cinquina | verde acqua `#4D9496` | Tailwind + strato "notte" in fondo a `stile.css` |
 | Pellicola | oro `#E8B04B` | CSS proprio |
 | Giradischi | rosa `#EC4899` (secondo colore ciano `#22D3EE`) | Tailwind + strato "notte" in fondo a `stile.css`, icone.js |
+| Ritornello | viola `#A78BFA` (`--viola`) | CSS proprio; titolo tra i segni musicali di ritornello, timer a pentagramma |
 
 Ordine dei fogli di stile in ogni pagina: `font.css`, (`tailwind.css`), `base.css`, `notte.css`, `stile.css` del gioco.
 
@@ -117,6 +120,8 @@ per questo tutte le chiavi hanno il prefisso `rg-`. Usa sempre `RG.archivio`, ma
 | `rg-cinestar-partita` | partita in corso, compreso il film del turno e "annulla" |
 | `rg-hitstar-brani-giocati` | brani già usciti (ultimi 500), prima `hitstar_played_songs_v1` |
 | `rg-hitstar-partita` | partita in corso, compresi brano del turno, carte già verificate e "annulla" |
+| `rg-ritornello-brani-cantati` | brani già cantati (ultimi 500): escono per ultimi |
+| `rg-ritornello-partita` | partita in corso, compresi fase del turno, brano, aiuti, tempo rimasto e "annulla" |
 | `rg-<gioco>-migrazione` | segno che la migrazione è già stata fatta |
 
 **Nomi interni**: i giochi si chiamavano "HINT FAKE", "Hitstar" e "CineStar". Le chiavi di memoria (`rg-hintfake-…`, `rg-hitstar-…`, `rg-cinestar-…`)
@@ -173,6 +178,15 @@ invece la schermata iniziale con il riquadro "Partita in corso" (Riprendi / Scar
   Se la connessione cade, la partita non finisce: compare "Riprova". Come Pellicola è "solo online": offline,
   toccando la sua scatola nel menù compare "Giradischi ha bisogno di internet" e non si entra.
 
+- **Ritornello**: un turno ha 4 fasi (passa il telefono, brano segreto, canta, svela) e si salva a ogni passaggio
+  e a ogni secondo del timer. Ricaricando durante il canto si torna al canto con lo stesso brano e il tempo **fermo**
+  ("Riprendi il tempo"). "Annulla" torna alla scelta dei punti del turno precedente: dall'esito, nella premiazione o
+  all'inizio del turno dopo, finché non parte il tempo. Punti: titolo +2, solo artista +1, furto +1 (una squadra
+  avversaria, una risposta), aiuti anno e prima lettera −1 ciascuno (mai sotto zero), chi dice una parola perde il turno.
+  **Funziona anche offline** con i brani inclusi (niente `data-solo-online`): con internet arrivano anche brani da iTunes
+  e allo svelamento si ascolta l'anteprima (per i brani inclusi viene cercata su iTunes al momento). Gli indirizzi
+  di anteprime e copertine sono accettati solo se `https://`.
+
 ## Come aggiungere un nuovo gioco
 
 1. Crea `giochi/<nome>/` con `index.html`, `gioco.js`, `stile.css` e `dati/`.
@@ -211,7 +225,7 @@ invece la schermata iniziale con il riquadro "Partita in corso" (Riprendi / Scar
 ## Tailwind
 
 `shared/stile/tailwind.css` è Tailwind v4 **già compilato** e fa parte del repository: non serve nessun passaggio
-per pubblicare. Contiene solo le classi usate in `giochi/cinquina/` e `giochi/giradischi/` (Pellicola e il menù hanno
+per pubblicare. Contiene solo le classi usate in `giochi/cinquina/` e `giochi/giradischi/` (Pellicola, Ritornello e il menù hanno
 CSS proprio). Se aggiungi classi Tailwind nuove in quei giochi, rigeneralo da un ambiente con Node e committalo:
 
 ```
@@ -247,11 +261,12 @@ con uno schermo da 360×780, blocca le richieste verso internet e salva gli scre
 | `cinquina` | vecchi indirizzi, migrazione, partita completa, annulla, ripresa, timer, import, muto |
 | `pellicola offline` / `online` | offline: avviso "serve internet", niente partita né ripresa; online (risposte finte): partita completa, indizi, ripresa, annulla (3 casi) |
 | `giradischi`, `giradischi-offline` | ascolto, sfida, gettoni, bonus Pro, annulla, ripresa, rete persa, avvio senza internet |
+| `ritornello online` / `offline` | online (risposte finte): filtri del catalogo, anteprime, aiuti, furto, parola, tempo scaduto, ripresa, annulla (3 casi), vittoria, salvataggio manomesso; offline: si gioca con i brani inclusi |
 | `larghezze` | nessuno scorrimento orizzontale in ogni schermata, a 320 e 360px (anche con pellicola lunga) |
 | `pwa` | elenco `FILE` completo, installabilità, pagine offline, avviso "ha bisogno di internet" dal menù per Pellicola e Giradischi, avviso e "Controlla aggiornamenti" (su una copia del sito) |
 
 - iTunes, MusicBrainz, Wikidata e Wikipedia non sono raggiungibili dall'ambiente cloud: le prove usano le risposte finte
-  di `prove/finti-pellicola.js` e `prove/finti-giradischi.js` (`context.route`).
+  di `prove/finti-pellicola.js`, `prove/finti-giradischi.js` e `prove/finti-ritornello.js` (`context.route`).
 - Se aggiungi una funzione, aggiungi il suo controllo alla prova del gioco. Guarda gli screenshot prima di chiudere una fase.
 - `prove/` non va nell'elenco `FILE` del service worker (la prova `pwa` la esclude).
 
@@ -268,5 +283,5 @@ rossa: va corretta prima di unire.
 
 - **Cinquina** (prima "HINT FAKE"), **Pellicola** (prima "CineStar") e **Giradischi** (prima "Hitstar"): rinominati
   per non richiamare giochi commerciali (HINT, Hitster) né la catena di cinema CineStar. In Giradischi il grido della
-  sfida è "SCRATCH!". Il regolamento di Cinquina è scritto con parole proprie: se lo modifichi, non copiare testi da
+  sfida è "SCRATCH!". **Ritornello** è nato con il suo nome: le chiavi di memoria sono `rg-ritornello-…`. Il regolamento di Cinquina è scritto con parole proprie: se lo modifichi, non copiare testi da
   regolamenti ufficiali.

@@ -59,7 +59,7 @@ const versioneDi = (testo) => testo.match(/const VERSIONE = '([^']+)';/)[1];
 
     // 3. Senza connessione
     await context.setOffline(true);
-    const pagine = [['', '.pila'], ['giochi/cinquina/', '#setup-screen'], ['giochi/pellicola/', '#setup-screen'], ['giochi/giradischi/', '#setup-screen'],
+    const pagine = [['', '.pila'], ['giochi/cinquina/', '#setup-screen'], ['giochi/pellicola/', '#setup-screen'], ['giochi/giradischi/', '#setup-screen'], ['giochi/ritornello/', '#preparazione'],
       ['HINT_FAKE.html', '#setup-screen'], ['giochi/hint-fake/', '#setup-screen'], ['hitstar_il_gioco_della_musica.html', '#setup-screen'], ['giochi/hitstar/', '#setup-screen'],
       ['cinestar_il_gioco_dei_film.html', '#setup-screen'], ['giochi/cinestar/', '#setup-screen'], ['giochi/cinquina/?da=preferiti', '#setup-screen']];
     for (const [url, sel] of pagine) {
@@ -75,6 +75,12 @@ const versioneDi = (testo) => testo.match(/const VERSIONE = '([^']+)';/)[1];
     await page.click('text=Registra Punti e Gira la Ruota');
     await page.waitForFunction(() => state.totalTurnsPlayed === 1 && !state.animating);
     ok(true, 'offline: Cinquina si gioca');
+    await page.goto(BASE + 'giochi/ritornello/');
+    await page.click('#inizia');
+    await page.waitForSelector('#fase-consegna:not(.hidden)', { timeout: 30000 });
+    await page.click('#mostra-brano'); await page.click('#via'); await page.click('#indovinato');
+    await page.click('[data-esito="titolo"]');
+    ok(await page.evaluate(() => RITORNELLO.stato.squadre[0].punti === 2), 'offline: Ritornello si gioca con i brani inclusi');
     // dal menù, offline, toccando Pellicola l'avviso compare subito e si resta nel menù
     await page.goto(BASE);
     // il browser di prova, dopo molte pagine offline, a volte torna a dire "online": qui lo si fissa offline
@@ -87,6 +93,9 @@ const versioneDi = (testo) => testo.match(/const VERSIONE = '([^']+)';/)[1];
     await page.click('.scatola-giradischi');
     await page.waitForFunction(() => [...document.querySelectorAll('.rg-toast-errore')].some(t => t.textContent.includes('Giradischi ha bisogno di internet')), null, { timeout: 10000 });
     ok(page.url() === BASE, 'offline: toccando Giradischi nel menù compare l\'avviso e si resta nel menù');
+    await page.click('.scatola-ritornello');
+    await page.waitForURL('**/giochi/ritornello/', { timeout: 10000 });
+    ok(true, 'offline: dal menù Ritornello si apre (non è "solo online")');
     await page.goto(BASE + 'giochi/pellicola/');
     await page.click('#start-game-btn');
     await page.waitForSelector('.rg-toast-errore', { timeout: 30000 });

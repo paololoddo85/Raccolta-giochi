@@ -30,6 +30,7 @@
     --verde-acqua: #4D9496;/* Cinquina */
     --rosa: #EC4899;       /* Giradischi */
     --ciano: #22D3EE;      /* Giradischi, secondo colore */
+    --viola: #A78BFA;      /* Ritornello */
     /* colore guida della pagina (oro se il gioco non ne sceglie uno) */
     --accento: var(--oro);
     --accento-chiaro: #F0C877;

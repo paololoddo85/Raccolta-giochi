@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Combriccola</title>
-    <meta name="description" content="Giochi da festa da fare con il telefono: Cinquina, Pellicola e Giradischi.">
+    <meta name="description" content="Giochi da festa da fare con il telefono: Cinquina, Pellicola, Giradischi e Ritornello.">
     <meta name="theme-color" content="#0a1020">
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="icon" type="image/png" sizes="32x32" href="icone/favicon-32.png">
@@ -34,7 +34,7 @@
             </div>
             <ul id="elenco-nomi" class="nomi" aria-live="polite"></ul>
             <form id="modulo-nomi" class="modulo-nomi" hidden>
-                <p class="nota">I primi due nomi sono anche le squadre di Cinquina. Pellicola usa fino a 4 nomi, Giradischi fino a 6.</p>
+                <p class="nota">I primi due nomi sono anche le squadre di Cinquina. Pellicola e Ritornello usano fino a 4 nomi, Giradischi fino a 6.</p>
                 <div class="campi-nomi" id="campi-nomi"></div>
                 <div class="azioni-nomi">
                     <button type="button" id="svuota-nomi" class="rg-pulsante rg-pulsante-tenue">Svuota</button>
@@ -103,6 +103,26 @@
                         <span class="in-corso" hidden>Partita in corso</span>
                     </a>
                     <button type="button" class="azzera" data-gioco="hitstar" hidden>Azzera la partita in corso</button>
+                </li>
+                <li>
+                    <a class="scatola scatola-ritornello" href="giochi/ritornello/" data-gioco="ritornello">
+                        <svg class="motivo" viewBox="0 0 100 100" aria-hidden="true">
+                            <g fill="currentColor">
+                                <rect x="14" y="8" width="12" height="84" rx="1"/>
+                                <rect x="34" y="8" width="4" height="84" rx="1"/>
+                                <circle cx="54" cy="36" r="7"/>
+                                <circle cx="54" cy="64" r="7"/>
+                            </g>
+                        </svg>
+                        <span class="scatola-nome">Ritornello</span>
+                        <span class="scatola-descrizione">Canticchiate il brano senza parole: la vostra squadra deve indovinare titolo e artista.</span>
+                        <span class="scatola-fatti">
+                            <span>2–4 squadre</span><span>Anche offline</span>
+                        </span>
+                        <span class="scatola-nota">Con internet arrivano brani nuovi e allo svelamento si ascolta il pezzo vero.</span>
+                        <span class="in-corso" hidden>Partita in corso</span>
+                    </a>
+                    <button type="button" class="azzera" data-gioco="ritornello" hidden>Azzera la partita in corso</button>
                 </li>
             </ul>
         </section>

@@ -1,7 +1,7 @@
 {
   "name": "Combriccola",
   "short_name": "Combriccola",
-  "description": "Giochi da festa da fare con un telefono solo: Cinquina, Pellicola e Giradischi.",
+  "description": "Giochi da festa da fare con un telefono solo: Cinquina, Pellicola, Giradischi e Ritornello.",
   "lang": "it",
   "dir": "ltr",
   "id": "./",
@@ -20,6 +20,7 @@
   "shortcuts": [
     { "name": "Cinquina", "url": "giochi/cinquina/", "icons": [{ "src": "icone/icona-192.png", "sizes": "192x192" }] },
     { "name": "Pellicola", "url": "giochi/pellicola/", "icons": [{ "src": "icone/icona-192.png", "sizes": "192x192" }] },
-    { "name": "Giradischi", "url": "giochi/giradischi/", "icons": [{ "src": "icone/icona-192.png", "sizes": "192x192" }] }
+    { "name": "Giradischi", "url": "giochi/giradischi/", "icons": [{ "src": "icone/icona-192.png", "sizes": "192x192" }] },
+    { "name": "Ritornello", "url": "giochi/ritornello/", "icons": [{ "src": "icone/icona-192.png", "sizes": "192x192" }] }
   ]
 }

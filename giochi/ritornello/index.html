@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0A1020" />
+  <link rel="manifest" href="../../manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="32x32" href="../../icone/favicon-32.png">
+  <link rel="apple-touch-icon" href="../../icone/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Combriccola">
+  <title>Ritornello · Combriccola</title>
+  <link rel="stylesheet" href="../../shared/stile/font.css">
+  <link rel="stylesheet" href="../../shared/stile/base.css">
+  <link rel="stylesheet" href="../../shared/stile/notte.css">
+  <link rel="stylesheet" href="stile.css">
+</head>
+<body>
+
+<!-- ========================================================= -->
+<!-- PREPARAZIONE                                               -->
+<!-- ========================================================= -->
+<div id="preparazione" class="schermo">
+  <div class="setup">
+    <header>
+      <a href="../../" class="rg-indietro" aria-label="Torna a Combriccola" title="Torna a Combriccola">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+      </a>
+      <h1 class="insegna"><span class="ripresa ripresa-apri" aria-hidden="true"></span>Ritornello<span class="ripresa ripresa-chiudi" aria-hidden="true"></span></h1>
+      <p class="tagline">Canticchia il brano senza dire una parola. La tua squadra deve indovinare titolo e artista.</p>
+      <div class="regole">
+        <p>A turno, chi canta guarda in segreto il brano e poi lo canticchia: <strong>na-na, pa-pa, fischio o bocca chiusa</strong>, mai una parola del titolo o del testo.</p>
+        <p>La sua squadra ha il tempo del timer: <strong>titolo giusto +2</strong>, <strong>solo l'artista +1</strong>. Se non indovina, le altre squadre possono rubare con una risposta sola: <strong>+1</strong>.</p>
+        <p>Aiuti per chi indovina, <strong>−1 punto</strong> ciascuno: l'anno di uscita e la prima lettera del titolo. Chi dice una parola perde il turno.</p>
+        <p>Allo svelamento si ascolta il pezzo vero (serve internet). Vince la prima squadra che arriva al traguardo.</p>
+      </div>
+    </header>
+
+    <form class="setup-form" onsubmit="return false">
+      <div id="resume-box" hidden></div>
+
+      <div>
+        <span class="field-label" id="etichetta-squadre">Squadre</span>
+        <div class="segmented segmented-3" role="group" aria-labelledby="etichetta-squadre">
+          <button type="button" data-count="2" class="count-btn is-active" aria-pressed="true">2</button>
+          <button type="button" data-count="3" class="count-btn" aria-pressed="false">3</button>
+          <button type="button" data-count="4" class="count-btn" aria-pressed="false">4</button>
+        </div>
+      </div>
+
+      <div>
+        <span class="field-label">Nomi delle squadre</span>
+        <div id="nomi-squadre" class="names-grid"></div>
+      </div>
+
+      <div>
+        <label for="scelta-brani" class="field-label">Brani</label>
+        <select id="scelta-brani" class="select">
+          <option value="tutto">Di tutto un po'</option>
+          <option value="italiane">Solo italiane</option>
+          <option value="internazionali">Solo internazionali</option>
+          <option value="classici">Classici fino agli anni '80</option>
+          <option value="9000">Anni '90 e 2000</option>
+          <option value="recenti">Dal 2010 a oggi</option>
+          <option value="bambini">Cartoni, Disney e Zecchino d'Oro</option>
+        </select>
+      </div>
+
+      <div class="two-cols">
+        <div>
+          <label for="scelta-traguardo" class="field-label">Punti per vincere</label>
+          <select id="scelta-traguardo" class="select">
+            <option value="10">10 – partita veloce</option>
+            <option value="15" selected>15 – partita classica</option>
+            <option value="20">20 – partita lunga</option>
+          </select>
+        </div>
+        <div>
+          <label for="scelta-tempo" class="field-label">Tempo per cantare</label>
+          <select id="scelta-tempo" class="select">
+            <option value="30">30 secondi</option>
+            <option value="45" selected>45 secondi</option>
+            <option value="60">60 secondi</option>
+          </select>
+        </div>
+      </div>
+
+      <button id="inizia" type="button" class="btn btn-primary btn-block">Inizia la partita</button>
+      <p class="setup-note">Con internet arrivano anche brani dal catalogo iTunes e allo svelamento si ascolta il pezzo vero. Senza connessione si gioca con i brani inclusi, senza ascolto.</p>
+    </form>
+  </div>
+</div>
+
+<!-- ========================================================= -->
+<!-- PARTITA                                                    -->
+<!-- ========================================================= -->
+<div id="gioco" class="schermo hidden">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <button id="esci" type="button" class="btn btn-ghost btn-small">← Menu</button>
+      <span class="brand">Ritornello</span>
+      <div id="punteggi" class="scoreboard" aria-label="Punteggi"></div>
+    </div>
+  </header>
+
+  <main class="palco">
+
+    <!-- 1. Passa il telefono a chi canta -->
+    <section id="fase-consegna" class="fase hidden" aria-labelledby="consegna-squadra">
+      <p class="kicker" id="consegna-giro">Turno 1</p>
+      <h2 id="consegna-squadra" class="grande">Squadra A</h2>
+      <p class="spiega">Chi canta prende il telefono. Gli altri non guardano lo schermo.</p>
+      <button id="mostra-brano" type="button" class="btn btn-primary btn-block">Sono io: mostra il brano</button>
+      <button type="button" class="link-btn annulla-turno" hidden>↶ Punti sbagliati? Annulla l'ultimo turno</button>
+    </section>
+
+    <!-- 2. Il brano segreto, solo per chi canta -->
+    <section id="fase-segreto" class="fase hidden" aria-labelledby="segreto-titolo">
+      <p class="kicker">Solo per i tuoi occhi</p>
+      <div id="segreto-carta" class="carta">
+        <div class="carta-copertina" id="segreto-copertina" aria-hidden="true"></div>
+        <div class="carta-testo">
+          <h2 id="segreto-titolo" class="carta-titolo">Titolo</h2>
+          <p id="segreto-artista" class="carta-artista">Artista</p>
+          <p id="segreto-anno" class="carta-anno">1980</p>
+        </div>
+      </div>
+      <div class="ripasso">
+        <button id="ripassa" type="button" class="btn btn-ghost btn-block" disabled>Ascolta 10 secondi in cuffia</button>
+        <p id="ripasso-nota" class="nota-piccola">Cerco l'anteprima…</p>
+      </div>
+      <button id="via" type="button" class="btn btn-primary btn-block">Pronto: via al tempo!</button>
+      <button id="cambia-brano" type="button" class="link-btn">Non la conosco: cambia brano (una volta per turno)</button>
+      <button type="button" class="link-btn annulla-turno" hidden>↶ Punti sbagliati? Annulla l'ultimo turno</button>
+    </section>
+
+    <!-- 3. Canticchia! -->
+    <section id="fase-canta" class="fase hidden" aria-labelledby="canta-titolo">
+      <div class="canta-testa">
+        <h2 id="canta-titolo" class="grande">Canticchia!</h2>
+        <p class="spiega" id="canta-chi">Squadra A indovina</p>
+      </div>
+      <div class="pentagramma" id="pentagramma" aria-hidden="true">
+        <span class="rigo"></span><span class="rigo"></span><span class="rigo"></span><span class="rigo"></span><span class="rigo"></span>
+        <span class="nota-viaggio" id="nota-viaggio"></span>
+      </div>
+      <p class="secondi" id="secondi" role="timer" aria-live="off">45</p>
+      <button id="sbircia" type="button" class="btn btn-ghost btn-block sbircia">Tieni premuto per rivedere il brano</button>
+      <p id="sbircia-testo" class="sbircia-testo" aria-live="polite"></p>
+
+      <div class="aiuti">
+        <h3>Aiuti per chi indovina <span>−1 punto ciascuno</span></h3>
+        <div class="aiuti-righe">
+          <button type="button" class="aiuto" data-aiuto="anno">Anno di uscita</button>
+          <button type="button" class="aiuto" data-aiuto="lettera">Prima lettera del titolo</button>
+        </div>
+        <p id="aiuti-scoperti" class="aiuti-scoperti"></p>
+      </div>
+
+      <div class="canta-azioni">
+        <button id="indovinato" type="button" class="btn btn-primary btn-block">Indovinato! Svela</button>
+        <div class="canta-azioni-due">
+          <button id="pausa" type="button" class="btn btn-ghost">Pausa</button>
+          <button id="parola" type="button" class="btn btn-ghost btn-pericolo">Ha detto una parola</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Svelamento, punti e furto -->
+    <section id="fase-svela" class="fase hidden" aria-labelledby="svela-titolo">
+      <p class="kicker" id="svela-motivo">Ecco il brano</p>
+      <div class="carta carta-svelata">
+        <div class="carta-copertina" id="svela-copertina" aria-hidden="true"></div>
+        <div class="carta-testo">
+          <h2 id="svela-titolo" class="carta-titolo">Titolo</h2>
+          <p id="svela-artista" class="carta-artista">Artista</p>
+          <p id="svela-anno" class="carta-anno">1980</p>
+        </div>
+      </div>
+      <div class="lettore" id="lettore">
+        <button id="ascolta" type="button" class="btn btn-ghost lettore-tasto" disabled>Ascolta</button>
+        <div class="lettore-barra"><span id="lettore-avanzamento"></span></div>
+      </div>
+      <p id="lettore-nota" class="nota-piccola"></p>
+
+      <div id="blocco-punti" class="domanda">
+        <h3 id="domanda-punti">Cosa ha indovinato Squadra A?</h3>
+        <div class="scelte">
+          <button type="button" class="scelta" data-esito="titolo"><strong>Il titolo</strong><span>+2</span></button>
+          <button type="button" class="scelta" data-esito="artista"><strong>Solo l'artista</strong><span>+1</span></button>
+          <button type="button" class="scelta scelta-tenue" data-esito="niente"><strong>Niente</strong><span>0</span></button>
+        </div>
+      </div>
+
+      <div id="blocco-furto" class="domanda hidden">
+        <h3>Chi ruba?</h3>
+        <p class="spiega">Un'altra squadra prova a rispondere, una volta sola: titolo o artista giusti valgono +1.</p>
+        <div class="scelte" id="scelte-furto"></div>
+      </div>
+
+      <div id="blocco-esito" class="esito hidden">
+        <p id="esito-testo" class="esito-testo"></p>
+        <div class="esito-azioni">
+          <button type="button" class="btn btn-ghost annulla-turno" hidden>↶ Annulla</button>
+          <button id="prossimo" type="button" class="btn btn-primary">Prossimo turno</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Premiazione -->
+<div id="vittoria" class="overlay overlay-solid hidden" role="dialog" aria-labelledby="vittoria-titolo">
+  <div class="dialog">
+    <div>
+      <p class="kicker">Fine della partita</p>
+      <h2 id="vittoria-titolo">Vince Squadra A</h2>
+      <p id="vittoria-dettaglio" class="detail"></p>
+    </div>
+    <ol id="classifica" class="standings"></ol>
+    <div class="dialog-actions">
+      <button id="ancora" type="button" class="btn btn-primary">Gioca ancora</button>
+      <button id="cambia-impostazioni" type="button" class="btn btn-ghost">Cambia impostazioni</button>
+    </div>
+    <button type="button" class="link-btn annulla-turno" hidden>↶ Punti sbagliati? Annulla l'ultimo turno</button>
+  </div>
+</div>
+
+<audio id="anteprima" preload="none"></audio>
+
+  <!-- Parti comuni di Combriccola -->
+  <script src="../../shared/js/base.js"></script>
+  <script src="../../shared/js/aggiornamento.js"></script>
+  <script src="../../shared/js/migrazioni.js"></script>
+  <script src="../../shared/js/squadre.js"></script>
+  <script src="../../shared/js/timer.js"></script>
+  <script src="../../shared/js/suoni.js"></script>
+  <script src="../../shared/js/dialoghi.js"></script>
+  <script src="../../shared/js/partita.js"></script>
+  <!-- Brani e gioco -->
+  <script src="dati/brani.js"></script>
+  <script src="dati/ricerche.js"></script>
+  <script src="gioco.js"></script>
+</body>
+</html>

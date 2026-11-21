@@ -1,0 +1,206 @@
+/* Ritornello: stili propri del gioco.
+   Colori, caratteri, pulsanti e campi stanno in shared/stile/notte.css (stile comune a tutta Combriccola).
+   Colore guida: viola. Il segno del gioco è il "ritornello" della musica scritta:
+   le due barre con i due punti che dicono "da capo", attorno al titolo. */
+:root {
+  --accento: var(--viola);
+  --accento-chiaro: #C4B5FD;
+  --su-accento: var(--notte);
+  --accento-luce: rgba(167, 139, 250, 0.10);
+  --viola-tenue: rgba(167, 139, 250, 0.14);
+}
+
+.hidden { display: none !important; }
+.schermo { position: relative; z-index: 1; }
+
+/* =========================================================
+   PREPARAZIONE
+   ========================================================= */
+.setup { max-width: 1040px; margin: 0 auto; padding: 32px 20px 40px; display: grid; gap: 40px; }
+@media (min-width: 900px) { .setup { grid-template-columns: 1.1fr 1fr; align-items: start; padding-top: 72px; gap: 64px; } }
+.setup header .rg-indietro { margin-bottom: 20px; }
+
+/* Il titolo dentro i segni di ritornello */
+.insegna {
+  display: flex; align-items: center; gap: .14em;
+  margin: 0; color: var(--accento);
+  font-family: var(--display); font-weight: 900; text-transform: uppercase;
+  font-size: clamp(46px, 15vw, 128px); line-height: .82; letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.ripresa {
+  --spessa: .1em; --sottile: .035em; --punto: .11em;
+  position: relative; flex-shrink: 0;
+  width: .34em; height: .86em;
+}
+/* barre: una spessa e una sottile */
+.ripresa::before {
+  content: ''; position: absolute; top: 0; bottom: 0; width: calc(var(--spessa) + .07em + var(--sottile));
+  background:
+    linear-gradient(currentColor, currentColor) left / var(--spessa) 100% no-repeat,
+    linear-gradient(currentColor, currentColor) right / var(--sottile) 100% no-repeat;
+}
+/* i due punti */
+.ripresa::after {
+  content: ''; position: absolute; width: var(--punto); height: var(--punto); border-radius: 50%;
+  top: calc(33% - var(--punto) / 2); background: currentColor;
+  box-shadow: 0 .29em 0 currentColor;
+}
+.ripresa-apri::before { left: 0; }
+.ripresa-apri::after { right: 0; }
+.ripresa-chiudi::before { right: 0; transform: scaleX(-1); }
+.ripresa-chiudi::after { left: 0; }
+
+.tagline { font-size: 19px; line-height: 1.45; max-width: 32ch; margin: 18px 0 0; color: var(--luce); }
+.regole { margin-top: 28px; max-width: 46ch; color: var(--fumo); font-size: 15px; }
+.regole p { margin: 0 0 10px; }
+.regole strong { color: var(--luce); font-weight: 600; }
+
+.setup-form { background: var(--platea); border: 1px solid var(--filo); border-radius: var(--r-medio); padding: 24px; display: grid; gap: 22px; }
+.segmented-3 { grid-template-columns: repeat(3, 1fr); }
+.names-grid { display: grid; gap: 10px; }
+@media (min-width: 480px) { .names-grid { grid-template-columns: 1fr 1fr; } }
+.two-cols { display: grid; gap: 22px; }
+@media (min-width: 480px) { .two-cols { grid-template-columns: 1fr 1fr; gap: 14px; } }
+.setup-note { font-size: 13px; color: var(--fumo); margin: -6px 0 0; }
+
+/* =========================================================
+   BARRA IN ALTO
+   ========================================================= */
+.topbar {
+  position: sticky; top: 0; z-index: 30;
+  background: rgba(10, 16, 32, 0.94);
+  border-bottom: 1px solid var(--filo);
+}
+.topbar-inner { max-width: 720px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 12px; }
+.brand { font-family: var(--display); font-weight: 900; font-size: 22px; color: var(--accento); text-transform: uppercase; line-height: 1; }
+/* sui telefoni stretti i punteggi contano più del nome del gioco */
+@media (max-width: 419px) { .brand { display: none; } }
+.scoreboard { display: flex; gap: 6px; margin-left: auto; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.scoreboard::-webkit-scrollbar { display: none; }
+.chip { flex-shrink: 0; display: flex; align-items: baseline; gap: 7px; padding: 4px 9px; border-radius: var(--r-piccolo); border: 1px solid var(--filo); font-size: 14px; }
+.chip-name { color: var(--luce-tenue); font-weight: 600; max-width: 8ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chip-num { font-family: var(--display); font-weight: 800; font-size: 19px; color: var(--luce); }
+.chip.is-active { border-color: var(--accento); background: var(--viola-tenue); }
+.chip.is-active .chip-num { color: var(--accento-chiaro); }
+
+/* =========================================================
+   FASI DEL TURNO
+   ========================================================= */
+.palco { max-width: 560px; margin: 0 auto; padding: 24px 16px 40px; }
+.fase { display: grid; gap: 18px; }
+.kicker { margin: 0; color: var(--fumo); font-size: 16px; }
+.grande {
+  margin: 0; font-family: var(--display); font-weight: 900; text-transform: uppercase;
+  font-size: clamp(44px, 13vw, 72px); line-height: .9; color: var(--accento); overflow-wrap: anywhere;
+}
+.spiega { margin: 0; color: var(--luce-tenue); font-size: 16px; }
+.nota-piccola { margin: -8px 0 0; font-size: 13px; color: var(--fumo); }
+.link-btn { justify-self: center; background: none; border: 0; padding: 6px 2px; color: var(--accento-chiaro); font-weight: 600; font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
+.link-btn[hidden], .annulla-turno[hidden] { display: none; }
+#fase-consegna { padding-top: 12vh; }
+
+/* Carta del brano */
+.carta { display: grid; grid-template-columns: 104px minmax(0, 1fr); gap: 16px; align-items: center; padding: 16px; background: var(--platea); border: 1px solid var(--filo); border-radius: var(--r-medio); }
+.carta-copertina {
+  aspect-ratio: 1; border-radius: var(--r-piccolo); overflow: hidden;
+  /* senza copertina: il disco con i solchi */
+  background: repeating-radial-gradient(circle at 50% 50%, #0d1324 0 3px, #161f38 3px 4px);
+  position: relative;
+}
+.carta-copertina::after { content: ''; position: absolute; inset: 38%; border-radius: 50%; background: var(--accento); }
+.carta-copertina img { position: relative; z-index: 1; width: 100%; height: 100%; object-fit: cover; display: block; }
+.carta-titolo { margin: 0; font-family: var(--display); font-weight: 800; font-size: clamp(28px, 8vw, 38px); line-height: 1; text-transform: uppercase; overflow-wrap: anywhere; }
+.carta-artista { margin: 6px 0 0; font-size: 17px; font-weight: 600; color: var(--luce-tenue); overflow-wrap: anywhere; }
+.carta-anno { margin: 2px 0 0; font-family: var(--display); font-weight: 800; font-size: 22px; color: var(--accento-chiaro); }
+.carta-svelata { border-top: 4px solid var(--accento); }
+.ripasso { display: grid; gap: 14px; }
+
+/* ---------- Canta: il pentagramma è il timer ---------- */
+.canta-testa { display: grid; gap: 4px; }
+.pentagramma {
+  position: relative; height: 104px; margin: 6px 6px 0;
+  display: flex; flex-direction: column; justify-content: space-between; padding: 12px 0;
+}
+.rigo { display: block; height: 1.5px; background: var(--filo); }
+.nota-viaggio {
+  position: absolute; left: 0; top: 50%;
+  width: 26px; height: 19px; margin: -9.5px 0 0 -13px;
+  border-radius: 50%; background: var(--accento);
+  transform: rotate(-22deg);
+  transition: left 1s linear, top .35s cubic-bezier(.3, 1.6, .5, 1);
+}
+.nota-viaggio::after { content: ''; position: absolute; right: 1px; bottom: 9px; width: 2.5px; height: 46px; background: var(--accento); transform: rotate(22deg); transform-origin: bottom; }
+.secondi {
+  margin: -4px 0 0; text-align: center;
+  font-family: var(--display); font-weight: 900; font-size: clamp(88px, 30vw, 140px); line-height: .85;
+  font-variant-numeric: tabular-nums; color: var(--luce);
+}
+.is-ultimi .secondi { color: var(--ko); }
+.is-ultimi .nota-viaggio, .is-ultimi .nota-viaggio::after { background: var(--ko); }
+.sbircia { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.sbircia.is-premuto { border-color: var(--accento); background: var(--viola-tenue); }
+.sbircia-testo { margin: -8px 0 0; min-height: 1.5em; text-align: center; font-weight: 600; color: var(--accento-chiaro); overflow-wrap: anywhere; }
+
+.aiuti { border-top: 1px solid var(--filo); padding-top: 14px; }
+.aiuti h3 { margin: 0 0 10px; font-size: 15px; font-weight: 600; display: flex; justify-content: space-between; gap: 10px; }
+.aiuti h3 span { color: var(--fumo); font-weight: 500; }
+.aiuti-righe { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.aiuto { min-height: 48px; padding: 6px 10px; border-radius: var(--r-piccolo); border: 1px solid var(--accento); background: transparent; color: var(--accento-chiaro); font-weight: 600; font-size: 14px; line-height: 1.25; }
+.aiuto:hover:not(:disabled) { background: var(--viola-tenue); }
+.aiuto:disabled { border-color: var(--filo); color: var(--fumo); }
+.aiuti-scoperti { margin: 10px 0 0; display: grid; gap: 4px; font-size: 16px; }
+.aiuti-scoperti:empty { display: none; }
+.aiuti-scoperti strong { font-family: var(--display); font-size: 22px; color: var(--accento-chiaro); }
+.canta-azioni { display: grid; gap: 10px; }
+.canta-azioni-due { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.canta-azioni-due .btn { padding: 0 10px; font-size: 15px; }
+.btn-pericolo { border-color: rgba(229, 83, 75, .55); color: #F0948E; }
+
+/* ---------- Svela ---------- */
+.lettore { display: flex; align-items: center; gap: 12px; }
+.lettore-tasto { min-width: 120px; border-color: var(--accento); color: var(--accento-chiaro); }
+.lettore-tasto:disabled { border-color: var(--filo); color: var(--fumo); }
+.lettore-barra { flex: 1; height: 6px; border-radius: 3px; background: var(--velluto); overflow: hidden; }
+.lettore-barra span { display: block; height: 100%; width: 0; background: var(--accento); }
+.domanda { display: grid; gap: 10px; }
+.domanda h3 { margin: 0; font-size: 18px; font-weight: 700; }
+.scelte { display: grid; gap: 8px; }
+.scelta {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  min-height: 56px; padding: 0 18px; border-radius: var(--r-piccolo);
+  border: 1px solid var(--accento); background: var(--viola-tenue); color: var(--luce);
+  text-align: left; font-size: 17px;
+}
+.scelta strong { font-weight: 600; overflow-wrap: anywhere; }
+.scelta span { font-family: var(--display); font-weight: 900; font-size: 28px; color: var(--accento-chiaro); }
+.scelta:active { transform: translateY(1px); }
+.scelta-tenue { border-color: var(--filo); background: transparent; }
+.scelta-tenue span { color: var(--fumo); }
+.esito { display: grid; gap: 16px; padding: 18px; border-radius: var(--r-medio); background: var(--platea); border: 1px solid var(--filo); }
+.esito-testo { margin: 0; font-size: 18px; }
+.esito-testo strong { font-family: var(--display); font-weight: 900; font-size: 30px; color: var(--ok); margin-right: 4px; }
+.esito-azioni { display: flex; justify-content: flex-end; gap: 10px; }
+.esito-azioni .btn { padding: 0 16px; }
+.esito-azioni .btn-primary { flex: 1; }
+
+/* =========================================================
+   PREMIAZIONE
+   ========================================================= */
+.overlay { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
+.overlay-solid { background: var(--notte); }
+.dialog { width: 100%; max-width: 480px; margin: auto; text-align: center; display: grid; gap: 22px; }
+.dialog h2 { font-family: var(--display); font-weight: 900; text-transform: uppercase; font-size: clamp(44px, 12vw, 72px); line-height: .9; margin: 4px 0 0; color: var(--accento); overflow-wrap: anywhere; }
+.dialog .detail { margin: 10px 0 0; color: var(--fumo); font-size: 15px; }
+.standings { list-style: none; margin: 0; padding: 0; text-align: left; border-top: 1px solid var(--filo); }
+.standings li { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 12px 4px; border-bottom: 1px solid var(--filo); }
+.standings .pos { font-family: var(--display); font-weight: 800; font-size: 22px; color: var(--fumo); width: 1.6em; display: inline-block; }
+.standings li:first-child .pos, .standings li:first-child .pn { color: var(--accento-chiaro); }
+.standings .pn { font-weight: 600; overflow-wrap: anywhere; }
+.standings .ps { font-size: 14px; color: var(--fumo); white-space: nowrap; }
+.dialog-actions { display: grid; gap: 10px; }
+@media (min-width: 480px) { .dialog-actions { grid-template-columns: 1fr 1fr; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .nota-viaggio { transition: none; }
+}
