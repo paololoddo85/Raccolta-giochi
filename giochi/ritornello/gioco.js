@@ -104,6 +104,12 @@
     // "Ultimi 10 anni": l'anno in corso e i 9 prima (nel 2026: dal 2017), calcolato sulla data di oggi
     const ANNO_CORRENTE = new Date().getFullYear();
     const ANNO_MODERNO = ANNO_CORRENTE - 9;
+    // Ultimi 3 anni per le ricerche con l'anno; a gennaio e febbraio (prima di Sanremo) l'anno nuovo
+    // non ha ancora successi: si parte da quello prima
+    const anniRicerca = () => {
+        const da = new Date().getMonth() >= 2 ? 0 : 1;
+        return [da, da + 1, da + 2].map(n => ANNO_CORRENTE - n);
+    };
 
     const CATEGORIE = {
         tutto: () => true,
@@ -190,7 +196,7 @@
         const etichette = etichetteVersione(r.trackName);
         if (etichette && VERSIONI_VIETATE.test(etichette)) return false;
         const anno = parseInt(r.releaseDate.slice(0, 4), 10);
-        return anno >= 1940 && anno <= 2030;
+        return anno >= 1940 && anno <= ANNO_CORRENTE + 1;
     }
 
     const RICERCA_ITALIANA = /ital|sanremo|tormentoni|vasco|battisti|mina|celentano|pausini|ramazzotti|jovanotti|883|dalla|ligabue|maneskin|mahmood|d'avena|zecchino|vanni|bambini|disney/i;
@@ -201,7 +207,7 @@
         const fisse = haChiave(DATI.ricerche, categoria) ? DATI.ricerche[categoria] : DATI.ricerche.tutto;
         // ricerche con l'anno, per gli ultimi 3 anni ("sanremo 2026", "sanremo 2025"…)
         const conAnno = (haChiave(DATI.ricercheConAnno, categoria) ? DATI.ricercheConAnno[categoria] : [])
-            .flatMap(q => [0, 1, 2].map(n => q.replace('{anno}', ANNO_CORRENTE - n)));
+            .flatMap(q => anniRicerca().map(anno => q.replace('{anno}', anno)));
         const ricerche = RG.mescola([...fisse, ...conAnno]).slice(0, 6);
         const trovati = new Map();
         const annoMinimo = new Map(); // tra tutte le versioni restituite: le ristampe hanno anni successivi
@@ -979,5 +985,5 @@
     if (SALVATAGGIO.leggi() && RG.partita.ricaricata()) riprendi();
 
     // Per le prove automatiche
-    window.RITORNELLO = { stato, mazzo: () => mazzo, timer: () => timer, SALVATAGGIO };
+    window.RITORNELLO = { stato, mazzo: () => mazzo, timer: () => timer, SALVATAGGIO, inclusi: c => RISERVA.filter(CATEGORIE[c]).length };
 })();

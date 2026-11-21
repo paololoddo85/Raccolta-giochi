@@ -1,5 +1,5 @@
 const { apri, ok, BASE, SHOTS } = require('./comune');
-const { finti, stato: rete } = require('./finti-ritornello');
+const { finti, stato: rete, CATALOGO } = require('./finti-ritornello');
 const MODO = process.argv[2] || 'online'; // online | offline
 (async () => {
   const { browser, page, errori } = await apri({ finti: MODO === 'online' ? finti : null });
@@ -34,7 +34,7 @@ const MODO = process.argv[2] || 'online'; // online | offline
     if (MODO === 'offline') {
       await page.waitForSelector('.rg-toast-avviso');
       ok((await page.textContent('.rg-toast-avviso')).includes('brani inclusi'), 'offline: avviso "si gioca con i brani inclusi" e la partita parte lo stesso');
-      ok(s0.squadre.length === 2 && await page.evaluate(() => RITORNELLO.mazzo().length) > 50, 'offline: mazzo con i brani inclusi');
+      ok(s0.squadre.length === 2 && await page.evaluate(() => RITORNELLO.mazzo().length + 1 === RITORNELLO.inclusi('italiane-moderne') && RITORNELLO.mazzo().length > 10), 'offline: mazzo con tutti i brani inclusi della categoria');
       ok(await page.evaluate(() => [RITORNELLO.stato.brano, ...RITORNELLO.mazzo()].every(b => ['it', 'rap'].includes(b.gruppo) && b.anno >= new Date().getFullYear() - 9)), '"Italiane moderne": solo brani italiani degli ultimi 10 anni');
       await page.click('#mostra-brano'); await fase('segreto');
       ok(await page.isDisabled('#ripassa') && (await page.textContent('#ripasso-nota')).includes('Senza connessione'), 'offline: niente ripasso in cuffia, con la spiegazione');
@@ -197,7 +197,10 @@ const MODO = process.argv[2] || 'online'; // online | offline
 
     // "Italiane moderne" online: dal catalogo solo brani degli ultimi 10 anni, trattati come italiani
     await page.selectOption('#scelta-brani', 'italiane-moderne');
+    // mescolamento fisso (al contrario): escono di sicuro le ricerche con l'anno, che stanno in fondo
+    await page.evaluate(() => { window.__mescola = RG.mescola; RG.mescola = a => [...a].reverse(); });
     await page.click('#inizia'); await fase('consegna');
+    await page.evaluate(() => { RG.mescola = window.__mescola; });
     const moderne = await page.evaluate(() => [RITORNELLO.stato.brano, ...RITORNELLO.mazzo()]);
     ok(moderne.some(b => b.titolo.startsWith('Brano Online')) && moderne.every(b => ['it', 'rap'].includes(b.gruppo) && b.anno >= new Date().getFullYear() - 9), '"Italiane moderne" online: brani del catalogo solo degli ultimi 10 anni, come italiani');
     ok(!moderne.some(b => b.titolo === 'Pensare male' && b.artista !== 'The Kolors ed Elodie'), 'artisti con "ed": il brano incluso e quello di iTunes sono lo stesso, non esce due volte');
@@ -206,21 +209,23 @@ const MODO = process.argv[2] || 'online'; // online | offline
     // "Rap italiano moderno": solo rap degli ultimi 10 anni, inclusi e dal catalogo; il rap conta anche tra le italiane
     await page.selectOption('#scelta-brani', 'rap');
     await page.click('#inizia'); await fase('consegna');
+    const rapAttesi = CATALOGO.filter(b => b.trackName.startsWith('Brano Online') && b.primaryGenreName === 'Hip-Hop/Rap' && Number(b.releaseDate.slice(0, 4)) >= new Date().getFullYear() - 9).length;
     const rap = await page.evaluate(() => [RITORNELLO.stato.brano, ...RITORNELLO.mazzo()]);
-    ok(rap.every(b => b.gruppo === 'rap' && b.anno >= new Date().getFullYear() - 9) && rap.some(b => b.titolo === 'Cenere') && rap.some(b => b.titolo.startsWith('Brano Online')) && rap.length > 25 &&
-      rap.filter(b => b.titolo.startsWith('Brano Online')).every(b => Number(b.titolo.split(' ').pop()) % 2 === 0) &&
-      rap.filter(b => b.titolo === 'Lamborghini').length === 1,
-      '"Rap italiano moderno": brani rap inclusi e dal catalogo (solo genere hip-hop/rap), ultimi 10 anni, senza doppioni');
+    ok(rap.every(b => b.gruppo === 'rap' && b.anno >= new Date().getFullYear() - 9) && rap.some(b => !b.titolo.startsWith('Brano Online')) &&
+      rap.filter(b => b.titolo.startsWith('Brano Online')).length === rapAttesi,
+      `"Rap italiano moderno": brani rap inclusi e dal catalogo (tutti e soli i ${rapAttesi} di genere hip-hop/rap degli ultimi 10 anni)`);
     await page.click('#esci');
     await page.selectOption('#scelta-brani', 'italiane');
     await page.click('#inizia'); await fase('consegna');
-    ok(await page.evaluate(() => [RITORNELLO.stato.brano, ...RITORNELLO.mazzo()].some(b => b.titolo === 'Rockstar')), 'i brani rap restano anche in "Solo italiane"');
+    const italiane = await page.evaluate(() => [RITORNELLO.stato.brano, ...RITORNELLO.mazzo()]);
+    ok(italiane.some(b => b.gruppo === 'rap'), 'i brani rap restano anche in "Solo italiane"');
+    ok(italiane.filter(b => b.titolo === 'Lamborghini').length === 1, 'stesso brano con l\'artista scritto in modo diverso ("Guè Pequeno"/"Guè"): esce una volta sola');
     await page.click('#esci');
     ok(await page.evaluate(() => document.documentElement.scrollWidth) <= 360, 'nessuno scorrimento orizzontale');
     const y = new Date().getFullYear();
     const conAnno = rete.termini.filter(t => /^(sanremo|tormentoni estate|successi italiani|rap italiano|trap italiana) /.test(t));
-    ok(!rete.termini.some(t => t.includes('{anno}')) && conAnno.every(t => [y, y - 1, y - 2].includes(Number(t.split(' ').pop()))),
-      `ricerche con l'anno solo per gli ultimi 3 anni (${conAnno.join(', ') || 'nessuna estratta stavolta'})`);
+    ok(conAnno.length > 0 && !rete.termini.some(t => t.includes('{anno}')) && conAnno.every(t => [y, y - 1, y - 2, y - 3].includes(Number(t.split(' ').pop()))),
+      `ricerche con l'anno solo per gli ultimi anni (${conAnno.join(', ')})`);
     console.log('  richieste finte servite:', JSON.stringify(rete.richieste));
     ok(errori.length === 0, 'nessun errore in console' + (errori.length ? ':\n' + errori.join('\n') : ''));
   } catch (e) {

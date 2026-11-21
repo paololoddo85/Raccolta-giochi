@@ -5,7 +5,8 @@
  *
  * ricerche: ricerche iTunes per categoria (le stesse chiavi del menù "Brani" del gioco).
  *           Solo successi famosi, facili da riconoscere canticchiati.
- * ricercheConAnno: ricerche con "{anno}", ripetute dal gioco per gli ultimi 3 anni
+ * ricercheConAnno: ricerche con "{anno}", ripetute dal gioco per gli ultimi 3 anni (a gennaio e febbraio
+ *           si parte dall'anno prima)
  *           (le categorie "ultimi 10 anni" restano aggiornate da sole, anno dopo anno).
  * paroleAlbumVietate: parole intere che, nel titolo dell'ALBUM, indicano raccolte,
  *           compilation o versioni non originali.
