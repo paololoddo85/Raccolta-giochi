@@ -10,7 +10,7 @@ const { finti } = require('./finti-pellicola'); // Pellicola si gioca solo onlin
     ok(await page.isVisible('.scatola[data-gioco="hintfake"] .in-corso'), 'menù: "Partita in corso" su Cinquina (dopo migrazione)');
     ok(!(await page.isVisible('.scatola[data-gioco="cinestar"] .in-corso')), 'menù: nessuna partita su Pellicola');
     ok(await page.isVisible('.azzera[data-gioco="hintfake"]') && !(await page.isVisible('.azzera[data-gioco="cinestar"]')), '"Azzera la partita in corso" solo sotto i giochi con una partita salvata');
-    ok((await page.textContent('.scatola-giradischi')).includes('Solo online') && (await page.textContent('.scatola-cine')).includes('88 film inclusi'), 'note online: Giradischi solo online, Pellicola anche offline con 88 film');
+    ok((await page.textContent('.scatola-giradischi')).includes('Solo online') && (await page.textContent('.scatola-cine')).includes('Solo online'), 'note online: Giradischi e Pellicola solo online');
     await page.click('.azzera[data-gioco="hintfake"]');
     await page.click('#rg-conferma [data-risposta="no"]');
     ok(await page.evaluate(() => !!localStorage.getItem('rg-hintfake-partita')), 'azzera: "Annulla" lascia la partita com\'è');
@@ -34,7 +34,8 @@ const { finti } = require('./finti-pellicola'); // Pellicola si gioca solo onlin
     await page.click('#pulsante-suoni');
     // Azzera mentre il gioco è ancora in memoria (tasto indietro): la partita non deve tornare
     const richiestePrima = esterne.length; // Pellicola contatta per scelta il catalogo online: non conta
-    await page.goto(BASE + 'giochi/pellicola/');
+    await page.click('.scatola-cine'); // online: dal menù si entra in Pellicola
+    await page.waitForURL('**/giochi/pellicola/');
     await page.click('#start-game-btn');
     await page.waitForFunction(() => gameState.currentMovie, null, { timeout: 30000 });
     await page.goBack();
