@@ -88,7 +88,8 @@
     const RESTA = {
         hintfake: 'le carte importate e la memoria delle carte già uscite',
         cinestar: 'la memoria dei film già usciti',
-        hitstar: 'la memoria dei brani già usciti'
+        hitstar: 'la memoria dei brani già usciti',
+        ritornello: 'la memoria dei brani già cantati'
     };
     document.querySelectorAll('.azzera').forEach(b => b.addEventListener('click', async () => {
         const gioco = b.dataset.gioco;

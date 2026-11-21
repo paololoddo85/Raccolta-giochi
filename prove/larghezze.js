@@ -1,5 +1,5 @@
 const { apri, ok, BASE, SHOTS } = require('./comune');
-const fc = require('./finti-pellicola'), fh = require('./finti-giradischi');
+const fc = require('./finti-pellicola'), fh = require('./finti-giradischi'), fr = require('./finti-ritornello');
 const risultati = [];
 async function controlla(page, nome) {
   for (const w of [320, 360]) {
@@ -11,7 +11,7 @@ async function controlla(page, nome) {
   await page.setViewportSize({ width: 360, height: 760 });
 }
 (async () => {
-  let { browser, page } = await apri({ finti: async c => { await fc.finti(c); await fh.finti(c); } });
+  let { browser, page } = await apri({ finti: async c => { await fc.finti(c); await fh.finti(c); await fr.finti(c); } });
   await page.goto(BASE); await controlla(page, 'menù');
   // Cinquina
   await page.goto(BASE + 'giochi/cinquina/'); await controlla(page, 'Cinquina preparazione');
@@ -45,6 +45,19 @@ async function controlla(page, nome) {
   await controlla(page, 'Giradischi carta girata');
   await page.screenshot({ path: SHOTS + 'giradischi-girata-320.png', fullPage: true });
   await page.click('header button[onclick="openRulesModal()"]'); await controlla(page, 'Giradischi regolamento');
+  // Ritornello, con 4 squadre dai nomi lunghi
+  await page.goto(BASE + 'giochi/ritornello/'); await controlla(page, 'Ritornello preparazione');
+  await page.click('.count-btn[data-count="4"]');
+  await page.locator('.nome-squadra').evaluateAll(els => els.forEach((e, i) => { e.value = 'Squadra lunghissima ' + i; }));
+  await page.click('#inizia'); await page.waitForSelector('#fase-consegna:not(.hidden)', { timeout: 30000 });
+  await controlla(page, 'Ritornello consegna (4 squadre)');
+  await page.evaluate(() => { RITORNELLO.stato.brano.titolo = 'Supercalifragilistichespiralidoso e un titolo davvero molto lungo'; });
+  await page.click('#mostra-brano'); await controlla(page, 'Ritornello brano segreto');
+  await page.click('#via'); await page.click('[data-aiuto="lettera"]'); await controlla(page, 'Ritornello canta');
+  await page.click('#indovinato'); await controlla(page, 'Ritornello svela');
+  await page.click('[data-esito="niente"]'); await controlla(page, 'Ritornello furto');
+  await page.screenshot({ path: SHOTS + 'ritornello-furto-320.png', fullPage: true });
+  await page.click('[data-ladro="2"]'); await controlla(page, 'Ritornello esito');
   console.log(risultati.join('\n'));
   if (risultati.some(r => r.startsWith('✗'))) process.exitCode = 1;
   await browser.close();

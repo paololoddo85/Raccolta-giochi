@@ -2,7 +2,7 @@
  * COMBRICCOLA - stile del menù
  * Stile "notte" comune (shared/stile/notte.css): fondo blu notte, titoli da cartellone.
  * Ogni gioco è una scatola del suo colore, appoggiata storta sulla pila.
- * Le tre sillabe del nome hanno i colori dei tre giochi.
+ * Le tre sillabe del nome hanno i colori dei primi tre giochi.
  */
 :root {
     /* nomi usati qui sotto, presi dallo stile comune */
@@ -18,6 +18,8 @@
     --cine-bordo: #a3741f;
     --giradischi: #ec4899;
     --giradischi-bordo: #9d2766;
+    --ritornello: #a78bfa;
+    --ritornello-bordo: #6346c2;
 }
 
 .nascosto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -98,6 +100,7 @@
 .pila li:nth-child(1) { --storto: -1.2deg; }
 .pila li:nth-child(2) { --storto: 0.9deg; }
 .pila li:nth-child(3) { --storto: -0.6deg; }
+.pila li:nth-child(4) { --storto: 1.1deg; }
 
 .scatola {
     --spessore: 10px;
@@ -123,6 +126,7 @@
 .scatola-cinquina { --faccia: var(--cinquina); --bordo: var(--cinquina-bordo); --su-faccia: #ffffff; }
 .scatola-cine { --faccia: var(--cine); --bordo: var(--cine-bordo); --su-faccia: #1a0f22; }
 .scatola-giradischi { --faccia: var(--giradischi); --bordo: var(--giradischi-bordo);  --su-faccia: #ffffff; }
+.scatola-ritornello { --faccia: var(--ritornello); --bordo: var(--ritornello-bordo); --su-faccia: #160f2e; }
 
 .motivo {
     position: absolute; right: -14px; top: -14px;

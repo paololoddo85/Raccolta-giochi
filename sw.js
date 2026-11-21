@@ -2,7 +2,7 @@
  * COMBRICCOLA - service worker
  *
  * Al primo accesso salva sul telefono tutti i file del sito: dopo si gioca anche senza connessione.
- * I contenuti online dei giochi (catalogo e locandine di Pellicola, catalogo e AUDIO di Giradischi)
+ * I contenuti online dei giochi (catalogo e locandine di Pellicola, catalogo e AUDIO di Giradischi e Ritornello)
  * non passano di qui: arrivano sempre da internet e non vengono mai salvati.
  *
  * A OGNI RILASCIO:
@@ -11,7 +11,7 @@
  * Quando la versione cambia, nelle pagine compare "Nuova versione disponibile — tocca per aggiornare"
  * (shared/js/aggiornamento.js). Il service worker nuovo si attiva solo dopo quel tocco.
  */
-const VERSIONE = '7';
+const VERSIONE = '8';
 const CACHE = `combriccola-v${VERSIONE}`;
 
 // Percorsi relativi alla cartella del sito (dove sta questo file)
@@ -78,7 +78,15 @@ const FILE = [
     'giochi/giradischi/stile.css',
     'giochi/giradischi/gioco.js',
     'giochi/giradischi/icone.js',
-    'giochi/giradischi/dati/ricerche.js'
+    'giochi/giradischi/dati/ricerche.js',
+
+    // Ritornello
+    'giochi/ritornello/',
+    'giochi/ritornello/index.html',
+    'giochi/ritornello/stile.css',
+    'giochi/ritornello/gioco.js',
+    'giochi/ritornello/dati/brani.js',
+    'giochi/ritornello/dati/ricerche.js'
 ];
 
 const CARTELLA = new URL('./', self.location).pathname; // es. /Raccolta-giochi/

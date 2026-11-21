@@ -11,6 +11,7 @@ const { finti } = require('./finti-pellicola'); // Pellicola si gioca solo onlin
     ok(!(await page.isVisible('.scatola[data-gioco="cinestar"] .in-corso')), 'menù: nessuna partita su Pellicola');
     ok(await page.isVisible('.azzera[data-gioco="hintfake"]') && !(await page.isVisible('.azzera[data-gioco="cinestar"]')), '"Azzera la partita in corso" solo sotto i giochi con una partita salvata');
     ok((await page.textContent('.scatola-giradischi')).includes('Solo online') && (await page.textContent('.scatola-cine')).includes('Solo online'), 'note online: Giradischi e Pellicola solo online');
+    ok((await page.textContent('.scatola-ritornello')).includes('Anche offline') && !(await page.isVisible('.scatola[data-gioco="ritornello"] .in-corso')), 'Ritornello nel menù: "Anche offline", nessuna partita in corso');
     await page.click('.azzera[data-gioco="hintfake"]');
     await page.click('#rg-conferma [data-risposta="no"]');
     ok(await page.evaluate(() => !!localStorage.getItem('rg-hintfake-partita')), 'azzera: "Annulla" lascia la partita com\'è');
