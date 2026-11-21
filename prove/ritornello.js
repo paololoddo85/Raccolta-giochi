@@ -51,7 +51,7 @@ const MODO = process.argv[2] || 'online'; // online | offline
     // Catalogo online: i brani da scartare non entrano nel mazzo
     const mazzo = await page.evaluate(() => RITORNELLO.mazzo().map(b => b.titolo + '|' + b.anno + '|' + b.anteprima));
     ok(mazzo.some(b => b.startsWith('Brano Online')), 'online: i brani del catalogo iTunes entrano nel mazzo');
-    ok(!mazzo.some(b => ['Canzone (Live)|', 'Altra canzone|', 'Karaoke|2000|', 'Senza https|'].some(p => b.startsWith(p))), 'versioni live, compilation, karaoke e anteprime non https scartate');
+    ok(!mazzo.some(b => /\/finto\/600[1-4]\.m4a$/.test(b) || b.startsWith('Senza https|')), 'versioni live, compilation, karaoke e anteprime non https scartate');
     ok(mazzo.some(b => b.startsWith('Ristampa|1975|')), 'ristampa: si usa l\'anno della versione più vecchia');
     ok(s0.squadre.map(s => s.nome).join() === 'Paolo,Giulia' && s0.traguardo === 10, 'partita a 2 squadre, traguardo 10');
 
@@ -168,11 +168,12 @@ const MODO = process.argv[2] || 'online'; // online | offline
       RITORNELLO.stato.avviata = false; // niente salvataggio automatico mentre la pagina si ricarica
       const g = JSON.parse(localStorage.getItem('rg-ritornello-partita'));
       g.brano = { titolo: '<b>x</b>', artista: 'y', anno: 'z', anteprima: 'javascript:alert(1)', copertina: 'data:text/html,1' };
-      g.fase = 'segreto';
+      g.fase = 'segreto'; g.categoria = 'constructor';
       localStorage.setItem('rg-ritornello-partita', JSON.stringify(g));
     });
     await page.reload(); await fase('segreto');
     ok(await page.evaluate(() => { const b = RITORNELLO.stato.brano; return b.anteprima === '' && b.copertina === '' && b.anno === null; }) && await page.textContent('#segreto-titolo') === '<b>x</b>', 'salvataggio manomesso: indirizzi non https scartati, titolo come testo');
+    ok(await page.evaluate(() => RITORNELLO.stato.categoria) === 'tutto', 'salvataggio manomesso: una categoria inesistente ("constructor") torna "tutto"');
 
     // salvataggio con un furto impossibile (squadra -1): niente errori
     await page.evaluate(() => {
@@ -193,6 +194,14 @@ const MODO = process.argv[2] || 'online'; // online | offline
     await page.click('#esci');
     await page.click('#resume-box [data-azione="scarta"]'); await si();
     ok(await page.isHidden('#resume-box'), 'scarta partita (con conferma in app)');
+
+    // "Italiane moderne" online: dal catalogo solo brani dal 2000, trattati come italiani
+    await page.selectOption('#scelta-brani', 'italiane-moderne');
+    await page.click('#inizia'); await fase('consegna');
+    const moderne = await page.evaluate(() => [RITORNELLO.stato.brano, ...RITORNELLO.mazzo()]);
+    ok(moderne.some(b => b.titolo.startsWith('Brano Online')) && moderne.every(b => b.gruppo === 'it' && b.anno >= 2000), '"Italiane moderne" online: brani del catalogo solo dal 2000, come italiani');
+    ok(!moderne.some(b => b.titolo === 'Pensare male' && b.artista !== 'The Kolors ed Elodie'), 'artisti con "ed": il brano incluso e quello di iTunes sono lo stesso, non esce due volte');
+    await page.click('#esci');
     ok(await page.evaluate(() => document.documentElement.scrollWidth) <= 360, 'nessuno scorrimento orizzontale');
     console.log('  richieste finte servite:', JSON.stringify(rete.richieste));
     ok(errori.length === 0, 'nessun errore in console' + (errori.length ? ':\n' + errori.join('\n') : ''));

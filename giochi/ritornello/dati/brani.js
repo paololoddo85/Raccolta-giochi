@@ -145,7 +145,7 @@ window.RITORNELLO_BRANI = [
     ["Notti in bianco", "Blanco", 2021, "it"],
     ["Fiamme negli occhi", "Coma_Cose", 2021, "it"],
     ["Pensare male", "The Kolors ed Elodie", 2021, "it"],
-    ["I Wanna Be Your Slave", "Måneskin", 2021, "it"],
+    ["Vent'anni", "Måneskin", 2020, "it"],
     ["Bellissima", "Annalisa", 2022, "it"],
     ["Dove si balla", "Dargen D'Amico", 2022, "it"],
     ["Sesso occasionale", "Tananai", 2022, "it"],

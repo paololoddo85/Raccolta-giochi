@@ -24,6 +24,8 @@ CATALOGO.push(brano(6001, 'Canzone (Live)', 'Gruppo', 1990), brano(6002, 'Altra 
   brano(6003, 'Karaoke', 'Karaoke Band', 2000), brano(6004, 'Senza https', 'Gruppo', 2000, { previewUrl: 'javascript:alert(1)' }),
   brano(6005, 'Ristampa', 'Gruppo Vecchio', 2015), brano(6006, 'Ristampa', 'Gruppo Vecchio', 1975, { collectionName: 'Raccolta' }),
   brano(6007, '<img src=x onerror=alert(1)>', 'Hacker', 2001));
+// lo stesso brano incluso "Pensare male" (The Kolors ed Elodie), scritto come su iTunes
+CATALOGO.push(brano(6100, 'Pensare male', 'The Kolors & Elodie', 2021));
 function jsonp(route, data) {
   const cb = new URL(route.request().url()).searchParams.get('callback');
   return route.fulfill({ status: 200, contentType: 'text/javascript', body: `${cb}(${JSON.stringify(data)});` });

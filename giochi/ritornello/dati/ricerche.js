@@ -24,8 +24,8 @@ window.RITORNELLO_RICERCHE = {
             "adriano celentano", "mina", "lucio dalla", "ligabue", "maneskin", "mahmood"
         ],
         'italiane-moderne': [
-            "hit italiane 2000", "hit italiane 2010", "hit italiane 2020", "tormentoni estivi italiani",
-            "sanremo 2023", "sanremo 2024", "sanremo 2025", "sanremo 2026",
+            "sanremo 2019", "sanremo 2021", "sanremo 2022", "sanremo 2023", "sanremo 2024", "sanremo 2025",
+            "sanremo 2026", "tormentoni estate 2023", "tormentoni estate 2024", "tormentoni estate 2025",
             "annalisa", "elodie", "marco mengoni", "mahmood", "maneskin", "tananai", "the kolors",
             "ultimo", "tiziano ferro", "cesare cremonini", "negramaro", "boomdabash"
         ],

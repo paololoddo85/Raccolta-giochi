@@ -59,7 +59,7 @@
     }
 
     function artistaPrincipale(testo) {
-        return normalizza(String(testo || '').split(/\s+(?:ft\.?|feat\.?|featuring|x|e|and)\s+|&|,/i)[0]);
+        return normalizza(String(testo || '').split(/\s+(?:ft\.?|feat\.?|featuring|x|e|ed|and)\s+|&|,/i)[0]);
     }
 
     function chiave(brano) {
@@ -111,7 +111,9 @@
         recenti: b => b.gruppo !== 'bimbi' && b.anno >= 2010,
         bambini: b => b.gruppo === 'bimbi'
     };
-    const filtroCategoria = () => CATEGORIE[stato.categoria] || CATEGORIE.tutto;
+    // Solo le chiavi scritte qui (non "constructor", "toString"… ereditati da Object): arrivano anche da salvataggi
+    const haChiave = (tabella, chiaveCercata) => typeof chiaveCercata === 'string' && Object.prototype.hasOwnProperty.call(tabella, chiaveCercata);
+    const filtroCategoria = () => (haChiave(CATEGORIE, stato.categoria) ? CATEGORIE[stato.categoria] : CATEGORIE.tutto);
 
     // rg-ritornello-brani-cantati: brani usciti nelle partite precedenti (escono per ultimi)
     function storico() {
@@ -191,7 +193,7 @@
     // Brani del catalogo iTunes per la categoria scelta, oppure null se iTunes non risponde
     async function scaricaCatalogo(categoria) {
         if (navigator.onLine === false) return null; // il telefono sa già di essere offline
-        const ricerche = RG.mescola(DATI.ricerche[categoria] || DATI.ricerche.tutto).slice(0, 6);
+        const ricerche = RG.mescola(haChiave(DATI.ricerche, categoria) ? DATI.ricerche[categoria] : DATI.ricerche.tutto).slice(0, 6);
         const trovati = new Map();
         const annoMinimo = new Map(); // tra tutte le versioni restituite: le ristampe hanno anni successivi
         let raggiunto = false;
@@ -779,7 +781,7 @@
             squadre: pulisciSquadre(u.squadre), turnoDi: u.turnoDi, giro: Math.max(1, Number(u.giro) || 1), brano,
             aiuti: pulisciAiuti(u.aiuti), cambiato: !!u.cambiato,
             usati: pulisciUsati(u.usati),
-            svelaMotivo: u.svelaMotivo in MOTIVI ? u.svelaMotivo : 'indovinato'
+            svelaMotivo: haChiave(MOTIVI, u.svelaMotivo) ? u.svelaMotivo : 'indovinato'
         };
     }
 
@@ -808,12 +810,12 @@
             giro: Math.max(1, Number(g.giro) || 1),
             traguardo: numero(g.traguardo, [10, 15, 20], 15),
             secondi: numero(g.secondi, [30, 45, 60], 45),
-            categoria: g.categoria in CATEGORIE ? g.categoria : 'tutto',
+            categoria: haChiave(CATEGORIE, g.categoria) ? g.categoria : 'tutto',
             brano: pulisciBrano(g.brano),
             cambiato: !!g.cambiato,
             aiuti: pulisciAiuti(g.aiuti),
             esito: pulisciEsito(g.esito, squadre.length),
-            svelaMotivo: g.svelaMotivo in MOTIVI ? g.svelaMotivo : null,
+            svelaMotivo: haChiave(MOTIVI, g.svelaMotivo) ? g.svelaMotivo : null,
             annulla: pulisciAnnulla(g.annulla),
             usati: pulisciUsati(g.usati),
             avviata: true,
