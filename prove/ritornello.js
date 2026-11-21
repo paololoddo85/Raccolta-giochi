@@ -35,7 +35,7 @@ const MODO = process.argv[2] || 'online'; // online | offline
       await page.waitForSelector('.rg-toast-avviso');
       ok((await page.textContent('.rg-toast-avviso')).includes('brani inclusi'), 'offline: avviso "si gioca con i brani inclusi" e la partita parte lo stesso');
       ok(s0.squadre.length === 2 && await page.evaluate(() => RITORNELLO.mazzo().length) > 50, 'offline: mazzo con i brani inclusi');
-      ok(await page.evaluate(() => [RITORNELLO.stato.brano, ...RITORNELLO.mazzo()].every(b => b.gruppo === 'it' && b.anno >= 2000)), '"Italiane moderne": solo brani italiani dal 2000 in poi');
+      ok(await page.evaluate(() => [RITORNELLO.stato.brano, ...RITORNELLO.mazzo()].every(b => ['it', 'rap'].includes(b.gruppo) && b.anno >= 2000)), '"Italiane moderne": solo brani italiani dal 2000 in poi');
       await page.click('#mostra-brano'); await fase('segreto');
       ok(await page.isDisabled('#ripassa') && (await page.textContent('#ripasso-nota')).includes('Senza connessione'), 'offline: niente ripasso in cuffia, con la spiegazione');
       await page.click('#via'); await fase('canta'); await page.click('#indovinato'); await fase('svela');
@@ -187,6 +187,18 @@ const MODO = process.argv[2] || 'online'; // online | offline
 
     // ← Menu e scarta
     await page.click('#esci');
+
+    // "Rap italiano moderno": solo rap dal 2000, inclusi e dal catalogo; il rap conta anche tra le italiane
+    await page.selectOption('#scelta-brani', 'rap');
+    await page.click('#inizia'); await fase('consegna');
+    const rap = await page.evaluate(() => [RITORNELLO.stato.brano, ...RITORNELLO.mazzo()]);
+    ok(rap.every(b => b.gruppo === 'rap' && b.anno >= 2000) && rap.some(b => b.titolo === 'Cenere') && rap.some(b => b.titolo.startsWith('Brano Online')) && rap.length > 40,
+      '"Rap italiano moderno": brani rap inclusi e dal catalogo, solo dal 2000');
+    await page.click('#esci');
+    await page.selectOption('#scelta-brani', 'italiane');
+    await page.click('#inizia'); await fase('consegna');
+    ok(await page.evaluate(() => [RITORNELLO.stato.brano, ...RITORNELLO.mazzo()].some(b => b.titolo === 'Rockstar')), 'i brani rap restano anche in "Solo italiane"');
+    await page.click('#esci');
     ok(await page.isVisible('#resume-box'), '"← Menu" torna alla preparazione con la partita salvata');
     await togliToast();
     ok(await page.evaluate(() => { document.getElementById('inizia').click(); return [...document.querySelectorAll('#resume-box button')].every(b => b.disabled); }), 'mentre si prepara una partita nuova Riprendi e Scarta sono bloccati');
@@ -199,7 +211,7 @@ const MODO = process.argv[2] || 'online'; // online | offline
     await page.selectOption('#scelta-brani', 'italiane-moderne');
     await page.click('#inizia'); await fase('consegna');
     const moderne = await page.evaluate(() => [RITORNELLO.stato.brano, ...RITORNELLO.mazzo()]);
-    ok(moderne.some(b => b.titolo.startsWith('Brano Online')) && moderne.every(b => b.gruppo === 'it' && b.anno >= 2000), '"Italiane moderne" online: brani del catalogo solo dal 2000, come italiani');
+    ok(moderne.some(b => b.titolo.startsWith('Brano Online')) && moderne.every(b => ['it', 'rap'].includes(b.gruppo) && b.anno >= 2000), '"Italiane moderne" online: brani del catalogo solo dal 2000, come italiani');
     ok(!moderne.some(b => b.titolo === 'Pensare male' && b.artista !== 'The Kolors ed Elodie'), 'artisti con "ed": il brano incluso e quello di iTunes sono lo stesso, non esce due volte');
     await page.click('#esci');
     ok(await page.evaluate(() => document.documentElement.scrollWidth) <= 360, 'nessuno scorrimento orizzontale');

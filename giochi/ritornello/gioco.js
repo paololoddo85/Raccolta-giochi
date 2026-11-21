@@ -87,7 +87,7 @@
             titolo: b.titolo.slice(0, 160),
             artista: b.artista.slice(0, 160),
             anno,
-            gruppo: ['it', 'int', 'bimbi'].includes(b.gruppo) ? b.gruppo : 'int',
+            gruppo: ['it', 'rap', 'int', 'bimbi'].includes(b.gruppo) ? b.gruppo : 'int',
             anteprima: urlSicuro(b.anteprima),
             copertina: urlSicuro(b.copertina)
         };
@@ -103,8 +103,9 @@
 
     const CATEGORIE = {
         tutto: () => true,
-        italiane: b => b.gruppo === 'it',
-        'italiane-moderne': b => b.gruppo === 'it' && b.anno >= 2000,
+        italiane: b => b.gruppo === 'it' || b.gruppo === 'rap',
+        'italiane-moderne': b => (b.gruppo === 'it' || b.gruppo === 'rap') && b.anno >= 2000,
+        rap: b => b.gruppo === 'rap' && b.anno >= 2000,
         internazionali: b => b.gruppo === 'int',
         classici: b => b.gruppo !== 'bimbi' && b.anno <= 1989,
         '9000': b => b.gruppo !== 'bimbi' && b.anno >= 1990 && b.anno <= 2009,
@@ -199,7 +200,7 @@
         let raggiunto = false;
 
         await Promise.all(ricerche.map(async (q) => {
-            const italiana = ['italiane', 'italiane-moderne', 'bambini'].includes(categoria) || RICERCA_ITALIANA.test(q);
+            const italiana = ['italiane', 'italiane-moderne', 'rap', 'bambini'].includes(categoria) || RICERCA_ITALIANA.test(q);
             const risultati = await cercaItunes(q, italiana ? 'IT' : 'US', 25);
             if (!risultati) return;
             raggiunto = true;
@@ -213,7 +214,7 @@
                 trovati.set(k, pulisciBrano({
                     ...b,
                     anno,
-                    gruppo: categoria === 'bambini' ? 'bimbi' : (italiana ? 'it' : 'int'),
+                    gruppo: categoria === 'bambini' ? 'bimbi' : categoria === 'rap' ? 'rap' : (italiana ? 'it' : 'int'),
                     anteprima: r.previewUrl,
                     copertina: copertinaGrande(r.artworkUrl100)
                 }));

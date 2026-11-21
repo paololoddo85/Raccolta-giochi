@@ -72,7 +72,7 @@ giochi/cinquina/dati/carte.js      le 304 carte di Cinquina (prima "HINT FAKE")
 giochi/pellicola/dati/film.js      88 film inclusi, titoli alternativi, ricerche del catalogo online (prima "CineStar")
 giochi/giradischi/dati/ricerche.js ricerche iTunes e parole che scartano raccolte/remaster/live (prima "Hitstar")
 giochi/giradischi/icone.js         icone Font Awesome incluse (SVG), licenza CC BY 4.0
-giochi/ritornello/dati/brani.js    brani inclusi da canticchiare [titolo, artista, anno, gruppo it/int/bimbi]
+giochi/ritornello/dati/brani.js    brani inclusi da canticchiare [titolo, artista, anno, gruppo it/rap/int/bimbi]
 giochi/ritornello/dati/ricerche.js ricerche iTunes per categoria e parole che scartano raccolte/live/remix
 prove/                             prove automatiche (Playwright): `node prove/esegui.js` — non fanno parte del sito
 ```
