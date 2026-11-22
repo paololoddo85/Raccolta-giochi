@@ -38,6 +38,18 @@ const { finti, stato: rete } = require('./finti-giradischi');
     const tutte = await page.evaluate(() => [...gameState.players.flatMap(p => p.timeline), gameState.currentCard, ...gameState.readyCards].map(c => c.title));
     ok(!tutte.includes('Canzone Ristampata'), 'la ristampa con una versione precedente non viene proposta');
 
+    // nessun artista domina il mazzo: al massimo 3 brani per artista tra timeline, carta, pronte e mazzo
+    const massimoInPartita = () => page.evaluate(() => {
+      const c = {};
+      const aggiungi = (x) => { if (!x) return; const a = normalizeArtist(x.artist); c[a] = (c[a] || 0) + 1; };
+      gameState.players.forEach(p => p.timeline.forEach(aggiungi));
+      aggiungi(gameState.currentCard); gameState.readyCards.forEach(aggiungi); gameState.deck.forEach(aggiungi);
+      return Math.max(0, ...Object.values(c));
+    });
+    ok(await massimoInPartita() <= 3, 'partita: al massimo 3 brani per artista nel mazzo');
+    await page.evaluate(() => refillDeckOnline(gameState));
+    ok(await massimoInPartita() <= 3, 'dopo un altro giro di ricerche il limite per artista regge');
+
     // ascolto
     await page.click('#btn-play-pause');
     await page.waitForFunction(() => !document.getElementById('mystery-audio-player').paused, null, { timeout: 10000 });

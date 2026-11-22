@@ -48,6 +48,8 @@ const BANNED_ALBUM_KEYWORDS = window.GIRADISCHI_DATI.paroleAlbumVietate;
 // Nel titolo del BRANO si controllano solo le "etichette" di versione: quello che sta
 // tra parentesi/quadre o dopo un trattino ("Song - Live", "Song (2011 Remaster)").
 const BANNED_TRACK_VERSION_KEYWORDS = window.GIRADISCHI_DATI.paroleVersioneVietate;
+// Massimo di brani per artista in un giro di ricerche: un catalogo grande non riempie il mazzo
+const MAX_BRANI_PER_ARTISTA = 3;
 
 function escapeRegex(str) {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -208,6 +210,34 @@ async function fetchLiveItunesPool(genreFilter, queryCount = 7) {
     return filteredTracks;
 }
 
+// Massimo di brani per artista nel mazzo: un catalogo grande (Queen, Vasco…) non lo deve riempire.
+// `giaPresenti` conta i brani già in partita per artista (vedi contaArtistiInPartita).
+function limitaPerArtista(tracce, giaPresenti = new Map()) {
+    const conteggio = new Map(giaPresenti);
+    return tracce.filter(t => {
+        const artista = normalizeArtist(t.artist);
+        const quanti = conteggio.get(artista) || 0;
+        if (quanti >= MAX_BRANI_PER_ARTISTA) return false;
+        conteggio.set(artista, quanti + 1);
+        return true;
+    });
+}
+
+// Quanti brani per artista ci sono già in partita: timeline, carta girata, pronte e mazzo
+function contaArtistiInPartita(gs) {
+    const conteggio = new Map();
+    const aggiungi = (c) => {
+        if (!c) return;
+        const artista = normalizeArtist(c.artist);
+        conteggio.set(artista, (conteggio.get(artista) || 0) + 1);
+    };
+    gs.players.forEach(p => p.timeline.forEach(aggiungi));
+    aggiungi(gs.currentCard);
+    gs.readyCards.forEach(aggiungi);
+    gs.deck.forEach(aggiungi);
+    return conteggio;
+}
+
 function yearMatchesFilter(year, genreFilter) {
     if (genreFilter === '7080') return year >= 1970 && year <= 1989;
     if (genreFilter === '9000') return year >= 1990 && year <= 2009;
@@ -325,7 +355,8 @@ async function refillDeckOnline(gs) {
     gs.networkDown = fetchLiveItunesPool.allFailed;
     const used = usedSongKeys(gs);
     const inDeck = new Set(gs.deck.map(c => c.matchKey));
-    const add = fresh.filter(t => !used.has(t.matchKey) && !inDeck.has(t.matchKey));
+    const nuovi = fresh.filter(t => !used.has(t.matchKey) && !inDeck.has(t.matchKey));
+    const add = limitaPerArtista(nuovi, contaArtistiInPartita(gs));
     gs.deck = [...shuffleArray(add), ...gs.deck];
     return add.length;
 }
@@ -678,7 +709,7 @@ async function startGame() {
         const gameMode = document.getElementById('game-mode').value;
         const targetCards = parseInt(document.getElementById('target-cards').value, 10);
 
-        const liveTracks = await fetchLiveItunesPool(genreFilter);
+        const liveTracks = limitaPerArtista(await fetchLiveItunesPool(genreFilter));
         if (liveTracks.length === 0) {
             showToast("Impossibile caricare i brani: Giradischi ha bisogno di internet. Controlla la connessione e riprova.", "error");
             return;

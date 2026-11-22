@@ -37,7 +37,8 @@ window.GIRADISCHI_DATI = {
       '7080': [
           "70s number one hits", "70s disco hits", "70s classic rock",
           "80s number one hits", "80s pop hits", "80s synthpop hits",
-          "italo disco hits", "vasco rossi", "queen", "michael jackson", "madonna"
+          "italo disco hits", "vasco rossi", "queen", "disco 70s", "new wave 80s",
+          "soul 70s", "funk 80s"
       ],
       '9000': [
           "90s number one hits", "90s eurodance hits", "90s pop hits",
