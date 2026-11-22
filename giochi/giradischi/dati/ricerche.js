@@ -2,8 +2,9 @@
  * Giradischi (prima "Hitstar") - liste usate per pescare i brani dal catalogo online di iTunes.
  * Il gioco non ha brani inclusi: per giocare serve la connessione.
  *
- * ricerche: ricerche iTunes per catalogo ("all", "rock", "italian", "7080", "9000", "modern").
- *           Solo successi famosi: niente brani secondari.
+ * ricerche: ricerche iTunes per catalogo ("all", "rock", "italian", "7080", "9000", "modern",
+ *           "napoletane"). Solo successi famosi: niente brani secondari.
+ *           "napoletane": canzoni in napoletano (o di cantanti napoletani) uscite dal 1990 a oggi.
  * paroleAlbumVietate: parole intere che, nel titolo dell'ALBUM, indicano raccolte,
  *           compilation, remaster o versioni non originali.
  * paroleVersioneVietate: parole che, tra parentesi o dopo " - " nel titolo del BRANO,
@@ -49,6 +50,13 @@ window.GIRADISCHI_DATI = {
           "2010s top hits", "2015 top hits", "2018 top hits",
           "2020 top hits", "2022 top hits", "2024 top hits",
           "2025 top hits", "2026 top hits", "dua lipa", "ed sheeran", "the weeknd", "taylor swift"
+      ],
+      napoletane: [
+          "canzoni napoletane", "napoletane anni 90", "neomelodici napoletani", "napoli canzone",
+          "pino daniele", "enzo avitabile", "pietra montecorvino", "nino d'angelo", "gigi finizio",
+          "franco ricciardi", "tommy riccio", "mario merola", "sal da vinci", "gigi d'alessio",
+          "peppino di capri", "liberato", "geolier", "clementino", "tony colombo", "lina sastri",
+          "enzo gragnaniello", "almamegretta", "99 posse", "raiz", "daniele sepe"
       ]
   },
 

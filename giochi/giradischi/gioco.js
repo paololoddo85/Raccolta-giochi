@@ -124,9 +124,7 @@ function isOriginalNonCompilationTrack(item, genreFilter) {
     if (isNaN(year) || year < 1955 || year > 2026) return false;
 
     // Rispetta i filtri temporali selezionati
-    if (genreFilter === '7080' && (year < 1970 || year > 1989)) return false;
-    if (genreFilter === '9000' && (year < 1990 || year > 2009)) return false;
-    if (genreFilter === 'modern' && year < 2010) return false;
+    if (!yearMatchesFilter(year, genreFilter)) return false;
 
     return true;
 }
@@ -144,7 +142,7 @@ async function fetchLiveItunesPool(genreFilter, queryCount = 7) {
     let failed = 0;
     const requests = selectedQueries.map(async (q) => {
         try {
-            const isItalianQuery = genreFilter === 'italian' || /ital|sanremo|vasco|battisti|mina|celentano|pausini|ramazzotti|jovanotti|883|cremonini|ferro|mengoni|mahmood|ligabue|maneskin/i.test(q);
+            const isItalianQuery = genreFilter === 'italian' || genreFilter === 'napoletane' || /ital|sanremo|vasco|battisti|mina|celentano|pausini|ramazzotti|jovanotti|883|cremonini|ferro|mengoni|mahmood|ligabue|maneskin/i.test(q);
             const country = isItalianQuery ? 'IT' : 'US';
             const url = `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&country=${country}&media=music&entity=song&limit=25`;
             const data = await itunesRequest(url, 6000);
@@ -242,6 +240,7 @@ function yearMatchesFilter(year, genreFilter) {
     if (genreFilter === '7080') return year >= 1970 && year <= 1989;
     if (genreFilter === '9000') return year >= 1990 && year <= 2009;
     if (genreFilter === 'modern') return year >= 2010;
+    if (genreFilter === 'napoletane') return year >= 1990;
     return true;
 }
 

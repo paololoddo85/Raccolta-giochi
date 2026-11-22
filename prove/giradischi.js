@@ -177,6 +177,10 @@ const { finti, stato: rete } = require('./finti-giradischi');
     ok(await page.evaluate(() => RG.suoni.muto), 'tasto muto condiviso');
     await page.click('#btn-mute');
     ok(await page.evaluate(() => document.documentElement.scrollWidth) <= 360, 'nessuno scorrimento orizzontale');
+    // Canzoni napoletane: voce nel menù, ricerche dedicate, filtro dal 1990 a oggi (nessun limite superiore oltre il 2026)
+    ok(await page.evaluate(() => !!document.querySelector('#genre-filter option[value="napoletane"]')), 'catalogo "Canzoni Napoletane" nel menù');
+    ok(await page.evaluate(() => LIVE_SEARCH_POOLS.napoletane.length > 0 && LIVE_SEARCH_POOLS.napoletane.every(q => q.trim().length > 0)), 'catalogo napoletane: ricerche presenti');
+    ok(await page.evaluate(() => [1989, 1990, 2000, 2026].map(a => yearMatchesFilter(a, 'napoletane')).join() === 'false,true,true,true'), 'catalogo napoletane: solo dal 1990 in poi');
     console.log('  richieste finte servite:', JSON.stringify(rete.richieste));
     ok(errori.length === 0, 'nessun errore in console' + (errori.length ? ':\n' + errori.join('\n') : ''));
   } catch (e) {
