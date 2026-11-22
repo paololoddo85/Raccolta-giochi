@@ -121,6 +121,7 @@
         rap: b => b.gruppo === 'rap' && b.anno >= ANNO_MODERNO,
         internazionali: b => b.gruppo === 'int',
         classici: b => b.gruppo !== 'bimbi' && b.anno <= 1989,
+        anni80: b => b.gruppo !== 'bimbi' && b.anno >= 1980 && b.anno <= 1989,
         '9000': b => b.gruppo !== 'bimbi' && b.anno >= 1990 && b.anno <= 2009,
         recenti: b => b.gruppo !== 'bimbi' && b.anno >= 2010,
         bambini: b => b.gruppo === 'bimbi'
@@ -166,6 +167,9 @@
             document.head.appendChild(script);
         });
     }
+
+    // il telefono sa già di essere offline (senza aspettare una risposta che non arriverà)
+    const senzaRete = () => navigator.onLine === false;
 
     function cercaItunes(termine, paese, limite) {
         return jsonp(`https://itunes.apple.com/search?term=${encodeURIComponent(termine)}&country=${paese}&media=music&entity=song&limit=${limite}`);
@@ -217,7 +221,7 @@
 
     // Brani del catalogo iTunes per la categoria scelta, oppure null se iTunes non risponde
     async function scaricaCatalogo(categoria) {
-        if (navigator.onLine === false) return null; // il telefono sa già di essere offline
+        if (senzaRete()) return null; // il telefono sa già di essere offline
         const fisse = haChiave(DATI.ricerche, categoria) ? DATI.ricerche[categoria] : DATI.ricerche.tutto;
         // ricerche con l'anno, per gli ultimi 3 anni ("sanremo 2026", "sanremo 2025"…)
         const conAnno = (haChiave(DATI.ricercheConAnno, categoria) ? DATI.ricercheConAnno[categoria] : [])
@@ -266,12 +270,12 @@
 
     // Testo sotto il pulsante di ascolto quando l'anteprima non c'è (ancora)
     function notaSenzaAnteprima(brano) {
-        if (navigator.onLine === false || itunesMuto) return 'Senza connessione non si può ascoltare il brano.';
+        if (senzaRete() || itunesMuto) return 'Senza connessione non si può ascoltare il brano.';
         if (nonTrovate.has(chiave(brano))) return 'Anteprima non trovata nel catalogo online.';
         return 'Cerco l\'anteprima…';
     }
     function trovaAnteprima(brano) {
-        if (!brano || brano.anteprima || navigator.onLine === false) return Promise.resolve(brano);
+        if (!brano || brano.anteprima || senzaRete()) return Promise.resolve(brano);
         const k = chiave(brano);
         if (!ricercheAnteprima.has(k)) {
             const ricerca = (async () => {
@@ -394,9 +398,10 @@
     const vincitrice = () => stato.squadre.find(s => s.punti >= stato.traguardo) || null;
 
     /* ================= FASI DEL TURNO ================= */
+    const FASI = ['consegna', 'segreto', 'canta', 'svela'];
     function mostraFase(fase) {
         stato.fase = fase;
-        ['consegna', 'segreto', 'canta', 'svela'].forEach(f => $(`fase-${f}`).classList.toggle('hidden', f !== fase));
+        FASI.forEach(f => $(`fase-${f}`).classList.toggle('hidden', f !== fase));
         disegnaPunteggi();
         aggiornaAnnulla();
         salva();
@@ -872,7 +877,7 @@
         mostraGioco();
         RG.toast(`Partita ripresa: tocca a ${squadraDiTurno().nome}`, 'successo');
 
-        const fase = ['consegna', 'segreto', 'canta', 'svela'].includes(g.fase) && stato.brano ? g.fase : null;
+        const fase = FASI.includes(g.fase) && stato.brano ? g.fase : null;
         if (!fase) inizioTurno();
         else if (fase === 'consegna') mostraConsegna();
         else if (fase === 'segreto') mostraSegreto();

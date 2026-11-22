@@ -44,6 +44,10 @@ window.RITORNELLO_RICERCHE = {
             "2010s pop hits", "2020s pop hits", "@queen", "@abba", "@michael jackson", "@madonna",
             "@the beatles", "@bee gees", "@dua lipa", "@ed sheeran", "@adele", "@shakira"
         ],
+        anni80: [
+            "top hits 1980s", "80s number one hits", "80s pop hits", "pop italiano anni 80",
+            "hit italiane anni 80", "@duran duran", "@eurythmics", "@a-ha", "@wham!", "@vasco rossi"
+        ],
         classici: [
             "60s number one hits", "70s number one hits", "70s disco hits", "80s number one hits",
             "80s pop hits", "@queen", "@abba", "@the beatles", "@michael jackson", "@lucio battisti", "@mina"

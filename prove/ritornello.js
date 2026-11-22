@@ -241,6 +241,16 @@ const MODO = process.argv[2] || 'online'; // online | offline
     ok(rete.termini.includes('gaia') && conGaia.includes('Gaia') && conGaia.includes('Marco Mengoni & Gaia') && !conGaia.includes('Gaia Noise'),
       'ricerca "@gaia" fino al mazzo: entrano Gaia e "Marco Mengoni & Gaia", "Gaia Noise" no');
     await page.click('#esci');
+
+    // "Canzoni anni '80": solo brani del 1980-1989 (italiani e internazionali, niente bambini)
+    await page.selectOption('#scelta-brani', 'anni80');
+    await page.evaluate(() => { RG.mescola = window.__mescola; });
+    await page.click('#inizia'); await fase('consegna');
+    const anni80 = await page.evaluate(() => [RITORNELLO.stato.brano, ...RITORNELLO.mazzo()]);
+    ok(anni80.length > 5 && anni80.every(b => b.anno >= 1980 && b.anno <= 1989 && b.gruppo !== 'bimbi') && anni80.some(b => b.gruppo === 'it') && anni80.some(b => b.gruppo === 'int'),
+      `"Canzoni anni '80": solo brani del 1980-1989, italiani e internazionali (${anni80.length} brani)`);
+    ok(await page.evaluate(() => RITORNELLO.inclusi('anni80') >= 30), '"Canzoni anni \'80": ci sono abbastanza brani inclusi per giocare offline');
+    await page.click('#esci');
     ok(await page.evaluate(() => document.documentElement.scrollWidth) <= 360, 'nessuno scorrimento orizzontale');
     const y = new Date().getFullYear();
     const conAnno = rete.termini.filter(t => /^(sanremo|tormentoni estate|successi italiani|rap italiano|trap italiana) /.test(t));
