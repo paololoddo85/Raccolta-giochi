@@ -1174,7 +1174,8 @@ function renderReveal(card, esito) {
     revealBadge.className = `px-3 py-1 rounded-full text-xs font-black uppercase border ${cls}`;
     revealBadge.innerHTML = `<i class="fa-solid ${icon} mr-1"></i> ${text(esito)}`;
 
-    proBonusBox.classList.toggle('hidden', !(esito.tipo === 'giusto' && gameState.mode === 'pro'));
+    // Il bonus Pro (titolo e artista) vale anche se l'anno è sbagliato: la box resta visibile in ogni esito
+    proBonusBox.classList.toggle('hidden', gameState.mode !== 'pro');
     claimBtn.disabled = !!gameState.bonusAwarded;
     claimBtn.innerHTML = gameState.bonusAwarded ? `<i class="fa-solid fa-check"></i> Assegnato!` : `+1 Gettone <i class="fa-solid fa-coins"></i>`;
 
