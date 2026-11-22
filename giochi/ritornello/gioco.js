@@ -121,6 +121,7 @@
         rap: b => b.gruppo === 'rap' && b.anno >= ANNO_MODERNO,
         internazionali: b => b.gruppo === 'int',
         classici: b => b.gruppo !== 'bimbi' && b.anno <= 1989,
+        anni80: b => b.gruppo !== 'bimbi' && b.anno >= 1980 && b.anno <= 1989,
         '9000': b => b.gruppo !== 'bimbi' && b.anno >= 1990 && b.anno <= 2009,
         recenti: b => b.gruppo !== 'bimbi' && b.anno >= 2010,
         bambini: b => b.gruppo === 'bimbi'
