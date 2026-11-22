@@ -379,12 +379,22 @@ function usedSongKeys(gs) {
 }
 
 async function refillDeckOnline(gs) {
-    const fresh = await fetchLiveItunesPool(gs.genreFilter, 4);
-    gs.networkDown = fetchLiveItunesPool.allFailed;
     const used = usedSongKeys(gs);
     const inDeck = new Set(gs.deck.map(c => c.matchKey));
-    const nuovi = fresh.filter(t => !used.has(t.matchKey) && !inDeck.has(t.matchKey));
-    const add = limitaPerArtista(nuovi, contaArtistiInPartita(gs));
+    // Prima solo alcune ricerche, a caso (veloce e gentile con iTunes)…
+    const pesca = async (quante) => {
+        const fresh = await fetchLiveItunesPool(gs.genreFilter, quante);
+        gs.networkDown = fetchLiveItunesPool.allFailed;
+        const nuovi = fresh.filter(t => !used.has(t.matchKey) && !inDeck.has(t.matchKey));
+        return limitaPerArtista(nuovi, contaArtistiInPartita(gs));
+    };
+    let add = await pesca(4);
+    // …ma se non esce nessun brano nuovo, prova TUTTE le ricerche del filtro prima di dire
+    // che il catalogo è finito (le ricerche a caso spesso ripescano sempre gli stessi brani).
+    if (add.length === 0 && !gs.networkDown) {
+        const tutte = (LIVE_SEARCH_POOLS[gs.genreFilter] || LIVE_SEARCH_POOLS.all).length;
+        add = await pesca(tutte);
+    }
     gs.deck = [...shuffleArray(add), ...gs.deck];
     return add.length;
 }
