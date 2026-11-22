@@ -758,6 +758,16 @@ function moviesInPlayKeys(players = gameState.players) {
   return keys;
 }
 
+// Divide i film in mai giocati e già giocati. Nel mazzo i già giocati finiscono in fondo:
+// pop() pesca per ultimi, quindi escono prima quelli mai visti.
+function dividiPerVisti(lista) {
+  const giocati = getPlayedMoviesHistory();
+  return {
+    nuovi: lista.filter(m => !giocati.has(movieKey(m))),
+    visti: lista.filter(m => giocati.has(movieKey(m)))
+  };
+}
+
 function refillDeck() {
   const inPlay = moviesInPlayKeys();
   // Prima i film della categoria scelta non ancora in una timeline (anche quelli scartati)
@@ -769,7 +779,8 @@ function refillDeck() {
     candidates = MOVIES_DATABASE.filter(m => !inPlay.has(movieKey(m)));
     if (candidates.length) showToast('Categoria esaurita: aggiungo film da tutto il catalogo.', 'info');
   }
-  gameState.deck = shuffleArray(candidates);
+  const { nuovi, visti } = dividiPerVisti(candidates);
+  gameState.deck = [...shuffleArray(visti), ...shuffleArray(nuovi)];
 }
 
 async function drawNextMovie() {
@@ -830,10 +841,8 @@ async function buildPoolAndDeck(eraFilter, excludeKeys = new Set()) {
   });
   gameState.pool = Array.from(mergedMap.values());
 
-  const playedSet = getPlayedMoviesHistory();
   const available = gameState.pool.filter(m => !excludeKeys.has(movieKey(m)));
-  const unseen = available.filter(m => !playedSet.has(movieKey(m)));
-  const seen = available.filter(m => playedSet.has(movieKey(m)));
+  const { nuovi: unseen, visti: seen } = dividiPerVisti(available);
   gameState.deck = [...shuffleArray(seen), ...shuffleArray(unseen)];
   return unseen;
 }
