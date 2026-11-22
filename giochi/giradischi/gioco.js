@@ -129,6 +129,8 @@ function isOriginalNonCompilationTrack(item, genreFilter) {
     return true;
 }
 
+const MAX_BRANI_PER_ARTISTA = 3;
+
 async function fetchLiveItunesPool(genreFilter, queryCount = 7) {
     const queries = LIVE_SEARCH_POOLS[genreFilter] || LIVE_SEARCH_POOLS.all;
     // Pesca alcune query diverse ogni volta (25 risultati ciascuna)
@@ -200,9 +202,16 @@ async function fetchLiveItunesPool(genreFilter, queryCount = 7) {
     // Primo filtro, senza altre richieste: se nei risultati stessi c'è una versione
     // dello stesso brano uscita in un anno precedente, questa è una ristampa → scartata
     const filteredTracks = [];
+    // Un artista con un catalogo grande non deve riempire il mazzo: al massimo
+    // MAX_BRANI_PER_ARTISTA brani per giro di ricerche
+    const brianiPerArtista = new Map();
     liveTracks.forEach(t => {
         if (minYearByKey.has(t.matchKey) && minYearByKey.get(t.matchKey) < t.year) return;
         if (!yearMatchesFilter(t.year, genreFilter)) return;
+        const artista = normalizeArtist(t.artist);
+        const quanti = brianiPerArtista.get(artista) || 0;
+        if (quanti >= MAX_BRANI_PER_ARTISTA) return;
+        brianiPerArtista.set(artista, quanti + 1);
         filteredTracks.push(t);
     });
     return filteredTracks;
