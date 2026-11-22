@@ -112,7 +112,7 @@ per questo tutte le chiavi hanno il prefisso `rg-`. Usa sempre `RG.archivio`, ma
 |---|---|
 | `rg-comune-squadre` | `{ nomi: [6 stringhe] }` — "Chi gioca stasera" |
 | `rg-comune-impostazioni` | `{ muto }` — impostazioni condivise |
-| `rg-hintfake-impostazioni` | `{ mode, includeHot }` |
+| `rg-hintfake-impostazioni` | `{ mode, includeHot, abilita }` — `abilita`: `tutte` (predefinito) o una sola abilità |
 | `rg-hintfake-carte-uscite-bambini` / `-adulti` | id delle carte già uscite |
 | `rg-hintfake-carte-importate` | carte importate |
 | `rg-hintfake-partita` | partita in corso (`v`, `savedAt`, …) |

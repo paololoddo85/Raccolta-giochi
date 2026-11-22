@@ -119,11 +119,47 @@ const { apri, ok, BASE, SHOTS } = require('./comune');
     const sulla = await page.evaluate(() => state.wheelSlots.filter(Boolean).map(c => c.abilita));
     ok(sulla.length === 3 && sulla.every(a => a === 'Parlare'), 'con "Solo Parlare" tutte le carte della ruota sono di Parlare dopo 3 turni');
     ok((await page.textContent('#header-deck-info')).includes('Solo Parlare'), 'in intestazione si legge "Solo Parlare": ' + await page.textContent('#header-deck-info'));
+    // Il mazzo finisce: si ricomincia solo con le carte di Parlare; l'annulla riporta tutto com'era
+    const finto = await page.evaluate(() => {
+      const mimare = BUILTIN_CARDS.find(c => c.abilita === 'Mimare' && cardAllowed(c)).id;
+      const parlare = getActiveDeck().map(c => c.id);
+      state.usedCardIds = [...parlare, mimare];
+      saveUsedIds();
+      return { mimare, parlare };
+    });
+    await page.waitForFunction(() => !state.animating);
+    const slotFinale = await page.evaluate(() => state.wheelSlots[4] ? 4 : state.wheelSlots.findIndex(Boolean));
+    await page.click(`.wheel-tile.card[data-slot="${slotFinale}"]`);
+    await page.click('text=Gira e Avvia 90s');
+    await page.click('#play-objects-list button:nth-child(1)');
+    await page.click('text=Fine Tempo');
+    await page.click('#opp-btn-normal');
+    const primaDelTurno = await page.evaluate(() => [...state.usedCardIds].sort());
+    await page.click('text=Registra Punti e Gira la Ruota');
+    await page.waitForFunction(() => !state.animating);
+    const dopoRestart = await page.evaluate(() => state.usedCardIds);
+    ok(dopoRestart.includes(finto.mimare) && finto.parlare.every(id => dopoRestart.filter(x => x === id).length <= 1), 'mazzo finito in "Solo Parlare": ricomincia con le sole Parlare, le altre abilità restano viste');
+    await page.click('#btn-undo-turn');
+    await page.click('#rg-conferma [data-risposta="si"]');
+    const dopoAnnulla = await page.evaluate(() => [...state.usedCardIds].sort());
+    ok(JSON.stringify(dopoAnnulla) === JSON.stringify(primaDelTurno), 'annulla dopo un ricomincio automatico: il mazzo torna com\'era prima del turno');
+    await page.click('text=Registra Punti e Gira la Ruota');
+    await page.waitForFunction(() => !state.animating);
     await page.reload();
     await page.waitForSelector('#active-game-container:not(.hidden)');
     ok(await page.evaluate(() => state.abilita) === 'Parlare', 'ricaricando la partita a una abilità riprende con la stessa scelta');
     await page.click('text=Nuova Partita');
     await page.click('#rg-conferma [data-risposta="si"]');
+    // Ricomincia mazzo con una sola abilità: riaprite solo le sue carte
+    await page.evaluate(() => {
+      const mimare = BUILTIN_CARDS.find(c => c.abilita === 'Mimare' && cardAllowed(c)).id;
+      storageSet(STORAGE.used(state.mode), [...getActiveDeck().map(c => c.id), mimare]);
+      window.__mimare = mimare;
+    });
+    await page.click('#setup-screen >> text=Ricomincia mazzo');
+    await page.click('#rg-conferma [data-risposta="si"]');
+    const dopoRicomincio = await page.evaluate(() => ({ usate: loadUsedIds(), mimare: window.__mimare, parlare: getActiveDeck().map(c => c.id) }));
+    ok(dopoRicomincio.usate.includes(dopoRicomincio.mimare) && !dopoRicomincio.usate.some(id => dopoRicomincio.parlare.includes(id)), '"Ricomincia mazzo" a una sola abilità riapre solo le sue carte');
     await page.click('#abilita-scelte [data-abilita="tutte"]');
     ok(await page.evaluate(() => state.abilita) === 'tutte' && (await page.evaluate(() => new Set(getActiveDeck().map(c => c.abilita)).size)) === 4, 'tornando a "Tutte e 4" il mazzo ha di nuovo le 4 abilità');
 

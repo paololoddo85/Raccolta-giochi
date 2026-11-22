@@ -339,7 +339,11 @@ function applyUndo(u) {
     state.guessedObjects = u.guessedObjects;
     state.forbiddenTriggered = u.forbiddenTriggered;
     // La carta pescata per quel turno torna "nuova"
-    if (u.drawnCardId !== null) {
+    if (Array.isArray(u.usedCardIds)) {
+        state.usedCardIds = [...u.usedCardIds];
+        saveUsedIds();
+    } else if (u.drawnCardId !== null) {
+        // Annulla di salvataggi fatti prima di questa versione: si toglie solo la carta pescata
         state.usedCardIds = state.usedCardIds.filter(id => id !== u.drawnCardId);
         saveUsedIds();
     }
@@ -404,8 +408,14 @@ function openImportRequestDefaults() {
 }
 
 function restartDeck() {
-    askConfirm('Ricominciare il mazzo?', 'Tutte le carte di questa versione torneranno "nuove".', 'Ricomincia', () => {
-        storageSet(STORAGE.used(state.mode), []);
+    const soloUna = state.abilita !== 'tutte';
+    const testo = soloUna
+        ? `Le carte di ${state.abilita} di questa versione torneranno "nuove". Le altre abilità restano come viste.`
+        : 'Tutte le carte di questa versione torneranno "nuove".';
+    askConfirm('Ricominciare il mazzo?', testo, 'Ricomincia', () => {
+        // Con una sola abilità si riaprono solo le sue carte
+        const daRiaprire = new Set(getActiveDeck().map(c => c.id));
+        storageSet(STORAGE.used(state.mode), soloUna ? loadUsedIds().filter(id => !daRiaprire.has(id)) : []);
         refreshSetupUI();
         showToast('Mazzo ricominciato da capo.');
     });
@@ -1058,7 +1068,8 @@ function finalizeTurnAndRotateWheel() {
         guessedObjects: [...state.guessedObjects],
         forbiddenTriggered: state.forbiddenTriggered,
         opponentChoices: { ...state.opponentChoices },
-        drawnCardId: null
+        drawnCardId: null,
+        usedCardIds: [...state.usedCardIds] // prima della pesca: anche un ricomincio automatico del mazzo si annulla
     };
     state.lastTurnUndo = undo;
 
