@@ -250,6 +250,9 @@ const MODO = process.argv[2] || 'online'; // online | offline
     ok(anni80.length > 5 && anni80.every(b => b.anno >= 1980 && b.anno <= 1989 && b.gruppo !== 'bimbi') && anni80.some(b => b.gruppo === 'it') && anni80.some(b => b.gruppo === 'int'),
       `"Canzoni anni '80": solo brani del 1980-1989, italiani e internazionali (${anni80.length} brani)`);
     ok(await page.evaluate(() => RITORNELLO.inclusi('anni80') >= 30), '"Canzoni anni \'80": ci sono abbastanza brani inclusi per giocare offline');
+    const voci = await page.$$eval('#scelta-brani option', os => os.map(o => o.value));
+    ok(voci.filter(v => v.includes('anni') || v === 'classici').join() === 'anni80' && !voci.includes('classici'),
+      'menù Brani: una sola voce sugli anni 80, niente "Classici"');
     await page.click('#esci');
     ok(await page.evaluate(() => document.documentElement.scrollWidth) <= 360, 'nessuno scorrimento orizzontale');
     const y = new Date().getFullYear();

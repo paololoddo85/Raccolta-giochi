@@ -48,10 +48,6 @@ window.RITORNELLO_RICERCHE = {
             "top hits 1980s", "80s number one hits", "80s pop hits", "pop italiano anni 80",
             "hit italiane anni 80", "@duran duran", "@eurythmics", "@a-ha", "@wham!", "@vasco rossi"
         ],
-        classici: [
-            "60s number one hits", "70s number one hits", "70s disco hits", "80s number one hits",
-            "80s pop hits", "@queen", "@abba", "@the beatles", "@michael jackson", "@lucio battisti", "@mina"
-        ],
         '9000': [
             "90s number one hits", "90s eurodance hits", "90s pop hits", "2000s number one hits",
             "2000s pop hits", "@883|max pezzali", "@laura pausini", "@spice girls", "@britney spears", "@backstreet boys"
