@@ -77,12 +77,20 @@ const MODO = process.argv[2] || 'offline'; // offline | online
     const rimpiazzo = await page.evaluate(() => {
       const chiavi = gameState.pool.map(movieKey);
       const visti = chiavi.slice(0, Math.floor(chiavi.length / 2));
-      ARCHIVIO.scrivi('film-giocati', visti);
-      gameState.deck = [];
-      refillDeck();
-      const nuovi = gameState.deck.filter(m => !visti.includes(movieKey(m))).length;
-      const codaNuovi = gameState.deck.slice(-nuovi).every(m => !visti.includes(movieKey(m)));
-      return { nuovi, codaNuovi };
+      const storicoPrima = ARCHIVIO.leggi('film-giocati', []);
+      const mazzoPrima = gameState.deck;
+      try {
+        ARCHIVIO.scrivi('film-giocati', visti);
+        gameState.deck = [];
+        refillDeck();
+        const nuovi = gameState.deck.filter(m => !visti.includes(movieKey(m))).length;
+        const codaNuovi = gameState.deck.slice(-nuovi).every(m => !visti.includes(movieKey(m)));
+        return { nuovi, codaNuovi };
+      } finally {
+        // si ripristina lo stato reale anche se il controllo fallisce
+        ARCHIVIO.scrivi('film-giocati', storicoPrima);
+        gameState.deck = mazzoPrima;
+      }
     });
     ok(rimpiazzo.nuovi > 0 && rimpiazzo.codaNuovi, 'mazzo ricostruito: prima i film mai giocati, i visti in fondo');
     await pronto(); await filmPronto();
