@@ -75,6 +75,16 @@
     max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .nomi-vuoto { color: var(--latte-tenue); font-size: 15px; }
+.frequenti { margin: 14px 0 0; }
+.frequenti[hidden] { display: none; }
+.frequenti-titolo { margin: 0; font-size: 14px; color: var(--latte-tenue); }
+.frequenti .nomi { margin-top: 8px; }
+.nome-suggerito {
+    padding: 6px 12px; border: 1px dashed var(--linea); border-radius: 999px;
+    background: none; color: var(--latte); font: inherit; font-weight: 600; font-size: 15px;
+    max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer;
+}
+.nome-suggerito:active { background: var(--prugna-chiara); }
 
 .modulo-nomi { margin-top: 16px; }
 .modulo-nomi[hidden] { display: none; }

@@ -18,10 +18,34 @@
         const nomi = RG.squadre.tutti().filter(Boolean);
         if (!nomi.length) {
             elenco.innerHTML = '<li class="nomi-vuoto">Nessun nome ancora. Ogni gioco userà i suoi (Squadra A, Cinefilo 1…).</li>';
+        } else {
+            elenco.innerHTML = nomi.map(n => `<li class="nome">${RG.esc(n)}</li>`).join('');
+        }
+        disegnaFrequenti();
+    }
+
+    // "Giocano spesso": i nomi che hanno giocato più volte, da toccare per aggiungerli.
+    // Non si mostrano mentre il modulo "Modifica" è aperto, così non si perde quello che si sta scrivendo.
+    const frequenti = document.getElementById('frequenti');
+    let suggeriti = [];
+    function disegnaFrequenti() {
+        suggeriti = modulo.hidden ? RG.squadre.frequenti(8) : [];
+        frequenti.hidden = !suggeriti.length;
+        frequenti.innerHTML = suggeriti.length ? `
+            <p class="frequenti-titolo">Giocano spesso · tocca per aggiungerli</p>
+            <div class="nomi">${suggeriti.map((n, i) => `<button type="button" class="nome-suggerito" data-indice="${i}">+ ${RG.esc(n)}</button>`).join('')}</div>` : '';
+    }
+    frequenti.addEventListener('click', (e) => {
+        const b = e.target.closest('.nome-suggerito');
+        if (!b) return;
+        const nome = suggeriti[Number(b.dataset.indice)];
+        if (!RG.squadre.aggiungi(nome)) {
+            RG.toast('Sono già tutti i posti pieni: togli un nome con "Modifica".', 'avviso');
             return;
         }
-        elenco.innerHTML = nomi.map(n => `<li class="nome">${RG.esc(n)}</li>`).join('');
-    }
+        disegnaNomi();
+        RG.toast(`${nome} è in "Chi gioca stasera"`, 'successo');
+    });
 
     function disegnaCampi() {
         campi.innerHTML = RG.squadre.tutti().map((n, i) => `
@@ -35,6 +59,7 @@
         modulo.hidden = !aperto;
         apri.setAttribute('aria-expanded', aperto ? 'true' : 'false');
         apri.textContent = aperto ? 'Chiudi' : 'Modifica';
+        disegnaFrequenti();
         if (aperto) {
             disegnaCampi();
             const primo = campi.querySelector('input');
