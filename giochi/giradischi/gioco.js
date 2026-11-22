@@ -126,7 +126,16 @@ function isOriginalNonCompilationTrack(item, genreFilter) {
     // Rispetta i filtri temporali selezionati
     if (!yearMatchesFilter(year, genreFilter)) return false;
 
+    // Classici Anni '70 - '80: solo canzoni pop (niente rock, metal, rap, soul, blues…)
+    if (!genereAmmesso(item.primaryGenreName, genreFilter)) return false;
+
     return true;
+}
+
+// Nel catalogo "70-80" entra solo ciò che iTunes classifica come pop (es. "Pop", "Italian Pop")
+function genereAmmesso(genere, genreFilter) {
+    if (genreFilter !== '7080') return true;
+    return /pop/i.test(genere || '');
 }
 
 async function fetchLiveItunesPool(genreFilter, queryCount = 7) {

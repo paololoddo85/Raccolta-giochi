@@ -195,6 +195,15 @@ const { finti, stato: rete } = require('./finti-giradischi');
     ok(await page.evaluate(() => !!document.querySelector('#genre-filter option[value="napoletane"]')), 'catalogo "Canzoni Napoletane" nel menù');
     ok(await page.evaluate(() => LIVE_SEARCH_POOLS.napoletane.length > 0 && LIVE_SEARCH_POOLS.napoletane.every(q => q.trim().length > 0)), 'catalogo napoletane: ricerche presenti');
     ok(await page.evaluate(() => [1989, 1990, 2000, 2026].map(a => yearMatchesFilter(a, 'napoletane')).join() === 'false,true,true,true'), 'catalogo napoletane: solo dal 1990 in poi');
+    // Classici Anni '70 - '80: solo pop (rap, metal, soul, blues, rock esclusi); gli altri cataloghi restano invariati
+    ok(await page.evaluate(() => {
+      const brano = (genere) => ({ previewUrl: 'https://x/a.m4a', trackName: 'Prova', artistName: 'Artista', collectionName: 'Album', releaseDate: '1980-01-01T07:00:00Z', primaryGenreName: genere });
+      const pop = ['Pop', 'Italian Pop', 'Musica pop'].map(g => isOriginalNonCompilationTrack(brano(g), '7080'));
+      const altro = ['Hip-Hop/Rap', 'Metal', 'Soul', 'Blues', 'Rock', 'R&B/Soul', 'Dance'].map(g => isOriginalNonCompilationTrack(brano(g), '7080'));
+      const altriCataloghi = ['Rock', 'Hip-Hop/Rap'].map(g => isOriginalNonCompilationTrack(brano(g), 'all'));
+      return pop.every(Boolean) && altro.every(x => !x) && altriCataloghi.every(Boolean);
+    }), '70-80: solo brani pop (rap, metal, soul, blues, rock fuori); gli altri cataloghi non cambiano');
+    ok(await page.evaluate(() => LIVE_SEARCH_POOLS['7080'].every(q => !/rock|soul|funk|disco|metal|rap|blues/i.test(q))), '70-80: ricerche solo pop');
     console.log('  richieste finte servite:', JSON.stringify(rete.richieste));
     ok(errori.length === 0, 'nessun errore in console' + (errori.length ? ':\n' + errori.join('\n') : ''));
   } catch (e) {

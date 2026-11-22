@@ -36,10 +36,8 @@ window.GIRADISCHI_DATI = {
           "cesare cremonini", "tiziano ferro", "marco mengoni", "mahmood"
       ],
       '7080': [
-          "70s number one hits", "70s disco hits", "70s classic rock",
-          "80s number one hits", "80s pop hits", "80s synthpop hits",
-          "italo disco hits", "vasco rossi", "queen", "disco 70s", "new wave 80s",
-          "soul 70s", "funk 80s"
+          "70s number one hits", "70s pop hits", "pop 70s",
+          "80s number one hits", "80s pop hits", "pop 80s", "80s synthpop hits"
       ],
       '9000': [
           "90s number one hits", "90s eurodance hits", "90s pop hits",
