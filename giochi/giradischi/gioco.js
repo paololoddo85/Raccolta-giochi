@@ -61,6 +61,8 @@ function buildWordRegex(words) {
 
 const BANNED_ALBUM_REGEX = buildWordRegex(BANNED_ALBUM_KEYWORDS);
 const BANNED_TRACK_VERSION_REGEX = buildWordRegex(BANNED_TRACK_VERSION_KEYWORDS);
+// Artisti rap o urban esclusi dal catalogo napoletano (nome intero, vedi dati/ricerche.js)
+const NAPOLETANE_ARTISTI_ESCLUSI = buildWordRegex(window.GIRADISCHI_DATI.artistiEsclusiNapoletane);
 
 // Estrae le parti "versione" di un titolo: contenuto di (...) e [...] e ciò che segue " - "
 function getTrackVersionTags(trackName) {
@@ -126,10 +128,25 @@ function isOriginalNonCompilationTrack(item, genreFilter) {
     // Rispetta i filtri temporali selezionati
     if (!yearMatchesFilter(year, genreFilter)) return false;
 
-    // Il catalogo napoletano è solo canzoni popolari o neomelodiche: niente rap/hip-hop
-    if (genreFilter === 'napoletane' && /hip.?hop|rap/i.test(item.primaryGenreName || '')) return false;
+    // Il catalogo napoletano è solo canzoni popolari o neomelodiche: niente rap, hip-hop
+    // né gruppi rap/reggae-rap noti (iTunes spesso li classifica come "Alternative" o "Reggae")
+    if (genreFilter === 'napoletane') {
+        if (/hip.?hop|rap/i.test(item.primaryGenreName || '')) return false;
+        if (NAPOLETANE_ARTISTI_ESCLUSI.test(item.artistName)) return false;
+    }
+    // Classici Anni '70 - '80: solo canzoni pop (niente rock, metal, rap, soul, blues…)
+    if (!genereAmmesso(item.primaryGenreName, genreFilter)) return false;
 
     return true;
+}
+
+// Nel catalogo "70-80" entrano pop e disco (es. "Pop", "Italian Pop", "Disco").
+// Restano fuori rap, hip hop, metal, soul, blues e rock.
+function genereAmmesso(genere, genreFilter) {
+    if (genreFilter !== '7080') return true;
+    const g = genere || '';
+    if (/hip|rap|metal|soul|blues|rock/i.test(g)) return false;
+    return /pop|disco/i.test(g);
 }
 
 async function fetchLiveItunesPool(genreFilter, queryCount = 7) {
@@ -309,6 +326,9 @@ function checkMusicBrainzFirstRelease(song) {
             if (!res || !res.ok) return 'unknown';
             const data = await res.json();
             const recordings = data.recordings || [];
+            // 'ok' solo se una registrazione dello stesso brano e artista ha una data di prima uscita:
+            // se non la troviamo, il controllo non ha confermato nulla (è 'unknown', non 'ok')
+            let confermata = false;
             for (const rec of recordings) {
                 if (normalizeTitle(rec.title) !== wantTitle) continue;
                 const credit = (rec['artist-credit'] || []).map(c => c.name || (c.artist && c.artist.name) || '').join(' ');
@@ -316,9 +336,11 @@ function checkMusicBrainzFirstRelease(song) {
                 const first = rec['first-release-date'];
                 if (!first) continue;
                 const y = parseInt(first.substring(0, 4), 10);
-                if (!isNaN(y) && y < song.year) return 'reissue';
+                if (isNaN(y)) continue;
+                if (y < song.year) return 'reissue';
+                confermata = true;
             }
-            return 'ok';
+            return confermata ? 'ok' : 'unknown';
         } catch (e) {
             return 'unknown';
         }
@@ -332,8 +354,11 @@ async function checkIsOriginalRelease(song) {
     if (song.originalCheck) return song.originalCheck;
     const [itunes, mb] = await Promise.all([checkItunesEarlierVersions(song), checkMusicBrainzFirstRelease(song)]);
     let result;
+    // iTunes può solo scartare (versione precedente trovata). Il "buono" lo dà MusicBrainz, che conosce
+    // la prima uscita: un "ok" di iTunes non basta, perché cerca solo nel negozio del paese della carta
+    // (es. un brano italiano degli anni 70 con una ristampa del 2005 su iTunes US passava).
     if (itunes === 'reissue' || mb === 'reissue') result = 'reissue';
-    else if (itunes === 'ok' || mb === 'ok') result = 'ok';
+    else if (mb === 'ok') result = 'ok';
     else result = 'unknown';
     song.originalCheck = result;
     return result;

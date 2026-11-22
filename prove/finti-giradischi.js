@@ -12,7 +12,8 @@ function creaWav(secondi = 3, freq = 440, campioni = 8000) {
 const WAV = creaWav();
 const COVER = fs.readFileSync(__dirname + '/risorse/copertina.jpg');
 const CORS = { 'access-control-allow-origin': '*' };
-const stato = { rete: true, richieste: { itunes: 0, musicbrainz: 0, audio: 0 } };
+// musicbrainzGiu: MusicBrainz risponde 503 (succede davvero quando si va troppo veloci)
+const stato = { rete: true, musicbrainzGiu: false, richieste: { itunes: 0, musicbrainz: 0, audio: 0 } };
 const ARTISTI = ['Queen', 'Madonna', 'Vasco Rossi', 'Mina', 'Dua Lipa', 'Nirvana', 'Abba', 'Lucio Battisti', 'Adele', 'Prince'];
 const BRANI = [];
 for (let i = 0; i < 80; i++) {
@@ -23,6 +24,10 @@ for (let i = 0; i < 80; i++) {
 }
 // una ristampa: "Canzone Ristampata" del 2015 di cui esiste una versione del 1975 → va scartata
 BRANI.push({ ...BRANI[0], trackId: 999, trackName: 'Canzone Ristampata', collectionName: 'Canzone Ristampata', releaseDate: '2015-01-01T07:00:00Z' });
+// una ristampa di Battisti: su iTunes (negozio US) è del 2005, ma la prima uscita è del 1972
+BRANI.push({ ...BRANI[1], trackId: 998, trackName: 'Acqua azzurra, acqua chiara', artistName: 'Lucio Battisti', collectionName: 'Il meglio di Lucio Battisti', releaseDate: '2005-03-01T07:00:00Z' });
+// prima data di uscita (come MusicBrainz) dove diversa da quella di iTunes
+const PRIMA_USCITA = { 'Canzone Ristampata': '1975-01-01', 'Acqua azzurra, acqua chiara': '1972-01-01' };
 function jsonp(route, data) {
   const cb = new URL(route.request().url()).searchParams.get('callback');
   return route.fulfill({ status: 200, contentType: 'text/javascript', body: `${cb}(${JSON.stringify(data)});` });
@@ -48,7 +53,14 @@ module.exports = { stato, BRANI, async finti(context) {
   await context.route(/musicbrainz\.org/, route => {
     if (!stato.rete) return route.abort();
     stato.richieste.musicbrainz++;
-    return route.fulfill({ status: 200, contentType: 'application/json', headers: CORS, body: JSON.stringify({ recordings: [] }) });
+    if (stato.musicbrainzGiu) return route.fulfill({ status: 503, headers: CORS, body: '' });
+    // registrazioni con la loro prima uscita, cercate per titolo (come recording:"titolo")
+    const q = new URL(route.request().url()).searchParams.get('query') || '';
+    const titolo = (q.match(/recording:"([^"]*)"/) || [])[1] || '';
+    const recordings = BRANI.filter(b => b.trackName === titolo).map(b => ({
+      title: b.trackName, 'first-release-date': PRIMA_USCITA[b.trackName] || b.releaseDate.substring(0, 10),
+      'artist-credit': [{ name: b.artistName }] }));
+    return route.fulfill({ status: 200, contentType: 'application/json', headers: CORS, body: JSON.stringify({ recordings }) });
   });
   await context.route(/audio-ssl\.itunes\.apple\.com/, route => {
     if (!stato.rete) return route.abort();
