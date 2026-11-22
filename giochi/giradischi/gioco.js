@@ -307,6 +307,9 @@ function checkMusicBrainzFirstRelease(song) {
             if (!res || !res.ok) return 'unknown';
             const data = await res.json();
             const recordings = data.recordings || [];
+            // 'ok' solo se una registrazione dello stesso brano e artista ha una data di prima uscita:
+            // se non la troviamo, il controllo non ha confermato nulla (è 'unknown', non 'ok')
+            let confermata = false;
             for (const rec of recordings) {
                 if (normalizeTitle(rec.title) !== wantTitle) continue;
                 const credit = (rec['artist-credit'] || []).map(c => c.name || (c.artist && c.artist.name) || '').join(' ');
@@ -314,9 +317,11 @@ function checkMusicBrainzFirstRelease(song) {
                 const first = rec['first-release-date'];
                 if (!first) continue;
                 const y = parseInt(first.substring(0, 4), 10);
-                if (!isNaN(y) && y < song.year) return 'reissue';
+                if (isNaN(y)) continue;
+                if (y < song.year) return 'reissue';
+                confermata = true;
             }
-            return 'ok';
+            return confermata ? 'ok' : 'unknown';
         } catch (e) {
             return 'unknown';
         }
@@ -330,8 +335,11 @@ async function checkIsOriginalRelease(song) {
     if (song.originalCheck) return song.originalCheck;
     const [itunes, mb] = await Promise.all([checkItunesEarlierVersions(song), checkMusicBrainzFirstRelease(song)]);
     let result;
+    // iTunes può solo scartare (versione precedente trovata). Il "buono" lo dà MusicBrainz, che conosce
+    // la prima uscita: un "ok" di iTunes non basta, perché cerca solo nel negozio del paese della carta
+    // (es. un brano italiano degli anni 70 con una ristampa del 2005 su iTunes US passava).
     if (itunes === 'reissue' || mb === 'reissue') result = 'reissue';
-    else if (itunes === 'ok' || mb === 'ok') result = 'ok';
+    else if (mb === 'ok') result = 'ok';
     else result = 'unknown';
     song.originalCheck = result;
     return result;
