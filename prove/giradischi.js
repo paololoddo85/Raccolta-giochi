@@ -112,7 +112,13 @@ const { finti, stato: rete } = require('./finti-giradischi');
       const mDopo = await gs();
       ok(mDopo.card !== mPrima.card && mDopo.p[mPrima.cur].g === mPrima.p[mPrima.cur].g - 1, 'cambia brano: −1 gettone e nuovo brano');
     }
-    await sceltaConferma(false); await prossimo(); await cartaPronta();
+    await sceltaConferma(false);
+    const sbagliato = await page.evaluate(() => gameState.esito.tipo !== 'giusto');
+    const marco = (await gs()).cur, gettoniMarco = (await gs()).p[marco].g;
+    ok(sbagliato && await page.isVisible('#pro-bonus-box'), 'modalità Pro: anche con l\'anno sbagliato compare il bonus titolo/artista');
+    await page.click('#btn-claim-bonus');
+    ok((await gs()).p[marco].g === gettoniMarco + 1, 'anno sbagliato: il bonus titolo/artista dà +1 gettone');
+    await prossimo(); await cartaPronta();
 
     // Paolo compra una carta (3 gettoni)
     ok((await gs()).cur === 0, 'di nuovo il turno di Paolo');
