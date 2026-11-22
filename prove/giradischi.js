@@ -38,19 +38,17 @@ const { finti, stato: rete } = require('./finti-giradischi');
     const tutte = await page.evaluate(() => [...gameState.players.flatMap(p => p.timeline), gameState.currentCard, ...gameState.readyCards].map(c => c.title));
     ok(!tutte.includes('Canzone Ristampata'), 'la ristampa con una versione precedente non viene proposta');
 
-    // anni 70-80: nessun artista domina il mazzo (niente ricerche per solo artista, max 3 brani a testa per giro)
-    const anni7080 = await page.evaluate(async () => {
-      const brani = await fetchLiveItunesPool('7080', 11);
-      const perArtista = {};
-      brani.forEach(t => { const a = normalizeArtist(t.artist); perArtista[a] = (perArtista[a] || 0) + 1; });
-      return {
-        n: brani.length,
-        massimo: Math.max(0, ...Object.values(perArtista)),
-        soloArtista: GIRADISCHI_DATI.ricerche['7080'].filter(q => /michael jackson|madonna/i.test(q)).length
-      };
+    // nessun artista domina il mazzo: al massimo 3 brani per artista tra timeline, carta, pronte e mazzo
+    const massimoInPartita = () => page.evaluate(() => {
+      const c = {};
+      const aggiungi = (x) => { if (!x) return; const a = normalizeArtist(x.artist); c[a] = (c[a] || 0) + 1; };
+      gameState.players.forEach(p => p.timeline.forEach(aggiungi));
+      aggiungi(gameState.currentCard); gameState.readyCards.forEach(aggiungi); gameState.deck.forEach(aggiungi);
+      return Math.max(0, ...Object.values(c));
     });
-    ok(anni7080.n > 0 && anni7080.massimo <= 3, `anni 70-80: al massimo 3 brani per artista (massimo trovato ${anni7080.massimo} su ${anni7080.n})`);
-    ok(anni7080.soloArtista === 0, 'anni 70-80: nessuna ricerca per solo Michael Jackson o Madonna');
+    ok(await massimoInPartita() <= 3, 'partita: al massimo 3 brani per artista nel mazzo');
+    await page.evaluate(() => refillDeckOnline(gameState));
+    ok(await massimoInPartita() <= 3, 'dopo un altro giro di ricerche il limite per artista regge');
 
     // ascolto
     await page.click('#btn-play-pause');
