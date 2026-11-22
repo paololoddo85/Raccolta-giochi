@@ -83,6 +83,8 @@ body {
 @keyframes tilePop { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.4); } 70% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); } 100% { transform: translate(-50%, -50%) scale(1); } }
 .wheel-tile.pop { animation: tilePop 0.45s cubic-bezier(0.22, 1, 0.36, 1); }
 .mode-btn { transition: all 0.2s ease; }
+/* Scelta abilità: "Tutte e 4" occupa tutta la riga, le 4 "Solo …" stanno due per riga */
+#abilita-scelte > [data-abilita="tutte"] { grid-column: 1 / -1; }
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }

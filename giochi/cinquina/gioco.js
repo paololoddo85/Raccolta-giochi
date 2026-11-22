@@ -85,8 +85,12 @@ let state = {
     // Versione del gioco
     mode: 'adulti',      // 'adulti' | 'bambini'
     includeHot: true,    // solo per la versione adulti
+    abilita: 'tutte',    // 'tutte' (le 4 abilità) oppure una sola: 'Parlare' | 'Mimare' | 'Canticchiare' | 'Disegnare'
     animating: false
 };
+
+// Le 4 abilità in ordine, per la scelta "Solo …" a inizio partita
+const ABILITA_SCELTE = ['Parlare', 'Mimare', 'Canticchiare', 'Disegnare'];
 
 /**
  * AVVIO E INIZIALIZZAZIONE RUOTA A 5 SLOT
@@ -148,10 +152,11 @@ function loadSettings() {
     const saved = storageGet(STORAGE.settings, {});
     if (saved.mode === 'bambini' || saved.mode === 'adulti') state.mode = saved.mode;
     if (typeof saved.includeHot === 'boolean') state.includeHot = saved.includeHot;
+    if (saved.abilita === 'tutte' || ABILITA_SCELTE.includes(saved.abilita)) state.abilita = saved.abilita;
 }
 
 function saveSettings() {
-    storageSet(STORAGE.settings, { mode: state.mode, includeHot: state.includeHot });
+    storageSet(STORAGE.settings, { mode: state.mode, includeHot: state.includeHot, abilita: state.abilita });
 }
 
 function loadUsedIds() {
@@ -171,8 +176,17 @@ function cardAllowed(card) {
     return p === 'adulti' || (p === 'hot' && state.includeHot);
 }
 
+// Con una sola abilità scelta restano solo le carte di quella abilità
 function getActiveDeck() {
-    return [...BUILTIN_CARDS, ...IMPORTED_CARDS].filter(cardAllowed);
+    return [...BUILTIN_CARDS, ...IMPORTED_CARDS]
+        .filter(cardAllowed)
+        .filter(c => state.abilita === 'tutte' || c.abilita === state.abilita);
+}
+
+// Riga di riepilogo della partita: "Adulti 🌶️", "Bambini", con "· Solo Parlare" se c'è una sola abilità
+function etichettaPartita(mode, includeHot, abilita) {
+    const versione = mode === 'bambini' ? 'Bambini' : (includeHot ? 'Adulti 🌶️' : 'Adulti');
+    return abilita && abilita !== 'tutte' ? `${versione} · Solo ${abilita}` : versione;
 }
 
 /**
@@ -191,6 +205,13 @@ function setHot(on) {
     refreshSetupUI();
 }
 
+function setAbilita(abilita) {
+    state.abilita = abilita;
+    saveSettings();
+    refreshSetupUI();
+    playBeep(600, 0.05);
+}
+
 function refreshSetupUI() {
     const on = 'mode-btn rounded-2xl border-2 p-3.5 text-left border-[#4d9496] bg-[#e6f2f2] text-slate-900 shadow-sm';
     const off = 'mode-btn rounded-2xl border-2 p-3.5 text-left border-slate-200 bg-white text-slate-500';
@@ -198,6 +219,11 @@ function refreshSetupUI() {
     document.getElementById('mode-btn-adulti').className = state.mode === 'adulti' ? on : off;
     document.getElementById('hot-toggle-row').classList.toggle('hidden', state.mode !== 'adulti');
     document.getElementById('hot-toggle').checked = state.includeHot;
+    document.querySelectorAll('#abilita-scelte [data-abilita]').forEach(b => {
+        const scelta = b.dataset.abilita === state.abilita;
+        b.className = scelta ? on : off;
+        b.setAttribute('aria-pressed', scelta ? 'true' : 'false');
+    });
 
     const deck = getActiveDeck();
     const used = new Set(loadUsedIds());
@@ -216,6 +242,7 @@ function saveGame(slotsOverride) {
     SAVED_GAME.salva({
         mode: state.mode,
         includeHot: state.includeHot,
+        abilita: state.abilita,
         teams: state.teams,
         activeTeamIdx: state.activeTeamIdx,
         totalTurnsPlayed: state.totalTurnsPlayed,
@@ -238,7 +265,7 @@ function renderResumeBox() {
     const box = document.getElementById('resume-box');
     if (!g) { RG.partita.riquadro(box, null); return; }
     const [a, b] = g.teams;
-    const versione = g.mode === 'bambini' ? 'Bambini' : (g.includeHot ? 'Adulti 🌶️' : 'Adulti');
+    const versione = etichettaPartita(g.mode, g.includeHot, g.abilita);
     RG.partita.riquadro(box, {
         riassunto: `${a.name} ${a.score} – ${b.score} ${b.name}`,
         dettaglio: `Turno ${g.totalTurnsPlayed + 1} · tocca a ${g.teams[g.activeTeamIdx].name} · ${versione} · salvata ${RG.partita.quando(g.savedAt)}`,
@@ -252,6 +279,8 @@ function resumeSavedGame() {
     if (!g) { renderResumeBox(); return; }
     state.mode = g.mode === 'bambini' ? 'bambini' : 'adulti';
     state.includeHot = !!g.includeHot;
+    // Salvataggi precedenti alla scelta delle abilità: si gioca con tutte e 4
+    state.abilita = ABILITA_SCELTE.includes(g.abilita) ? g.abilita : 'tutte';
     saveSettings();
     state.teams = g.teams;
     state.activeTeamIdx = g.activeTeamIdx;
@@ -555,8 +584,14 @@ function drawOneCardFromDeck() {
     const used = new Set(state.usedCardIds);
     let available = deck.filter(c => !used.has(c.id) && !onWheel.has(c.id));
     if (available.length === 0) {
-        // Viste tutte: il mazzo ricomincia (tranne le carte già sulla ruota)
-        state.usedCardIds = [...onWheel];
+        // Viste tutte: il mazzo ricomincia (tranne le carte già sulla ruota).
+        // Con una sola abilità si azzerano solo le sue carte: le altre restano segnate come viste.
+        if (state.abilita === 'tutte') {
+            state.usedCardIds = [...onWheel];
+        } else {
+            const idMazzo = new Set(deck.map(c => c.id));
+            state.usedCardIds = state.usedCardIds.filter(id => !idMazzo.has(id) || onWheel.has(id));
+        }
         available = deck.filter(c => !onWheel.has(c.id));
         if (available.length === 0) available = deck;
         showToast('Avete visto tutte le carte! Il mazzo ricomincia da capo.');
@@ -573,7 +608,7 @@ function updateDeckCounter() {
     const deck = getActiveDeck();
     const used = new Set(state.usedCardIds);
     const fresh = deck.filter(c => !used.has(c.id)).length;
-    const label = state.mode === 'bambini' ? 'Bambini' : (state.includeHot ? 'Adulti 🌶️' : 'Adulti');
+    const label = etichettaPartita(state.mode, state.includeHot, state.abilita);
     document.getElementById('header-deck-info').textContent = `${label} · ${fresh} carte nuove`;
 }
 

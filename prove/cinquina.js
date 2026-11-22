@@ -96,6 +96,37 @@ const { apri, ok, BASE, SHOTS } = require('./comune');
     await page.screenshot({ path: SHOTS + 'cinquina-5-vittoria.png' });
     await page.click('text=Gioca una Nuova Partita');
 
+    // 3b. Una sola abilità scelta a inizio partita
+    await page.click('#abilita-scelte [data-abilita="Parlare"]');
+    const impParlare = await page.evaluate(() => JSON.parse(localStorage.getItem('rg-hintfake-impostazioni')).abilita);
+    ok(impParlare === 'Parlare', 'la scelta "Solo Parlare" è salvata nelle impostazioni');
+    const mazzoParlare = await page.evaluate(() => getActiveDeck().map(c => c.abilita));
+    ok(mazzoParlare.length > 0 && mazzoParlare.every(a => a === 'Parlare'), `mazzo di sola Parlare (${mazzoParlare.length} carte)`);
+    ok(await page.getAttribute('#abilita-scelte [data-abilita="Parlare"]', 'aria-pressed') === 'true', 'il pulsante scelto è segnato come attivo');
+    await page.screenshot({ path: SHOTS + 'cinquina-7-solo-parlare.png', fullPage: true });
+    await page.click('text=Inizia la Partita');
+    for (let t = 0; t < 3; t++) {
+      await page.waitForFunction(() => !state.animating);
+      const slot = await page.evaluate(() => state.wheelSlots[4] ? 4 : state.wheelSlots.findIndex(Boolean));
+      await page.click(`.wheel-tile.card[data-slot="${slot}"]`);
+      await page.click('text=Gira e Avvia 90s');
+      await page.click('#play-objects-list button:nth-child(1)');
+      await page.click('text=Fine Tempo');
+      await page.click('#opp-btn-normal');
+      await page.click('text=Registra Punti e Gira la Ruota');
+    }
+    await page.waitForFunction(() => !state.animating);
+    const sulla = await page.evaluate(() => state.wheelSlots.filter(Boolean).map(c => c.abilita));
+    ok(sulla.length === 3 && sulla.every(a => a === 'Parlare'), 'con "Solo Parlare" tutte le carte della ruota sono di Parlare dopo 3 turni');
+    ok((await page.textContent('#header-deck-info')).includes('Solo Parlare'), 'in intestazione si legge "Solo Parlare": ' + await page.textContent('#header-deck-info'));
+    await page.reload();
+    await page.waitForSelector('#active-game-container:not(.hidden)');
+    ok(await page.evaluate(() => state.abilita) === 'Parlare', 'ricaricando la partita a una abilità riprende con la stessa scelta');
+    await page.click('text=Nuova Partita');
+    await page.click('#rg-conferma [data-risposta="si"]');
+    await page.click('#abilita-scelte [data-abilita="tutte"]');
+    ok(await page.evaluate(() => state.abilita) === 'tutte' && (await page.evaluate(() => new Set(getActiveDeck().map(c => c.abilita)).size)) === 4, 'tornando a "Tutte e 4" il mazzo ha di nuovo le 4 abilità');
+
     // 4. Timer reale con orologio accelerato: a 0 passa da solo al passo 4
     await page.click('text=Inizia la Partita');
     await page.evaluate(() => { window.__vibr = []; navigator.vibrate = p => { window.__vibr.push(p); return true; }; });
