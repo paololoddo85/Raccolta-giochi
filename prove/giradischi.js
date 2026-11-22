@@ -213,6 +213,28 @@ const { finti, stato: rete } = require('./finti-giradischi');
       return ammessi.every(Boolean) && esclusi.every(x => !x) && altriCataloghi.every(Boolean);
     }), '70-80: entrano pop e disco; rap, metal, soul, blues, rock fuori; gli altri cataloghi non cambiano');
     ok(await page.evaluate(() => LIVE_SEARCH_POOLS['7080'].every(q => !/rock|soul|funk|metal|rap|blues/i.test(q))), '70-80: ricerche senza rock, soul, rap, metal, blues');
+    // Rifornimento: se le 4 ricerche a caso non danno brani nuovi, si provano TUTTE le ricerche del filtro
+    ok(await page.evaluate(async () => {
+      const orig = fetchLiveItunesPool, chiamate = [];
+      const traccia = { id: 'x', title: 'Brano Nuovo', artist: 'Artista Nuovo', year: 1980, matchKey: 'brano nuovo__artista nuovo', country: 'US', previewUrl: 'https://x/a.m4a' };
+      const totale = LIVE_SEARCH_POOLS.all.length;
+      fetchLiveItunesPool = async (g, q) => { chiamate.push(q); return q < totale ? [] : [traccia]; };
+      try {
+        const gs = { genreFilter: 'all', players: [{ name: 'A', tokens: 2, timeline: [] }], deck: [], readyCards: [], currentCard: null, usedKeys: new Set(), validating: null, networkDown: false };
+        const n = await refillDeckOnline(gs);
+        return n === 1 && gs.deck.length === 1 && chiamate.join() === '4,' + totale;
+      } finally { fetchLiveItunesPool = orig; }
+    }), 'rifornimento: con 4 ricerche vuote prova tutte le ricerche e trova il brano nuovo');
+    // Se nemmeno tutte le ricerche danno brani nuovi, il catalogo è davvero finito (si prova due volte, non di più)
+    ok(await page.evaluate(async () => {
+      const orig = fetchLiveItunesPool, chiamate = [];
+      fetchLiveItunesPool = async (g, q) => { chiamate.push(q); return []; };
+      try {
+        const gs = { genreFilter: 'all', players: [{ name: 'A', tokens: 2, timeline: [] }], deck: [], readyCards: [], currentCard: null, usedKeys: new Set(), validating: null, networkDown: false };
+        const n = await refillDeckOnline(gs);
+        return n === 0 && chiamate.length === 2;
+      } finally { fetchLiveItunesPool = orig; }
+    }), 'rifornimento: senza brani nuovi, al massimo due ricerche (a caso e tutte), poi "finito"');
     console.log('  richieste finte servite:', JSON.stringify(rete.richieste));
     ok(errori.length === 0, 'nessun errore in console' + (errori.length ? ':\n' + errori.join('\n') : ''));
   } catch (e) {
