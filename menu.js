@@ -14,15 +14,30 @@
     const campi = document.getElementById('campi-nomi');
     const apri = document.getElementById('apri-nomi');
 
+    const riepilogo = document.getElementById('riepilogo-nomi');
+
+    // Ogni nome è un interruttore: toccando lo si esclude per stasera (o lo si riattiva).
     function disegnaNomi() {
-        const nomi = RG.squadre.tutti().filter(Boolean);
-        if (!nomi.length) {
+        const posti = RG.squadre.posti().filter(p => p.nome);
+        const giocano = posti.filter(p => p.attivo).length;
+        if (!posti.length) {
             elenco.innerHTML = '<li class="nomi-vuoto">Nessun nome ancora. Ogni gioco userà i suoi (Squadra A, Cinefilo 1…).</li>';
         } else {
-            elenco.innerHTML = nomi.map(n => `<li class="nome">${RG.esc(n)}</li>`).join('');
+            elenco.innerHTML = posti.map(p => `
+                <li class="nome ${p.attivo ? 'attivo' : 'escluso'}"><button type="button" aria-pressed="${p.attivo}" data-indice="${p.indice}">${RG.esc(p.nome)}</button></li>`).join('');
         }
+        riepilogo.textContent = !posti.length ? ''
+            : giocano ? `Giocano stasera: ${giocano} su ${posti.length}. Tocca un nome per escluderlo o riattivarlo.`
+            : 'Nessuno gioca stasera: ogni gioco userà i suoi nomi di partenza. Tocca un nome per riattivarlo.';
         disegnaFrequenti();
     }
+
+    elenco.addEventListener('click', (e) => {
+        const b = e.target.closest('button[data-indice]');
+        if (!b) return;
+        RG.squadre.alterna(Number(b.dataset.indice));
+        disegnaNomi();
+    });
 
     // "Giocano spesso": i nomi che hanno giocato più volte, da toccare per aggiungerli.
     // Non si mostrano mentre il modulo "Modifica" è aperto, così non si perde quello che si sta scrivendo.

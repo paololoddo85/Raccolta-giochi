@@ -1584,7 +1584,7 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 
 // Avvio: i nomi di "Chi gioca stasera" decidono quanti giocatori proporre
 (function initSetup() {
-  const filled = RG.squadre.tutti().slice(0, 4).filter(Boolean).length;
+  const filled = Math.min(4, RG.squadre.posti().filter(p => p.attivo).length);
   setPlayerCount(Math.max(1, filled));
   renderPlayerNameInputs();
   renderResumeBox();

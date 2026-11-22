@@ -69,11 +69,23 @@
     text-decoration: underline; text-underline-offset: 4px; cursor: pointer;
 }
 .nomi { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 0; padding: 0; list-style: none; }
+.riepilogo-nomi { margin: 10px 0 0; }
+/* Ogni nome è un interruttore: acceso = gioca stasera (oro, con ✓), spento = escluso (contorno tratteggiato) */
 .nome {
-    padding: 6px 12px; border-radius: 999px;
-    background: var(--prugna-chiara); font-weight: 600; font-size: 15px;
-    max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    border-radius: 999px; border: 1px solid var(--cine);
+    background: var(--cine); color: var(--prugna); font-weight: 600; font-size: 15px;
+    max-width: 100%;
 }
+.nome button {
+    display: block; max-width: 100%; padding: 6px 12px; border: 0; background: none; color: inherit;
+    font: inherit; font-weight: 600; text-align: left;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer;
+}
+.nome.attivo button::before { content: "✓ "; }
+.nome.escluso { background: none; border: 1px dashed var(--linea); color: var(--latte-tenue); }
+.nome.escluso button { text-decoration: line-through; text-decoration-thickness: 1px; }
+.nome button:focus-visible { outline: 2px solid var(--cine); outline-offset: 2px; border-radius: 999px; }
+.nome:active { opacity: .8; }
 .nomi-vuoto { color: var(--latte-tenue); font-size: 15px; }
 .frequenti { margin: 14px 0 0; }
 .frequenti[hidden] { display: none; }

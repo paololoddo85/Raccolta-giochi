@@ -1004,7 +1004,7 @@
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') salva(); });
 
     // Avvio: i nomi di "Chi gioca stasera" decidono quante squadre proporre
-    const pieni = RG.squadre.tutti().slice(0, 4).filter(Boolean).length;
+    const pieni = Math.min(4, RG.squadre.posti().filter(p => p.attivo).length);
     scegliNumero(Math.min(4, Math.max(2, pieni)));
     disegnaRiquadro();
     if (SALVATAGGIO.leggi() && RG.partita.ricaricata()) riprendi();

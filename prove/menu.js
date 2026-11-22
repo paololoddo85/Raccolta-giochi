@@ -86,6 +86,42 @@ const { finti } = require('./finti-pellicola'); // Pellicola si gioca solo onlin
     // Paolo e Anna ora sono nell'elenco: non si suggeriscono. Restano Marco (4), Giulia (3) e Luca (2)
     ok(await page.evaluate(() => RG.squadre.frequenti(8).join()) === 'Marco,Giulia,Luca', 'frequenti: esclusi chi è in elenco, ordinati per partite');
     await page.screenshot({ path: SHOTS + 'menu-4-frequenti.png' });
+    // "Chi gioca stasera": tocco per escludere / riattivare un nome, nomi che arrivano ai giochi
+    await page.evaluate(() => localStorage.setItem('rg-comune-squadre', JSON.stringify({ nomi: ['Paolo', 'Giulia', 'Marco', '', '', ''], conteggi: {} })));
+    await page.goto(BASE);
+    await page.waitForSelector('#elenco-nomi .nome');
+    const pressi = () => page.locator('#elenco-nomi button').evaluateAll(bs => bs.map(b => b.getAttribute('aria-pressed')).join());
+    ok(await pressi() === 'true,true,true' && (await page.textContent('#riepilogo-nomi')).includes('Giocano stasera: 3 su 3'), 'nomi preimpostati: tutti giocano di default, riepilogo "3 su 3"');
+    await page.click('#elenco-nomi button[data-indice="1"]');
+    ok(await pressi() === 'true,false,true' && await page.locator('#elenco-nomi .nome.escluso').count() === 1, 'un tocco esclude Giulia: stato "escluso" visibile');
+    ok(await page.evaluate(() => RG.squadre.nomi(3, ['Squadra A', 'Squadra B', 'Giocatore 3']).join()) === 'Paolo,Marco,Giocatore 3', 'giochi: Giulia non gioca, Marco prende il secondo posto');
+    await page.screenshot({ path: SHOTS + 'menu-5-escluso.png' });
+    await page.click('#elenco-nomi button[data-indice="1"]');
+    ok(await pressi() === 'true,true,true' && await page.evaluate(() => RG.squadre.nomi(3).join()) === 'Paolo,Giulia,Marco', 'secondo tocco riattiva Giulia');
+    // Un nome nuovo, aggiunto dal modulo, gioca subito
+    await page.click('#apri-nomi');
+    await page.locator('#campi-nomi input').nth(3).fill('Sara');
+    await page.click('text=Salva i nomi');
+    ok(await pressi() === 'true,true,true,true' && (await page.textContent('#riepilogo-nomi')).includes('4 su 4'), 'nome nuovo aggiunto: gioca (4 su 4)');
+    // Esclusione di Paolo, poi avvio di Cinquina: le squadre sono Giulia e Marco
+    await page.click('#elenco-nomi button[data-indice="0"]');
+    await page.goto(BASE + 'giochi/cinquina/');
+    await page.waitForSelector('#setup-team-1');
+    ok(await page.inputValue('#setup-team-1') === 'Giulia' && await page.inputValue('#setup-team-2') === 'Marco', 'avvio Cinquina: con Paolo escluso le squadre sono Giulia e Marco');
+    await page.goto(BASE + 'giochi/ritornello/');
+    await page.waitForSelector('.count-btn.is-active');
+    ok(await page.getAttribute('.count-btn.is-active', 'data-count') === '3', 'avvio Ritornello: con Paolo escluso propone 3 squadre (Giulia, Marco, Sara)');
+    ok(await page.inputValue('#nomi-squadre input >> nth=0') === 'Giulia', 'avvio Ritornello: il primo nome è Giulia');
+    await page.goto(BASE);
+    await page.waitForSelector('#elenco-nomi .nome');
+    for (const i of [1, 2, 3]) await page.click(`#elenco-nomi button[data-indice="${i}"]`);
+    ok((await page.textContent('#riepilogo-nomi')).includes('Nessuno gioca stasera'), 'tutti esclusi: il riepilogo lo dice');
+    await page.goto(BASE + 'giochi/cinquina/');
+    await page.waitForSelector('#setup-team-1');
+    ok(await page.inputValue('#setup-team-1') === 'Squadra A' && await page.inputValue('#setup-team-2') === 'Squadra B', 'nessuno selezionato: Cinquina torna ai nomi di partenza');
+    await page.goto(BASE);
+    await page.waitForSelector('#elenco-nomi .nome');
+    await page.screenshot({ path: SHOTS + 'menu-6-selezione.png', fullPage: true });
     await page.goto(BASE);
     await page.goto(BASE);
     for (const w of [320, 412]) { await page.setViewportSize({ width: w, height: 800 }); const sw = await page.evaluate(() => document.documentElement.scrollWidth); ok(sw <= w, `nessuno scorrimento orizzontale a ${w}px`); }
