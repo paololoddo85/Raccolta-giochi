@@ -38,6 +38,20 @@ const { finti, stato: rete } = require('./finti-giradischi');
     const tutte = await page.evaluate(() => [...gameState.players.flatMap(p => p.timeline), gameState.currentCard, ...gameState.readyCards].map(c => c.title));
     ok(!tutte.includes('Canzone Ristampata'), 'la ristampa con una versione precedente non viene proposta');
 
+    // controllo "versione originale" diretto: una ristampa di Battisti del 2005 (prima uscita 1972) va scartata
+    const esito = (brano) => page.evaluate(b => checkIsOriginalRelease({ ...b }), brano);
+    ok(await esito({ title: 'Acqua azzurra, acqua chiara', artist: 'Lucio Battisti', year: 2005, country: 'US' }) === 'reissue',
+      'Battisti anni 70 uscito come ristampa 2005 (iTunes US non lo vede): scartato grazie a MusicBrainz');
+    ok(await esito({ title: 'Canzone 1', artist: 'Queen', year: 1960, country: 'US' }) === 'ok',
+      'brano originale confermato da MusicBrainz: ok');
+    // MusicBrainz non risponde: iTunes da solo non conferma la carta, quindi resta "non verificata"
+    const erroriPrima = errori.length; // i 503 di MusicBrainz sono attesi qui: non sono un errore del gioco
+    rete.musicbrainzGiu = true;
+    ok(await esito({ title: 'Canzone 1', artist: 'Queen', year: 1960, country: 'US' }) === 'unknown',
+      'MusicBrainz giù: la carta non è confermata (niente "ok" da iTunes da solo)');
+    rete.musicbrainzGiu = false;
+    errori.splice(erroriPrima);
+
     // nessun artista domina il mazzo: al massimo 3 brani per artista tra timeline, carta, pronte e mazzo
     const massimoInPartita = () => page.evaluate(() => {
       const c = {};
