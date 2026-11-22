@@ -5,8 +5,6 @@
 :root {
   --accento: var(--viola);
   --accento-chiaro: #C4B5FD;
-  --su-accento: var(--notte);
-  --accento-luce: rgba(167, 139, 250, 0.10);
   --viola-tenue: rgba(167, 139, 250, 0.14);
 }
 
