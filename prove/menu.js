@@ -4,7 +4,7 @@ const { finti } = require('./finti-pellicola'); // Pellicola si gioca solo onlin
   const { browser, page, esterne, errori } = await apri({ finti });
     try {
     await page.goto(BASE + 'menu.css');
-    await page.evaluate(() => { localStorage.clear(); localStorage.setItem('hintfake-partita-in-corso', JSON.stringify({ v: 1, savedAt: Date.now(), teams: [{name:'A',score:1,turnsPlayed:1},{name:'B',score:0,turnsPlayed:0}], wheelSlots: [null,null,null,null,null], activeTeamIdx: 1, totalTurnsPlayed: 1 })); });
+    await page.evaluate(() => { localStorage.clear(); localStorage.setItem('hintfake-partita-in-corso', JSON.stringify({ v: 2, savedAt: Date.now(), teams: [{name:'A',score:1,turnsPlayed:1},{name:'B',score:0,turnsPlayed:0}], wheelSlots: [null,null,null,null,null], activeTeamIdx: 1, totalTurnsPlayed: 1 })); });
     await page.goto(BASE);
     await page.waitForLoadState('networkidle');
     ok(await page.isVisible('.scatola[data-gioco="hintfake"] .in-corso'), 'menù: "Partita in corso" su Cinquina (dopo migrazione)');
@@ -57,7 +57,7 @@ const { finti } = require('./finti-pellicola'); // Pellicola si gioca solo onlin
     esterne.length = richiestePrima;
     // Stesso caso in Cinquina con una partita solo ripresa (nessun turno nuovo, quindi nessun salvataggio)
     await page.goto(BASE + 'menu.css');
-    await page.evaluate(() => localStorage.setItem('rg-hintfake-partita', JSON.stringify({ v: 1, savedAt: Date.now(), mode: 'adulti', includeHot: false, teams: [{ name: 'A', score: 3, turnsPlayed: 1 }, { name: 'B', score: 1, turnsPlayed: 1 }], activeTeamIdx: 0, totalTurnsPlayed: 2, wheelSlots: [null, null, null, null, null], history: [], lastTurnUndo: null })));
+    await page.evaluate(() => localStorage.setItem('rg-hintfake-partita', JSON.stringify({ v: 2, savedAt: Date.now(), mode: 'adulti', includeHot: false, teams: [{ name: 'A', score: 3, turnsPlayed: 1 }, { name: 'B', score: 1, turnsPlayed: 1 }], activeTeamIdx: 0, totalTurnsPlayed: 2, wheelSlots: [null, null, null, null, null], history: [], lastTurnUndo: null })));
     await page.goto(BASE + 'giochi/cinquina/');
     await page.click('#resume-box [data-azione="riprendi"]');
     await page.evaluate(() => { window.__segno = 'vecchia'; localStorage.removeItem('rg-hintfake-partita'); });

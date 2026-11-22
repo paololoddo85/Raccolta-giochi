@@ -19,25 +19,12 @@ const { apri, ok, BASE, SHOTS } = require('./comune');
     await page.goto(BASE + 'HINT_FAKE.html');
     await page.waitForURL('**/giochi/cinquina/');
     ok(page.url() === BASE + 'giochi/cinquina/', 'il vecchio indirizzo HINT_FAKE.html rimanda alla nuova posizione');
-    await page.waitForSelector('#resume-box:not([hidden])');
-    const riass = await page.textContent('#resume-box');
-    ok(riass.includes('Rossi 7 – 5 Blu'), 'la partita salvata nella vecchia pagina compare in "Partita in corso"');
+    await page.waitForSelector('#setup-screen:not(.hidden)');
+    ok(await page.isHidden('#resume-box'), 'la partita salvata con la versione vecchia non si riprende più (si parte dalla preparazione)');
     ok(await page.isChecked('#hot-toggle') === false, 'le impostazioni migrate (carte hot spente) sono state lette');
     const mig = await page.evaluate(() => ({ nuova: !!localStorage.getItem('rg-hintfake-partita'), vecchia: !!localStorage.getItem('hintfake-partita-in-corso') }));
     ok(mig.nuova && mig.vecchia, 'migrazione: chiave nuova creata, vecchia conservata');
     await page.screenshot({ path: SHOTS + 'cinquina-1-setup-ripresa.png', fullPage: true });
-
-    // 2. Riprendi
-    await page.click('#resume-box [data-azione="riprendi"]');
-    ok(await page.textContent('#active-team-title') === 'Rossi', 'ripresa: tocca alla squadra salvata');
-    ok(await page.textContent('#sc-total-0') === '7', 'ripresa: punteggio corretto');
-
-    // Nuova partita (conferma dentro l'app)
-    await page.click('text=Nuova Partita');
-    await page.waitForSelector('#rg-conferma:not([hidden])');
-    await page.screenshot({ path: SHOTS + 'cinquina-2-conferma.png' });
-    await page.click('#rg-conferma [data-risposta="si"]');
-    ok(await page.isVisible('#setup-screen'), 'Nuova partita: conferma in app e ritorno alla preparazione');
 
     // 3. Partita completa con nomi condivisi
     await page.fill('#setup-team-1', 'Leoni');

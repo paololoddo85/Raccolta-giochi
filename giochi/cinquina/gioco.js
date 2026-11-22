@@ -137,7 +137,7 @@ function storageSet(key, value) {
 
 // Partita salvata (rg-hintfake-partita)
 const SAVED_GAME = RG.partita.crea('hintfake', {
-    versione: 1,
+    versione: 2, // 2: partita con la scelta delle abilità; le partite salvate con la versione 1 non si riprendono più
     valida: g => Array.isArray(g.teams) && g.teams.length === 2 && Array.isArray(g.wheelSlots)
 });
 
