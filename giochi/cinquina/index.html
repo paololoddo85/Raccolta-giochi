@@ -99,6 +99,29 @@
                 </div>
             </div>
 
+            <!-- SCELTA ABILITÀ: TUTTE E 4 (PREDEFINITO) OPPURE UNA SOLA PER TUTTA LA PARTITA -->
+            <div class="max-w-xl mx-auto mb-5">
+                <div class="text-[11px] font-black uppercase tracking-wider text-slate-500 mb-2">Abilità</div>
+                <div id="abilita-scelte" class="grid grid-cols-2 gap-3">
+                    <button type="button" data-abilita="tutte" onclick="setAbilita('tutte')" class="mode-btn rounded-2xl border-2 p-3 text-left">
+                        <span class="font-black text-sm block">Tutte e 4</span>
+                        <span class="text-[11px] opacity-75">Il mazzo normale: Parlare, Mimare, Canticchiare e Disegnare</span>
+                    </button>
+                    <button type="button" data-abilita="Parlare" onclick="setAbilita('Parlare')" class="mode-btn rounded-2xl border-2 p-3 text-left">
+                        <span class="font-black text-sm block">Solo Parlare</span>
+                    </button>
+                    <button type="button" data-abilita="Mimare" onclick="setAbilita('Mimare')" class="mode-btn rounded-2xl border-2 p-3 text-left">
+                        <span class="font-black text-sm block">Solo Mimare</span>
+                    </button>
+                    <button type="button" data-abilita="Canticchiare" onclick="setAbilita('Canticchiare')" class="mode-btn rounded-2xl border-2 p-3 text-left">
+                        <span class="font-black text-sm block">Solo Canticchiare</span>
+                    </button>
+                    <button type="button" data-abilita="Disegnare" onclick="setAbilita('Disegnare')" class="mode-btn rounded-2xl border-2 p-3 text-left">
+                        <span class="font-black text-sm block">Solo Disegnare</span>
+                    </button>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl mx-auto mb-6">
                 <div class="bg-slate-50 p-4 rounded-2xl border-2 border-[#4d9496]/40">
                     <label class="block text-[11px] font-black uppercase tracking-wider text-[#366f71] mb-1.5">Nome Squadra 1 (Inizia)</label>
