@@ -91,6 +91,8 @@ let state = {
 
 // Le 4 abilità in ordine, per la scelta "Solo …" a inizio partita
 const ABILITA_SCELTE = ['Parlare', 'Mimare', 'Canticchiare', 'Disegnare'];
+// Valore valido per state.abilita: 'tutte' oppure una delle 4 abilità
+const abilitaValida = a => a === 'tutte' || ABILITA_SCELTE.includes(a);
 
 /**
  * AVVIO E INIZIALIZZAZIONE RUOTA A 5 SLOT
@@ -152,7 +154,7 @@ function loadSettings() {
     const saved = storageGet(STORAGE.settings, {});
     if (saved.mode === 'bambini' || saved.mode === 'adulti') state.mode = saved.mode;
     if (typeof saved.includeHot === 'boolean') state.includeHot = saved.includeHot;
-    if (saved.abilita === 'tutte' || ABILITA_SCELTE.includes(saved.abilita)) state.abilita = saved.abilita;
+    if (abilitaValida(saved.abilita)) state.abilita = saved.abilita;
 }
 
 function saveSettings() {
@@ -280,7 +282,7 @@ function resumeSavedGame() {
     state.mode = g.mode === 'bambini' ? 'bambini' : 'adulti';
     state.includeHot = !!g.includeHot;
     // Salvataggi precedenti alla scelta delle abilità: si gioca con tutte e 4
-    state.abilita = ABILITA_SCELTE.includes(g.abilita) ? g.abilita : 'tutte';
+    state.abilita = abilitaValida(g.abilita) ? g.abilita : 'tutte';
     saveSettings();
     state.teams = g.teams;
     state.activeTeamIdx = g.activeTeamIdx;
@@ -341,12 +343,11 @@ function applyUndo(u) {
     // La carta pescata per quel turno torna "nuova"
     if (Array.isArray(u.usedCardIds)) {
         state.usedCardIds = [...u.usedCardIds];
-        saveUsedIds();
     } else if (u.drawnCardId !== null) {
         // Annulla di salvataggi fatti prima di questa versione: si toglie solo la carta pescata
         state.usedCardIds = state.usedCardIds.filter(id => id !== u.drawnCardId);
-        saveUsedIds();
     }
+    saveUsedIds();
     state.lastTurnUndo = null;
 
     updateScorecardUI();
