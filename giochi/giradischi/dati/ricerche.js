@@ -60,7 +60,7 @@ window.GIRADISCHI_DATI = {
   // Artisti rap o urban (anche napoletani) da escludere dal catalogo "napoletane", per nome intero
   artistiEsclusiNapoletane: [
       "99 posse", "almamegretta", "raiz", "co.sang", "geolier", "clementino", "liberato",
-      "rocco hunt", "luchè", "luche", "lucariello", "rap"
+      "rocco hunt", "luchè", "luche", "lucariello"
   ],
 
   paroleAlbumVietate: [
