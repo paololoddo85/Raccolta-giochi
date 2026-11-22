@@ -307,14 +307,14 @@ window.CINQUINA_CARTE = {
                 ["Parlare", "Parolacce italiane", "Cazzo", "Stronzo", "Vaffanculo", "Minchia", "Coglione", "Merda"],
                 ["Parlare", "Nel sexy shop", "Vibratore", "Manette pelose", "Frustino", "Lubrificante", "Costume da infermiera", "Preservativi"],
                 ["Parlare", "Luoghi insoliti per fare l'amore", "Macchina", "Ascensore", "Spiaggia di notte", "Ufficio", "Camerino", "Bagno dell'aereo"],
-                ["Parlare", "Scuse per non scopare stasera", "Mal di testa", "Ho il ciclo", "Sono stanco, cazzo", "Ho la suocera in casa", "C'è la partita", "Mi si è fermato l'uccello"],
+                ["Parlare", "Scuse per non farlo stasera", "Mal di testa", "Sono stanco morto", "Domani mi alzo presto", "C'è la partita", "Ho mangiato troppo", "I bambini sono svegli"],
                 ["Parlare", "Appuntamenti online", "Tinder", "Match", "Ghosting", "Bumble", "Foto profilo", "Swipe a destra"],
                 ["Parlare", "Insulti da stadio", "Arbitro cornuto", "Venduto", "Buffone", "Vai a lavorare", "Scarso", "Ladro"],
                 ["Parlare", "Parti del corpo sexy", "Lato B", "Seno", "Labbra", "Collo", "Addominali", "Gambe lunghe"],
                 ["Parlare", "Addio al celibato e al nubilato", "Spogliarellista", "Shottini", "Limousine", "Fascia 'Futura sposa'", "Gadget a forma di pisello", "Penitenze"],
                 ["Parlare", "Modi per dire 'fare l'amore'", "Fare sesso", "Trombare", "Scopare", "Darci dentro", "Fare zum zum", "Consumare"],
                 ["Parlare", "Film sexy famosi", "Cinquanta sfumature di grigio", "9 settimane e ½", "Basic Instinct", "Eyes Wide Shut", "Malèna", "Il postino suona sempre due volte"],
-                ["Parlare", "Imprecazioni a raffica", "Porcoddio", "Vaffanculo", "Figlio di puttana", "Testa di cazzo", "Pezzo di merda", "Ti spacco il culo"],
+                ["Parlare", "Imprecazioni (senza bestemmie)", "Porca miseria", "Mannaggia", "Accidenti", "Porca vacca", "Cavolo", "Mortacci"],
                 ["Parlare", "Disastri in camera da letto", "Crampo", "Scorreggia sotto le coperte", "Chiamarlo col nome dell'ex", "Cadere dal letto", "Entra la suocera", "Letto che cigola"],
                 // MIMARE
                 ["Mimare", "Gesti volgari", "Dito medio", "Gesto dell'ombrello", "Fare le corna", "Toccarsi per scaramanzia", "Mostrare il sedere", "Mandare a quel paese"],
@@ -364,7 +364,9 @@ window.CINQUINA_CARTE = {
                 ["Canticchiare", "Canzoni da bordello", "Sex Bomb", "Sexy and I Know It", "Hot in Herre", "Lollipop", "Ass Like That", "Pony"],
                 ["Disegnare", "Organi genitali senza censura", "Pene", "Vagina", "Palle", "Capezzolo", "Clitoride", "Ano"],
                 ["Disegnare", "Giochi erotici da comodino", "Dildo", "Ovetto vibrante", "Palline cinesi", "Plug anale", "Olio da massaggio", "Gelato da leccare"],
-                ["Disegnare", "Facce dell'orgasmo", "Occhi al cielo", "Lingua fuori", "Bocca spalancata", "Pugno chiuso", "Sudore sulla fronte", "Denti stretti"]
+                ["Disegnare", "Facce dell'orgasmo", "Occhi al cielo", "Lingua fuori", "Bocca spalancata", "Pugno chiuso", "Sudore sulla fronte", "Denti stretti"],
+                ["Parlare", "Scuse per non scopare stasera", "Mal di testa", "Ho il ciclo", "Sono stanco, cazzo", "Ho la suocera in casa", "C'è la partita", "Mi si è fermato l'uccello"],
+                ["Parlare", "Imprecazioni a raffica", "Porcoddio", "Vaffanculo", "Figlio di puttana", "Testa di cazzo", "Pezzo di merda", "Ti spacco il culo"]
             ]
         }
 };
