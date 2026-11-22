@@ -126,7 +126,19 @@ function isOriginalNonCompilationTrack(item, genreFilter) {
     // Rispetta i filtri temporali selezionati
     if (!yearMatchesFilter(year, genreFilter)) return false;
 
+    // Classici Anni '70 - '80: solo canzoni pop (niente rock, metal, rap, soul, blues…)
+    if (!genereAmmesso(item.primaryGenreName, genreFilter)) return false;
+
     return true;
+}
+
+// Nel catalogo "70-80" entrano pop e disco (es. "Pop", "Italian Pop", "Disco").
+// Restano fuori rap, hip hop, metal, soul, blues e rock.
+function genereAmmesso(genere, genreFilter) {
+    if (genreFilter !== '7080') return true;
+    const g = genere || '';
+    if (/hip|rap|metal|soul|blues|rock/i.test(g)) return false;
+    return /pop|disco/i.test(g);
 }
 
 async function fetchLiveItunesPool(genreFilter, queryCount = 7) {
