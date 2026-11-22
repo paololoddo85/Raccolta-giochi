@@ -1509,7 +1509,7 @@ function applyUndo(u) {
 /* ================= AVVIO ================= */
 window.onload = function () {
     // I nomi di "Chi gioca stasera" decidono quanti giocatori proporre
-    const filled = RG.squadre.tutti().filter(Boolean).length;
+    const filled = RG.squadre.posti().filter(p => p.attivo).length;
     if (filled >= 1) setupPlayerCount = Math.min(6, filled);
     renderPlayerInputs();
     setupAudioListeners();
