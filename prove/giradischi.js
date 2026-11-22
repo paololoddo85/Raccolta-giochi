@@ -198,12 +198,12 @@ const { finti, stato: rete } = require('./finti-giradischi');
     // Classici Anni '70 - '80: solo pop (rap, metal, soul, blues, rock esclusi); gli altri cataloghi restano invariati
     ok(await page.evaluate(() => {
       const brano = (genere) => ({ previewUrl: 'https://x/a.m4a', trackName: 'Prova', artistName: 'Artista', collectionName: 'Album', releaseDate: '1980-01-01T07:00:00Z', primaryGenreName: genere });
-      const pop = ['Pop', 'Italian Pop', 'Musica pop'].map(g => isOriginalNonCompilationTrack(brano(g), '7080'));
-      const altro = ['Hip-Hop/Rap', 'Metal', 'Soul', 'Blues', 'Rock', 'R&B/Soul', 'Dance'].map(g => isOriginalNonCompilationTrack(brano(g), '7080'));
-      const altriCataloghi = ['Rock', 'Hip-Hop/Rap'].map(g => isOriginalNonCompilationTrack(brano(g), 'all'));
-      return pop.every(Boolean) && altro.every(x => !x) && altriCataloghi.every(Boolean);
-    }), '70-80: solo brani pop (rap, metal, soul, blues, rock fuori); gli altri cataloghi non cambiano');
-    ok(await page.evaluate(() => LIVE_SEARCH_POOLS['7080'].every(q => !/rock|soul|funk|disco|metal|rap|blues/i.test(q))), '70-80: ricerche solo pop');
+      const ammessi = ['Pop', 'Italian Pop', 'Musica pop', 'Disco'].map(g => isOriginalNonCompilationTrack(brano(g), '7080'));
+      const esclusi = ['Hip-Hop/Rap', 'Metal', 'Soul', 'Blues', 'Rock', 'R&B/Soul', 'Dance'].map(g => isOriginalNonCompilationTrack(brano(g), '7080'));
+      const altriCataloghi = ['Rock', 'Hip-Hop/Rap', 'Metal'].map(g => isOriginalNonCompilationTrack(brano(g), 'all'));
+      return ammessi.every(Boolean) && esclusi.every(x => !x) && altriCataloghi.every(Boolean);
+    }), '70-80: entrano pop e disco; rap, metal, soul, blues, rock fuori; gli altri cataloghi non cambiano');
+    ok(await page.evaluate(() => LIVE_SEARCH_POOLS['7080'].every(q => !/rock|soul|funk|metal|rap|blues/i.test(q))), '70-80: ricerche senza rock, soul, rap, metal, blues');
     console.log('  richieste finte servite:', JSON.stringify(rete.richieste));
     ok(errori.length === 0, 'nessun errore in console' + (errori.length ? ':\n' + errori.join('\n') : ''));
   } catch (e) {

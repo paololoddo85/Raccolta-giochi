@@ -132,10 +132,13 @@ function isOriginalNonCompilationTrack(item, genreFilter) {
     return true;
 }
 
-// Nel catalogo "70-80" entra solo ciò che iTunes classifica come pop (es. "Pop", "Italian Pop")
+// Nel catalogo "70-80" entrano pop e disco (es. "Pop", "Italian Pop", "Disco").
+// Restano fuori rap, hip hop, metal, soul, blues e rock.
 function genereAmmesso(genere, genreFilter) {
     if (genreFilter !== '7080') return true;
-    return /pop/i.test(genere || '');
+    const g = genere || '';
+    if (/hip|rap|metal|soul|blues|rock/i.test(g)) return false;
+    return /pop|disco/i.test(g);
 }
 
 async function fetchLiveItunesPool(genreFilter, queryCount = 7) {
