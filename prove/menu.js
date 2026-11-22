@@ -119,6 +119,10 @@ const { finti } = require('./finti-pellicola'); // Pellicola si gioca solo onlin
     await page.goto(BASE + 'giochi/cinquina/');
     await page.waitForSelector('#setup-team-1');
     ok(await page.inputValue('#setup-team-1') === 'Squadra A' && await page.inputValue('#setup-team-2') === 'Squadra B', 'nessuno selezionato: Cinquina torna ai nomi di partenza');
+    // Un gioco che torna a usare un nome escluso lo riattiva (salva: nome oltre i posti che giocano)
+    await page.evaluate(() => localStorage.setItem('rg-comune-squadre', JSON.stringify({ nomi: ['Paolo', 'Giulia', '', '', '', ''], conteggi: {}, esclusi: [1] })));
+    await page.evaluate(() => RG.squadre.salva(['Paolo', 'Giulia'], ['Cinefilo 1', 'Cinefilo 2']));
+    ok(await page.evaluate(() => RG.squadre.nomi(2, ['A', 'B']).join()) === 'Paolo,Giulia', 'un gioco che usa Giulia la riattiva');
     await page.goto(BASE);
     await page.waitForSelector('#elenco-nomi .nome');
     await page.screenshot({ path: SHOTS + 'menu-6-selezione.png', fullPage: true });
