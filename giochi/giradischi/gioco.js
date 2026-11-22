@@ -61,6 +61,8 @@ function buildWordRegex(words) {
 
 const BANNED_ALBUM_REGEX = buildWordRegex(BANNED_ALBUM_KEYWORDS);
 const BANNED_TRACK_VERSION_REGEX = buildWordRegex(BANNED_TRACK_VERSION_KEYWORDS);
+// Artisti rap o urban esclusi dal catalogo napoletano (nome intero, vedi dati/ricerche.js)
+const NAPOLETANE_ARTISTI_ESCLUSI = buildWordRegex(window.GIRADISCHI_DATI.artistiEsclusiNapoletane);
 
 // Estrae le parti "versione" di un titolo: contenuto di (...) e [...] e ciò che segue " - "
 function getTrackVersionTags(trackName) {
@@ -125,6 +127,13 @@ function isOriginalNonCompilationTrack(item, genreFilter) {
 
     // Rispetta i filtri temporali selezionati
     if (!yearMatchesFilter(year, genreFilter)) return false;
+
+    // Il catalogo napoletano è solo canzoni popolari o neomelodiche: niente rap, hip-hop
+    // né gruppi rap/reggae-rap noti (iTunes spesso li classifica come "Alternative" o "Reggae")
+    if (genreFilter === 'napoletane') {
+        if (/hip.?hop|rap/i.test(item.primaryGenreName || '')) return false;
+        if (NAPOLETANE_ARTISTI_ESCLUSI.test(item.artistName)) return false;
+    }
 
     // Classici Anni '70 - '80: solo canzoni pop (niente rock, metal, rap, soul, blues…)
     if (!genereAmmesso(item.primaryGenreName, genreFilter)) return false;
