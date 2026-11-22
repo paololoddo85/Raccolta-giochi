@@ -769,7 +769,11 @@ function refillDeck() {
     candidates = MOVIES_DATABASE.filter(m => !inPlay.has(movieKey(m)));
     if (candidates.length) showToast('Categoria esaurita: aggiungo film da tutto il catalogo.', 'info');
   }
-  gameState.deck = shuffleArray(candidates);
+  // Come in buildPoolAndDeck: i film già giocati in passato finiscono in fondo (pop() li pesca per ultimi)
+  const playedSet = getPlayedMoviesHistory();
+  const unseen = candidates.filter(m => !playedSet.has(movieKey(m)));
+  const seen = candidates.filter(m => playedSet.has(movieKey(m)));
+  gameState.deck = [...shuffleArray(seen), ...shuffleArray(unseen)];
 }
 
 async function drawNextMovie() {

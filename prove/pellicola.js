@@ -73,6 +73,18 @@ const MODO = process.argv[2] || 'offline'; // offline | online
     await page.click('#start-game-btn');
     await page.waitForSelector('#game-screen:not(.hidden)', { timeout: 30000 });
     ok(await page.evaluate(() => gameState.pool.some(m => m._live)), 'online: catalogo live aggiunto al mazzo (iTunes finto)');
+    // il mazzo ricostruito (quando si svuota) preferisce i film mai giocati
+    const rimpiazzo = await page.evaluate(() => {
+      const chiavi = gameState.pool.map(movieKey);
+      const visti = chiavi.slice(0, Math.floor(chiavi.length / 2));
+      ARCHIVIO.scrivi('film-giocati', visti);
+      gameState.deck = [];
+      refillDeck();
+      const nuovi = gameState.deck.filter(m => !visti.includes(movieKey(m))).length;
+      const codaNuovi = gameState.deck.slice(-nuovi).every(m => !visti.includes(movieKey(m)));
+      return { nuovi, codaNuovi };
+    });
+    ok(rimpiazzo.nuovi > 0 && rimpiazzo.codaNuovi, 'mazzo ricostruito: prima i film mai giocati, i visti in fondo');
     await pronto(); await filmPronto();
     await page.waitForSelector('#mystery-poster-canvas:not(.hidden), #mystery-poster-css-wrapper:not(.hidden)', { timeout: 20000 });
     ok(true, 'locandina pixelata mostrata');
