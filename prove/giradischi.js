@@ -181,6 +181,9 @@ const { finti, stato: rete } = require('./finti-giradischi');
     ok(await page.evaluate(() => !!document.querySelector('#genre-filter option[value="napoletane"]')), 'catalogo "Canzoni Napoletane" nel menù');
     ok(await page.evaluate(() => LIVE_SEARCH_POOLS.napoletane.length > 0 && LIVE_SEARCH_POOLS.napoletane.every(q => q.trim().length > 0)), 'catalogo napoletane: ricerche presenti');
     ok(await page.evaluate(() => [1989, 1990, 2000, 2026].map(a => yearMatchesFilter(a, 'napoletane')).join() === 'false,true,true,true'), 'catalogo napoletane: solo dal 1990 in poi');
+    ok(await page.evaluate(() => !LIVE_SEARCH_POOLS.napoletane.some(q => /rap|geolier|clementino|liberato|99 posse|almamegretta|raiz/i.test(q))), 'catalogo napoletane: nessun artista rap nelle ricerche');
+    ok(await page.evaluate(() => isOriginalNonCompilationTrack({ previewUrl: 'x', trackName: 'Brano', artistName: 'Artista', releaseDate: '2010-01-01T07:00:00Z', collectionName: 'Album', primaryGenreName: 'Hip-Hop/Rap' }, 'napoletane') === false
+      && isOriginalNonCompilationTrack({ previewUrl: 'x', trackName: 'Brano', artistName: 'Artista', releaseDate: '2010-01-01T07:00:00Z', collectionName: 'Album', primaryGenreName: 'Pop' }, 'napoletane') === true), 'catalogo napoletane: brani rap scartati, pop tenuto');
     console.log('  richieste finte servite:', JSON.stringify(rete.richieste));
     ok(errori.length === 0, 'nessun errore in console' + (errori.length ? ':\n' + errori.join('\n') : ''));
   } catch (e) {

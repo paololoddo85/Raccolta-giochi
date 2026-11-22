@@ -55,8 +55,7 @@ window.GIRADISCHI_DATI = {
           "canzoni napoletane", "napoletane anni 90", "neomelodici napoletani", "napoli canzone",
           "pino daniele", "enzo avitabile", "pietra montecorvino", "nino d'angelo", "gigi finizio",
           "franco ricciardi", "tommy riccio", "mario merola", "sal da vinci", "gigi d'alessio",
-          "peppino di capri", "liberato", "geolier", "clementino", "tony colombo", "lina sastri",
-          "enzo gragnaniello", "almamegretta", "99 posse", "raiz", "daniele sepe"
+          "peppino di capri", "tony colombo", "lina sastri", "enzo gragnaniello"
       ]
   },
 

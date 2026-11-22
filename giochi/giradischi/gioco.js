@@ -126,6 +126,9 @@ function isOriginalNonCompilationTrack(item, genreFilter) {
     // Rispetta i filtri temporali selezionati
     if (!yearMatchesFilter(year, genreFilter)) return false;
 
+    // Il catalogo napoletano è solo canzoni popolari o neomelodiche: niente rap/hip-hop
+    if (genreFilter === 'napoletane' && /hip.?hop|rap/i.test(item.primaryGenreName || '')) return false;
+
     return true;
 }
 
