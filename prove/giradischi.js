@@ -196,15 +196,14 @@ const { finti, stato: rete } = require('./finti-giradischi');
     ok(await page.evaluate(() => LIVE_SEARCH_POOLS.napoletane.length > 0 && LIVE_SEARCH_POOLS.napoletane.every(q => q.trim().length > 0)), 'catalogo napoletane: ricerche presenti');
     ok(await page.evaluate(() => [1989, 1990, 2000, 2026].map(a => yearMatchesFilter(a, 'napoletane')).join() === 'false,true,true,true'), 'catalogo napoletane: solo dal 1990 in poi');
     ok(await page.evaluate(() => !LIVE_SEARCH_POOLS.napoletane.some(q => /rap|geolier|clementino|liberato|99 posse|almamegretta|raiz/i.test(q))), 'catalogo napoletane: nessun artista rap nelle ricerche');
-    ok(await page.evaluate(() => isOriginalNonCompilationTrack({ previewUrl: 'x', trackName: 'Brano', artistName: 'Artista', releaseDate: '2010-01-01T07:00:00Z', collectionName: 'Album', primaryGenreName: 'Hip-Hop/Rap' }, 'napoletane') === false
-      && isOriginalNonCompilationTrack({ previewUrl: 'x', trackName: 'Brano', artistName: 'Artista', releaseDate: '2010-01-01T07:00:00Z', collectionName: 'Album', primaryGenreName: 'Pop' }, 'napoletane') === true), 'catalogo napoletane: brani rap scartati, pop tenuto');
     ok(await page.evaluate(() => {
       const brano = (artista, genere) => ({ previewUrl: 'x', trackName: 'Brano', artistName: artista, releaseDate: '2010-01-01T07:00:00Z', collectionName: 'Album', primaryGenreName: genere });
-      const esclusi = [['99 Posse', 'Alternative'], ['Almamegretta', 'Reggae'], ['Geolier', 'Pop'], ['Pino Daniele', 'Pop']];
-      return esclusi.slice(0, 3).every(([a, g]) => isOriginalNonCompilationTrack(brano(a, g), 'napoletane') === false)
-        && isOriginalNonCompilationTrack(brano('Pino Daniele', 'Pop'), 'napoletane') === true
-        && isOriginalNonCompilationTrack(brano('Gigi Finizio', 'Pop'), 'napoletane') === true;
-    }), 'catalogo napoletane: gruppi rap (99 Posse, Almamegretta, Geolier) fuori anche se iTunes li classifica come non rap; pop e neomelodici dentro');
+      const entra = (a, g) => isOriginalNonCompilationTrack(brano(a, g), 'napoletane');
+      // rap per genere e per nome (anche con genere non rap): fuori; pop e neomelodici: dentro
+      return entra('Artista', 'Hip-Hop/Rap') === false && entra('99 Posse', 'Alternative') === false
+        && entra('Almamegretta', 'Reggae') === false && entra('Geolier', 'Pop') === false
+        && entra('Artista', 'Pop') === true && entra('Pino Daniele', 'Pop') === true && entra('Gigi Finizio', 'Pop') === true;
+    }), 'catalogo napoletane: rap e gruppi urban fuori anche se iTunes li classifica altrimenti; pop e neomelodici dentro');
     // Classici Anni '70 - '80: solo pop (rap, metal, soul, blues, rock esclusi); gli altri cataloghi restano invariati
     ok(await page.evaluate(() => {
       const brano = (genere) => ({ previewUrl: 'https://x/a.m4a', trackName: 'Prova', artistName: 'Artista', collectionName: 'Album', releaseDate: '1980-01-01T07:00:00Z', primaryGenreName: genere });

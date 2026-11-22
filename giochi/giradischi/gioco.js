@@ -134,6 +134,7 @@ function isOriginalNonCompilationTrack(item, genreFilter) {
         if (/hip.?hop|rap/i.test(item.primaryGenreName || '')) return false;
         if (NAPOLETANE_ARTISTI_ESCLUSI.test(item.artistName)) return false;
     }
+
     // Classici Anni '70 - '80: solo canzoni pop (niente rock, metal, rap, soul, blues…)
     if (!genereAmmesso(item.primaryGenreName, genreFilter)) return false;
 
