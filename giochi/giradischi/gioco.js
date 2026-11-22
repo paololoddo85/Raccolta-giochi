@@ -854,7 +854,8 @@ async function drawNextCard() {
                 saveGame();
                 return;
             }
-            showToast("Catalogo esaurito: non ci sono altri brani originali verificati.", "error");
+            // Il messaggio dice perché: brani già usciti e quanti sono stati scartati come ristampe
+            showToast(`Catalogo esaurito: ${gs.usedKeys.size} brani già usciti, ${gs.discardedReissues} scartati come ristampe. Vince chi ha più carte.`, "error");
             endGameNoCards();
             return;
         }
