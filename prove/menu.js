@@ -64,6 +64,29 @@ const { finti } = require('./finti-pellicola'); // Pellicola si gioca solo onlin
     await Promise.all([page.waitForNavigation({ timeout: 10000 }), page.evaluate(() => window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true })))]);
     await page.waitForSelector('#setup-screen:not(.hidden)');
     ok(await page.evaluate(() => window.__segno === undefined && localStorage.getItem('rg-hintfake-partita') === null), 'Cinquina con partita solo ripresa: dopo "Azzera" si ricarica pulita');
+    // "Giocano spesso": conteggi delle partite, suggerimenti ordinati e tocco per aggiungere
+    await page.evaluate(() => localStorage.setItem('rg-comune-squadre', JSON.stringify({ nomi: ['Paolo', 'Giulia', '', '', '', ''], conteggi: { paolo: { nome: 'Paolo', volte: 5 }, giulia: { nome: 'Giulia', volte: 3 }, marco: { nome: 'Marco', volte: 4 }, luca: { nome: 'Luca', volte: 2 }, anna: { nome: 'Anna', volte: 1 } } })));
+    await page.goto(BASE);
+    await page.waitForSelector('#frequenti:not([hidden])');
+    const suggeriti = await page.locator('.nome-suggerito').allTextContents();
+    ok(suggeriti.join() === '+ Marco,+ Luca,+ Anna', 'suggerimenti: chi gioca più spesso e non è già in elenco');
+    await page.click('.nome-suggerito >> nth=0');
+    ok((await page.locator('.nome').allTextContents()).join() === 'Paolo,Giulia,Marco' && await page.evaluate(() => RG.squadre.tutti()[2]) === 'Marco', 'tocco: il nome va nel primo posto libero');
+    ok(await page.evaluate(() => RG.squadre.frequenti(8).join()) === 'Luca,Anna', 'Marco non è più tra i suggerimenti');
+    await page.click('#apri-nomi');
+    ok(await page.isHidden('#frequenti'), 'con "Modifica" aperto i suggerimenti non compaiono');
+    await page.click('#apri-nomi');
+    await page.evaluate(() => RG.squadre.imposta(['Paolo', 'Giulia', 'Marco', 'Luca', 'Anna', '']));
+    ok(await page.evaluate(() => RG.squadre.aggiungi('Sara')) === true && await page.evaluate(() => RG.squadre.tutti().join()) === 'Paolo,Giulia,Marco,Luca,Anna,Sara', 'un posto libero: aggiungi() lo riempie');
+    await page.evaluate(() => RG.squadre.imposta(['A1', 'A2', 'A3', 'A4', 'A5', 'A6']));
+    ok(await page.evaluate(() => RG.squadre.aggiungi('Sara') === false), 'elenco pieno: aggiungi() non sostituisce nessuno');
+    await page.evaluate(() => RG.squadre.imposta(['', '', '', '', '', '']));
+    await page.evaluate(() => { RG.squadre.salva(['Paolo', 'Anna', 'Squadra C'], ['Squadra A', 'Squadra B', 'Squadra C']); });
+    ok(await page.evaluate(() => { const c = RG.archivio.comune.leggi('squadre', {}).conteggi; return c.paolo.volte === 6 && c.anna.volte === 2 && !c['squadra c']; }), 'partita: ogni nome vero conta una volta, il predefinito del gioco no');
+    // Paolo e Anna ora sono nell'elenco: non si suggeriscono. Restano Marco (4), Giulia (3) e Luca (2)
+    ok(await page.evaluate(() => RG.squadre.frequenti(8).join()) === 'Marco,Giulia,Luca', 'frequenti: esclusi chi è in elenco, ordinati per partite');
+    await page.screenshot({ path: SHOTS + 'menu-4-frequenti.png' });
+    await page.goto(BASE);
     await page.goto(BASE);
     for (const w of [320, 412]) { await page.setViewportSize({ width: w, height: 800 }); const sw = await page.evaluate(() => document.documentElement.scrollWidth); ok(sw <= w, `nessuno scorrimento orizzontale a ${w}px`); }
     await page.setViewportSize({ width: 360, height: 780 });
